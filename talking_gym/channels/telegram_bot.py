@@ -361,14 +361,30 @@ async def _run_turn(update: Update, context: ContextTypes.DEFAULT_TYPE, transcri
     )
 
     # Voice model answer: learner HEARS the corrected sentence + coach's next line.
+    # Framed with formulaic spoken cues + a caption so it's obvious what the
+    # audio contains (testers found the raw concatenation confusing).
     if config.tts_enabled and spoken:
-        speak_text = ". ".join(x for x in (reply.corrected, reply.reply_en) if x)[:500]
-        if speak_text:
+        speak_parts: list[str] = []
+        caption_parts: list[str] = []
+        if reply.corrected:
+            speak_parts.append(f"Listen and repeat: {reply.corrected}")
+            caption_parts.append("Зөв хувилбар — сонсоод давтаарай")
+        if reply.reply_en:
+            if reply.done:
+                speak_parts.append(reply.reply_en)
+                caption_parts.append("Багшийн үг")
+            else:
+                speak_parts.append(f"Now, my question: {reply.reply_en}")
+                caption_parts.append("Багшийн асуулт")
+        if speak_parts:
             try:
-                audio = await tts.speak(speak_text)
+                audio = await tts.speak(". ".join(speak_parts)[:500])
                 # Voice note, NOT audio file: audio files land in Telegram's music
                 # player, which queues every audio in the chat as a playlist.
-                await update.message.reply_voice(voice=io.BytesIO(audio))
+                await update.message.reply_voice(
+                    voice=io.BytesIO(audio),
+                    caption="🔊 " + " → ".join(caption_parts),
+                )
             except ProviderError:
                 log.warning("TTS failed; text-only reply sent")
 
