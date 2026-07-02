@@ -10,6 +10,7 @@ import logging
 import sqlite3
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from .config import config
 
@@ -92,6 +93,29 @@ _PG_SCHEMA = [
 
 _pool = None
 
+# Supabase's dashboard offers Prisma-style URIs with query params libpq
+# doesn't understand (e.g. ?pgbouncer=true) — strip them so any of the
+# dashboard's connection strings works verbatim as SUPABASE_DB_URL.
+_NON_LIBPQ_PARAMS = {"pgbouncer", "connection_limit", "pool_timeout", "schema"}
+
+
+def _clean_dsn(url: str) -> str:
+    parts = urlsplit(url)
+    if not parts.query:
+        return url
+    kept = [
+        (k, v)
+        for k, v in parse_qsl(parts.query, keep_blank_values=True)
+        if k.lower() not in _NON_LIBPQ_PARAMS
+    ]
+    return urlunsplit(parts._replace(query=urlencode(kept)))
+
+
+def _configure_pg(conn) -> None:
+    # Supabase's transaction pooler (Supavisor/PgBouncer) doesn't support
+    # server-side prepared statements.
+    conn.prepare_threshold = None
+
 
 def _get_pool():
     global _pool
@@ -100,10 +124,11 @@ def _get_pool():
         from psycopg_pool import ConnectionPool
 
         _pool = ConnectionPool(
-            conninfo=config.database_url,
+            conninfo=_clean_dsn(config.database_url),
             min_size=0,
             max_size=5,
             kwargs={"row_factory": dict_row},
+            configure=_configure_pg,
         )
     return _pool
 
