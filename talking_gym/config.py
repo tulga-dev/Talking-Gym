@@ -57,8 +57,8 @@ class Config:
     admin_chat_id: int | None = field(default_factory=_admin_chat_id)
 
     # Coach persona name (English + Mongolian Cyrillic rendering).
-    coach_name_en: str = os.getenv("COACH_NAME_EN", "Bastard")
-    coach_name_mn: str = os.getenv("COACH_NAME_MN", "Бастард")
+    coach_name_en: str = os.getenv("COACH_NAME_EN", "Bagsh")
+    coach_name_mn: str = os.getenv("COACH_NAME_MN", "Багш")
 
     @property
     def tz(self) -> ZoneInfo:
