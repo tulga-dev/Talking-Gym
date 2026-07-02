@@ -1,4 +1,5 @@
 """Central configuration, loaded from environment / .env."""
+import logging
 import os
 from dataclasses import dataclass, field
 from zoneinfo import ZoneInfo
@@ -10,6 +11,21 @@ load_dotenv()
 
 def _bool(name: str, default: bool) -> bool:
     return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
+
+
+def _admin_chat_id() -> int | None:
+    """Optional feature — a malformed value must never crash the bot."""
+    raw = os.getenv("ADMIN_CHAT_ID", "").strip()
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError:
+        logging.getLogger(__name__).warning(
+            "ADMIN_CHAT_ID=%r is not a numeric Telegram id — admin features disabled. "
+            "Send a message to @userinfobot to get your numeric id.", raw
+        )
+        return None
 
 
 @dataclass(frozen=True)
@@ -38,9 +54,7 @@ class Config:
     db_path: str = os.getenv("DB_PATH", "talking_gym.db")
 
     # Founder chat: receives /feedback forwards, may call /stats.
-    admin_chat_id: int | None = (
-        int(os.getenv("ADMIN_CHAT_ID")) if os.getenv("ADMIN_CHAT_ID", "").strip() else None
-    )
+    admin_chat_id: int | None = field(default_factory=_admin_chat_id)
 
     @property
     def tz(self) -> ZoneInfo:
