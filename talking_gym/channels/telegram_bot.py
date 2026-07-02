@@ -444,7 +444,15 @@ async def _post_init(app: Application) -> None:
 
 
 def build_application() -> Application:
-    app = Application.builder().token(config.telegram_token).post_init(_post_init).build()
+    app = (
+        Application.builder()
+        .token(config.telegram_token)
+        .post_init(_post_init)
+        # Voice turns are 4-10s of network I/O (STT->LLM->TTS); without this,
+        # PTB handles ONE update at a time and every other user queues behind it.
+        .concurrent_updates(64)
+        .build()
+    )
 
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("today", cmd_today))

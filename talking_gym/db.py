@@ -126,7 +126,7 @@ def _get_pool():
         _pool = ConnectionPool(
             conninfo=_clean_dsn(config.database_url),
             min_size=0,
-            max_size=5,
+            max_size=10,   # sized for concurrent_updates(64); DB ops are millisecond-scale
             kwargs={"row_factory": dict_row},
             configure=_configure_pg,
         )
