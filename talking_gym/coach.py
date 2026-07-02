@@ -102,7 +102,7 @@ def start_daily_session(user_id: int) -> SessionIntro:
         # Beginners must never face a question they can't answer:
         # give a model answer to read aloud and adapt.
         parts.append(
-            f'\n📝 *Жишээ хариулт* — уншаад, өөрийн мэдээллээр өөрчлөөрэй:\n"{scenario.example_en}"'
+            f"\n📝 *Жишээ хариулт* — уншаад, өөрийн мэдээллээр өөрчлөөрэй:\n`{scenario.example_en}`"
         )
         parts.append(f"🇲🇳 _{scenario.example_mn}_")
         parts.append(
@@ -184,7 +184,8 @@ def format_reply(reply: CoachReply, transcript: str) -> str:
     if reply.reply_en and not reply.done:
         parts.append(f"\n💬 *{config.coach_name_mn}:* {reply.reply_en}")
         if reply.suggested_en:
-            parts.append(f'📝 *Жишээ:* "{reply.suggested_en}"')
+            # backticks inside a code span would break Markdown parsing
+            parts.append(f"📝 *Жишээ:*\n`{reply.suggested_en.replace('`', chr(39))}`")
             if reply.suggested_mn:
                 parts.append(f"🇲🇳 _{reply.suggested_mn}_")
     if reply.done:
