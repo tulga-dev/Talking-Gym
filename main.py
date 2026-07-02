@@ -24,6 +24,11 @@ def main() -> None:
         sys.exit("TELEGRAM_BOT_TOKEN is not set. Copy .env.example to .env and fill it in.")
     if not config.xai_api_key:
         sys.exit("XAI_API_KEY is not set. Copy .env.example to .env and fill it in.")
+    if config.database_url:
+        logging.info("Storage: Supabase/Postgres")
+    else:
+        logging.warning("Storage: local SQLite (%s) — fine for dev, data is lost on redeploy. "
+                        "Set SUPABASE_DB_URL for production.", config.db_path)
     db.init_db()
     app = build_application()
     logging.info("Talking Gym is running (long polling). Ctrl+C to stop.")

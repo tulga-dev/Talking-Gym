@@ -48,6 +48,7 @@ HELP = (
     "/streak — стрикээ харах\n"
     "/level — түвшнээ өөрчлөх\n"
     "/remind 19 — сануулгын цагаа тохируулах (0-23), /remind off — унтраах\n"
+    "/feedback — санал хүсэлт илгээх\n"
     "/help — энэ тусламж\n\n"
     "Дасгалын үеэр хариугаа 🎤 дуут мессежээр (эсвэл бичиж) илгээгээрэй."
 )
@@ -128,6 +129,43 @@ async def cmd_remind(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(HELP, parse_mode=ParseMode.MARKDOWN)
+
+
+async def cmd_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    u = update.effective_user
+    db.get_or_create_user(u.id, update.effective_chat.id, u.first_name or "")
+    text = " ".join(context.args or []).strip()
+    if not text:
+        await update.message.reply_text(
+            "Санал хүсэлтээ ингэж бичээрэй:\n/feedback Дуут хариу нь хэтэрхий удаан байна"
+        )
+        return
+    db.save_feedback(u.id, u.first_name or "", text)
+    await update.message.reply_text("Баярлалаа! 🙏 Таны санал бидэнд маш чухал.")
+    if config.admin_chat_id:
+        try:
+            await context.bot.send_message(
+                config.admin_chat_id,
+                f"💬 Feedback — {u.first_name} (id {u.id}):\n{text}",
+            )
+        except Exception:
+            log.warning("Could not forward feedback to admin chat")
+
+
+async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Founder-only dashboard for watching testers."""
+    if config.admin_chat_id is None or update.effective_user.id != config.admin_chat_id:
+        return  # silently ignore for non-admins
+    s = db.stats()
+    await update.message.reply_text(
+        "📈 *Talking Gym stats*\n"
+        f"Users: {s['users']}\n"
+        f"Sessions total: {s['sessions_total']}\n"
+        f"Trained today: {s['trained_today']}\n"
+        f"Voice today: {s['voice_seconds_today']}s\n"
+        f"Feedback items: {s['feedback']}",
+        parse_mode=ParseMode.MARKDOWN,
+    )
 
 
 # ---------- the voice / text turn pipeline ----------
@@ -240,6 +278,8 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("streak", cmd_streak))
     app.add_handler(CommandHandler("level", cmd_level))
     app.add_handler(CommandHandler("remind", cmd_remind))
+    app.add_handler(CommandHandler("feedback", cmd_feedback))
+    app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler("help", cmd_help))
     app.add_handler(CallbackQueryHandler(on_level_chosen, pattern=r"^level_"))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))

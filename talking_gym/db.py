@@ -1,55 +1,142 @@
-"""SQLite storage: users, streaks, sessions, daily voice usage."""
+"""Storage layer with two interchangeable backends:
+
+- Supabase / any Postgres  -> set SUPABASE_DB_URL (or DATABASE_URL); used in production
+  so data survives redeploys and all testers share one live database.
+- SQLite (default)         -> zero-setup local development.
+
+All queries are written with `?` placeholders and converted to `%s` for Postgres.
+"""
+import logging
 import sqlite3
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 
 from .config import config
 
-_SCHEMA = """
-CREATE TABLE IF NOT EXISTS users (
-    user_id       INTEGER PRIMARY KEY,        -- telegram user id (or synthetic id for other channels)
-    chat_id       INTEGER,
-    name          TEXT,
-    level         TEXT DEFAULT 'beginner',    -- beginner | intermediate | advanced
-    streak        INTEGER DEFAULT 0,
-    best_streak   INTEGER DEFAULT 0,
-    last_session_date TEXT,                   -- ISO date of last COMPLETED session (local tz)
-    sessions_done INTEGER DEFAULT 0,
-    reminder_hour INTEGER,
-    created_at    TEXT
-);
+log = logging.getLogger(__name__)
 
-CREATE TABLE IF NOT EXISTS active_sessions (
-    user_id      INTEGER PRIMARY KEY,
-    scenario_id  TEXT,
-    turns        INTEGER DEFAULT 0,
-    history      TEXT DEFAULT '',             -- compact transcript history for LLM context
-    started_at   TEXT
-);
+IS_POSTGRES = bool(config.database_url)
 
-CREATE TABLE IF NOT EXISTS voice_usage (
-    user_id  INTEGER,
-    day      TEXT,
-    seconds  INTEGER DEFAULT 0,
-    PRIMARY KEY (user_id, day)
-);
-"""
+_SQLITE_SCHEMA = [
+    """CREATE TABLE IF NOT EXISTS users (
+        user_id       INTEGER PRIMARY KEY,
+        chat_id       INTEGER,
+        name          TEXT,
+        level         TEXT DEFAULT 'beginner',
+        streak        INTEGER DEFAULT 0,
+        best_streak   INTEGER DEFAULT 0,
+        last_session_date TEXT,
+        sessions_done INTEGER DEFAULT 0,
+        reminder_hour INTEGER,
+        created_at    TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS active_sessions (
+        user_id      INTEGER PRIMARY KEY,
+        scenario_id  TEXT,
+        turns        INTEGER DEFAULT 0,
+        history      TEXT DEFAULT '',
+        started_at   TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS voice_usage (
+        user_id  INTEGER,
+        day      TEXT,
+        seconds  INTEGER DEFAULT 0,
+        PRIMARY KEY (user_id, day)
+    )""",
+    """CREATE TABLE IF NOT EXISTS feedback (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id    INTEGER,
+        name       TEXT,
+        text       TEXT,
+        created_at TEXT
+    )""",
+]
+
+# Telegram user/chat ids exceed 32-bit — BIGINT is required on Postgres.
+_PG_SCHEMA = [
+    """CREATE TABLE IF NOT EXISTS users (
+        user_id       BIGINT PRIMARY KEY,
+        chat_id       BIGINT,
+        name          TEXT,
+        level         TEXT DEFAULT 'beginner',
+        streak        INTEGER DEFAULT 0,
+        best_streak   INTEGER DEFAULT 0,
+        last_session_date TEXT,
+        sessions_done INTEGER DEFAULT 0,
+        reminder_hour INTEGER,
+        created_at    TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS active_sessions (
+        user_id      BIGINT PRIMARY KEY,
+        scenario_id  TEXT,
+        turns        INTEGER DEFAULT 0,
+        history      TEXT DEFAULT '',
+        started_at   TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS voice_usage (
+        user_id  BIGINT,
+        day      TEXT,
+        seconds  INTEGER DEFAULT 0,
+        PRIMARY KEY (user_id, day)
+    )""",
+    """CREATE TABLE IF NOT EXISTS feedback (
+        id         BIGSERIAL PRIMARY KEY,
+        user_id    BIGINT,
+        name       TEXT,
+        text       TEXT,
+        created_at TEXT
+    )""",
+]
+
+_pool = None
+
+
+def _get_pool():
+    global _pool
+    if _pool is None:
+        from psycopg.rows import dict_row
+        from psycopg_pool import ConnectionPool
+
+        _pool = ConnectionPool(
+            conninfo=config.database_url,
+            min_size=0,
+            max_size=5,
+            kwargs={"row_factory": dict_row},
+        )
+    return _pool
+
+
+class _PgAdapter:
+    """Makes a psycopg connection look like sqlite3 for our queries."""
+
+    def __init__(self, con):
+        self._con = con
+
+    def execute(self, sql: str, params=()):
+        return self._con.execute(sql.replace("?", "%s"), params)
 
 
 @contextmanager
 def _conn():
-    con = sqlite3.connect(config.db_path)
-    con.row_factory = sqlite3.Row
-    try:
-        yield con
-        con.commit()
-    finally:
-        con.close()
+    if IS_POSTGRES:
+        with _get_pool().connection() as con:  # commits on clean exit
+            yield _PgAdapter(con)
+    else:
+        con = sqlite3.connect(config.db_path)
+        con.row_factory = sqlite3.Row
+        try:
+            yield con
+            con.commit()
+        finally:
+            con.close()
 
 
 def init_db() -> None:
+    schema = _PG_SCHEMA if IS_POSTGRES else _SQLITE_SCHEMA
     with _conn() as con:
-        con.executescript(_SCHEMA)
+        for statement in schema:
+            con.execute(statement)
+    log.info("DB ready (backend: %s)", "postgres/supabase" if IS_POSTGRES else "sqlite")
 
 
 def _today() -> date:
@@ -58,7 +145,7 @@ def _today() -> date:
 
 # ---------- users ----------
 
-def get_or_create_user(user_id: int, chat_id: int, name: str) -> sqlite3.Row:
+def get_or_create_user(user_id: int, chat_id: int, name: str):
     with _conn() as con:
         row = con.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchone()
         if row:
@@ -72,7 +159,7 @@ def get_or_create_user(user_id: int, chat_id: int, name: str) -> sqlite3.Row:
         return con.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchone()
 
 
-def get_user(user_id: int) -> sqlite3.Row | None:
+def get_user(user_id: int):
     with _conn() as con:
         return con.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchone()
 
@@ -87,14 +174,14 @@ def set_reminder_hour(user_id: int, hour: int | None) -> None:
         con.execute("UPDATE users SET reminder_hour=? WHERE user_id=?", (hour, user_id))
 
 
-def all_users_with_reminders() -> list[sqlite3.Row]:
+def all_users_with_reminders() -> list:
     with _conn() as con:
         return con.execute("SELECT * FROM users WHERE reminder_hour IS NOT NULL").fetchall()
 
 
 # ---------- sessions & streaks ----------
 
-def get_active_session(user_id: int) -> sqlite3.Row | None:
+def get_active_session(user_id: int):
     with _conn() as con:
         return con.execute("SELECT * FROM active_sessions WHERE user_id=?", (user_id,)).fetchone()
 
@@ -102,8 +189,10 @@ def get_active_session(user_id: int) -> sqlite3.Row | None:
 def start_session(user_id: int, scenario_id: str) -> None:
     with _conn() as con:
         con.execute(
-            "INSERT OR REPLACE INTO active_sessions (user_id, scenario_id, turns, history, started_at) "
-            "VALUES (?,?,0,'',?)",
+            "INSERT INTO active_sessions (user_id, scenario_id, turns, history, started_at) "
+            "VALUES (?,?,0,'',?) "
+            "ON CONFLICT (user_id) DO UPDATE SET scenario_id=excluded.scenario_id, "
+            "turns=0, history='', started_at=excluded.started_at",
             (user_id, scenario_id, datetime.utcnow().isoformat()),
         )
 
@@ -134,8 +223,8 @@ def complete_session(user_id: int) -> tuple[int, int]:
             streak = 1
         best = max(streak, user["best_streak"])
         con.execute(
-            "UPDATE users SET streak=?, best_streak=?, last_session_date=?, sessions_done=sessions_done+1 "
-            "WHERE user_id=?",
+            "UPDATE users SET streak=?, best_streak=?, last_session_date=?, "
+            "sessions_done=sessions_done+1 WHERE user_id=?",
             (streak, best, today.isoformat(), user_id),
         )
         return streak, best
@@ -149,17 +238,24 @@ def did_session_today(user_id: int) -> bool:
 # ---------- voice usage cap ----------
 
 def add_voice_seconds(user_id: int, seconds: int) -> int:
+    """Portable read-then-write (per-user messages are sequential, so no race in practice)."""
     day = _today().isoformat()
     with _conn() as con:
-        con.execute(
-            "INSERT INTO voice_usage (user_id, day, seconds) VALUES (?,?,?) "
-            "ON CONFLICT(user_id, day) DO UPDATE SET seconds = seconds + excluded.seconds",
-            (user_id, day, seconds),
-        )
         row = con.execute(
             "SELECT seconds FROM voice_usage WHERE user_id=? AND day=?", (user_id, day)
         ).fetchone()
-        return row["seconds"]
+        if row:
+            total = row["seconds"] + seconds
+            con.execute(
+                "UPDATE voice_usage SET seconds=? WHERE user_id=? AND day=?", (total, user_id, day)
+            )
+        else:
+            total = seconds
+            con.execute(
+                "INSERT INTO voice_usage (user_id, day, seconds) VALUES (?,?,?)",
+                (user_id, day, seconds),
+            )
+        return total
 
 
 def voice_seconds_today(user_id: int) -> int:
@@ -169,3 +265,34 @@ def voice_seconds_today(user_id: int) -> int:
             "SELECT seconds FROM voice_usage WHERE user_id=? AND day=?", (user_id, day)
         ).fetchone()
         return row["seconds"] if row else 0
+
+
+# ---------- tester feedback & founder stats ----------
+
+def save_feedback(user_id: int, name: str, text: str) -> None:
+    with _conn() as con:
+        con.execute(
+            "INSERT INTO feedback (user_id, name, text, created_at) VALUES (?,?,?,?)",
+            (user_id, name, text, datetime.utcnow().isoformat()),
+        )
+
+
+def stats() -> dict:
+    today = _today().isoformat()
+    with _conn() as con:
+        users = con.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
+        sessions = con.execute("SELECT COALESCE(SUM(sessions_done),0) AS c FROM users").fetchone()["c"]
+        trained_today = con.execute(
+            "SELECT COUNT(*) AS c FROM users WHERE last_session_date=?", (today,)
+        ).fetchone()["c"]
+        voice_today = con.execute(
+            "SELECT COALESCE(SUM(seconds),0) AS c FROM voice_usage WHERE day=?", (today,)
+        ).fetchone()["c"]
+        feedback_count = con.execute("SELECT COUNT(*) AS c FROM feedback").fetchone()["c"]
+    return {
+        "users": users,
+        "sessions_total": sessions,
+        "trained_today": trained_today,
+        "voice_seconds_today": voice_today,
+        "feedback": feedback_count,
+    }

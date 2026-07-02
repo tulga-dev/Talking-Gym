@@ -33,7 +33,14 @@ class Config:
     default_reminder_hour: int = int(os.getenv("DEFAULT_REMINDER_HOUR", "19"))
     tz_name: str = os.getenv("TIMEZONE", "Asia/Ulaanbaatar")
 
+    # Postgres (Supabase) when set; falls back to local SQLite otherwise.
+    database_url: str = os.getenv("SUPABASE_DB_URL", "") or os.getenv("DATABASE_URL", "")
     db_path: str = os.getenv("DB_PATH", "talking_gym.db")
+
+    # Founder chat: receives /feedback forwards, may call /stats.
+    admin_chat_id: int | None = (
+        int(os.getenv("ADMIN_CHAT_ID")) if os.getenv("ADMIN_CHAT_ID", "").strip() else None
+    )
 
     @property
     def tz(self) -> ZoneInfo:

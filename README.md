@@ -45,6 +45,26 @@ python -m talking_gym.dev_chat --mock   # offline console chat with a canned LLM
 python -m talking_gym.dev_chat          # console chat through the real Grok LLM
 ```
 
+## Go live (runtime + Supabase) — let other people test it
+
+Local SQLite is dev-only. For a live bot that real testers can use, run it as a hosted worker with Supabase Postgres so data (users, streaks, feedback) survives redeploys.
+
+**1. Supabase (free tier is enough):**
+- Create a project at [supabase.com](https://supabase.com) → wait for it to provision
+- Dashboard → **Connect** → copy the **Transaction pooler** URI (port `6543`, IPv4-friendly — works on all hosts)
+- That URI (with your DB password filled in) is your `SUPABASE_DB_URL`. **Tables are created automatically on first boot** — no SQL to run.
+
+**2. Runtime — Railway (simplest):**
+- [railway.app](https://railway.app) → New Project → **Deploy from GitHub repo** → pick `tulga-dev/Talking-Gym` (it detects the Dockerfile)
+- Variables → add `TELEGRAM_BOT_TOKEN`, `XAI_API_KEY`, `SUPABASE_DB_URL`, `ADMIN_CHAT_ID`
+- Deploy. The bot uses long polling — no domain, no port, nothing to expose. **Run exactly 1 replica** (two pollers on one token conflict).
+- Any Docker host works the same: `docker build -t talking-gym . && docker run --env-file .env talking-gym`
+
+**3. Invite testers:**
+- Share your bot's `t.me/...` link
+- Testers send suggestions with `/feedback ...` — stored in Supabase and forwarded to your Telegram (`ADMIN_CHAT_ID` = your numeric id, ask [@userinfobot](https://t.me/userinfobot))
+- You watch adoption with `/stats` (admin-only): users, sessions, trained-today, voice seconds, feedback count
+
 ## What the bot does
 
 - `/start` — onboarding in Mongolian, pick your level (A1–A2 / B1 / B2+)
@@ -53,6 +73,7 @@ python -m talking_gym.dev_chat          # console chat through the real Grok LLM
 - ⌨️ typing works too (voice is just better practice)
 - `/streak` — 🔥 daily streak & totals (sessions complete after ~3 turns)
 - `/remind 19` — free daily nudge at 19:00 (Telegram pushes cost nothing)
+- `/feedback ...` — testers' suggestions go to Supabase + your Telegram; `/stats` (admin) shows adoption
 - Built-in **cost guardrail**: per-user daily voice cap (default 300s, `DAILY_VOICE_SECONDS_CAP`)
 
 ## Architecture
@@ -61,7 +82,8 @@ python -m talking_gym.dev_chat          # console chat through the real Grok LLM
 main.py                      entrypoint (long polling)
 talking_gym/
   config.py                  env config
-  db.py                      SQLite: users, streaks, sessions, voice usage
+  db.py                      dual backend: Supabase Postgres (prod) / SQLite (dev)
+                             users, streaks, sessions, voice usage, feedback
   scenarios.py               bilingual scenario bank (12 seed scenarios, 3 levels)
   prompts.py                 coach persona + strict-JSON turn contract
   coach.py                   ★ channel-agnostic coaching engine
