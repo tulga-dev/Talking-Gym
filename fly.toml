@@ -4,7 +4,7 @@
 # which stages app secrets from GitHub repo secrets on every push.
 
 app = "talking-gym-mn"
-primary_region = "hkg"   # closest Fly region to Mongolia
+primary_region = "sin"   # hkg is deprecated on Fly; latency is irrelevant for a polling bot
 
 [build]
   # uses ./Dockerfile
