@@ -28,6 +28,7 @@ _SQLITE_SCHEMA = [
         last_session_date TEXT,
         sessions_done INTEGER DEFAULT 0,
         reminder_hour INTEGER,
+        xp            INTEGER DEFAULT 0,
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -64,6 +65,7 @@ _PG_SCHEMA = [
         last_session_date TEXT,
         sessions_done INTEGER DEFAULT 0,
         reminder_hour INTEGER,
+        xp            INTEGER DEFAULT 0,
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -136,7 +138,21 @@ def init_db() -> None:
     with _conn() as con:
         for statement in schema:
             con.execute(statement)
+    _migrate()
     log.info("DB ready (backend: %s)", "postgres/supabase" if IS_POSTGRES else "sqlite")
+
+
+def _migrate() -> None:
+    """Additive migrations for databases created before a column existed."""
+    if IS_POSTGRES:
+        with _conn() as con:
+            con.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0")
+    else:
+        try:
+            with _conn() as con:
+                con.execute("ALTER TABLE users ADD COLUMN xp INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # column already exists
 
 
 def _today() -> date:
@@ -267,6 +283,14 @@ def voice_seconds_today(user_id: int) -> int:
         return row["seconds"] if row else 0
 
 
+def add_xp(user_id: int, amount: int) -> int:
+    """Add XP; returns the new total."""
+    with _conn() as con:
+        con.execute("UPDATE users SET xp = xp + ? WHERE user_id=?", (amount, user_id))
+        row = con.execute("SELECT xp FROM users WHERE user_id=?", (user_id,)).fetchone()
+        return row["xp"] if row else 0
+
+
 # ---------- tester feedback & founder stats ----------
 
 def save_feedback(user_id: int, name: str, text: str) -> None:
@@ -289,10 +313,12 @@ def stats() -> dict:
             "SELECT COALESCE(SUM(seconds),0) AS c FROM voice_usage WHERE day=?", (today,)
         ).fetchone()["c"]
         feedback_count = con.execute("SELECT COUNT(*) AS c FROM feedback").fetchone()["c"]
+        xp_total = con.execute("SELECT COALESCE(SUM(xp),0) AS c FROM users").fetchone()["c"]
     return {
         "users": users,
         "sessions_total": sessions,
         "trained_today": trained_today,
         "voice_seconds_today": voice_today,
         "feedback": feedback_count,
+        "xp_total": xp_total,
     }

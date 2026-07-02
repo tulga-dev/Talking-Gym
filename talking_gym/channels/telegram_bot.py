@@ -1,11 +1,13 @@
-"""Telegram channel adapter: handlers, daily reminders, voice pipeline."""
+"""Telegram channel adapter: Duolingo-style button UI, handlers, reminders, voice pipeline."""
 import datetime as dt
 import io
 import logging
 
 from telegram import (
+    BotCommand,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
     Update,
 )
 from telegram.constants import ChatAction, ParseMode
@@ -31,26 +33,41 @@ LEVELS = {
     "level_advanced": ("advanced", "🌳 Ахисан (B2+)"),
 }
 
+# Persistent big-button keyboard — users should never need to type a command.
+BTN_TODAY = "🏋️ Өнөөдрийн дасгал"
+BTN_PROGRESS = "🔥 Миний ахиц"
+BTN_HELP = "❓ Тусламж"
+
+MAIN_KEYBOARD = ReplyKeyboardMarkup(
+    [[BTN_TODAY], [BTN_PROGRESS, BTN_HELP]],
+    resize_keyboard=True,
+    is_persistent=True,
+    input_field_placeholder="🎤 Дуут мессежээр хариулаарай...",
+)
+
+NEXT_WORKOUT_KEYBOARD = InlineKeyboardMarkup(
+    [[InlineKeyboardButton("🔁 Дахин дасгал хийх", callback_data="new_session")]]
+)
+
 WELCOME = (
     "Сайн байна уу, {name}! 👋\n\n"
     "Би *Тамир* — таны хувийн англи хэлний дасгалжуулагч. 🏋️\n"
     "Өдөр бүр 5 минутын ярианы дасгал хийж, англиар *ярих* чадвараа хөгжүүлье.\n\n"
-    "Хэрхэн ажилладаг вэ:\n"
     "1️⃣ Би өдөр бүр нэг богино нөхцөл байдал өгнө\n"
     "2️⃣ Та 🎤 дуут мессежээр англиар хариулна\n"
-    "3️⃣ Би засвар, зөвлөгөө, оноо өгнө\n\n"
+    "3️⃣ Би засвар, зөвлөгөө, оноо, XP өгнө\n\n"
     "Эхлээд түвшнээ сонгоно уу:"
 )
 
 HELP = (
+    "*Товчлуурууд:*\n"
+    f"{BTN_TODAY} — өдрийн дасгалаа эхлүүлэх\n"
+    f"{BTN_PROGRESS} — стрик, XP, зэрэглэлээ харах\n\n"
     "*Тушаалууд:*\n"
-    "/today — өнөөдрийн дасгалыг эхлүүлэх\n"
-    "/streak — стрикээ харах\n"
+    "/remind 19 — сануулгын цаг (0-23), /remind off — унтраах\n"
     "/level — түвшнээ өөрчлөх\n"
-    "/remind 19 — сануулгын цагаа тохируулах (0-23), /remind off — унтраах\n"
-    "/feedback — санал хүсэлт илгээх\n"
-    "/help — энэ тусламж\n\n"
-    "Дасгалын үеэр хариугаа 🎤 дуут мессежээр (эсвэл бичиж) илгээгээрэй."
+    "/feedback — санал хүсэлт илгээх\n\n"
+    "Дасгалын үеэр хариугаа 🎤 *дуут мессежээр* (эсвэл бичиж) илгээгээрэй."
 )
 
 
@@ -60,7 +77,12 @@ def _level_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-# ---------- commands ----------
+async def _send_session_intro(chat, user_id: int) -> None:
+    intro = coach.start_daily_session(user_id)
+    await chat.send_message(intro.text_mn, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KEYBOARD)
+
+
+# ---------- commands & buttons ----------
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     u = update.effective_user
@@ -80,10 +102,18 @@ async def on_level_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     query = update.callback_query
     await query.answer()
     level, label = LEVELS[query.data]
+    db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
     db.set_level(query.from_user.id, level)
-    await query.edit_message_text(
-        f"Түвшин: {label} ✅\n\nЗа, эхэлцгээе! Эхний дасгалаа авахын тулд /today гэж бичээрэй. 🏋️"
-    )
+    await query.edit_message_text(f"Түвшин: {label} ✅")
+    # Duolingo-style: no ceremony — drop the learner straight into the first workout.
+    await _send_session_intro(query.message.chat, query.from_user.id)
+
+
+async def on_new_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer("Шинэ дасгал! 🏋️")
+    db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
+    await _send_session_intro(query.message.chat, query.from_user.id)
 
 
 async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -91,21 +121,16 @@ async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     db.get_or_create_user(u.id, update.effective_chat.id, u.first_name or "")
     if db.did_session_today(u.id) and db.get_active_session(u.id) is None:
         await update.message.reply_text(
-            "Та өнөөдрийн дасгалаа хийсэн байна! 🎉 Дахиад хийвэл бүр ч сайн — үргэлжлүүлье? "
-            "Тэгвэл шинэ дасгал эхлүүлж байна...",
+            "Өнөөдрийнхөө дасгалыг хийчихсэн байна! 🎉 Нэмэлт дасгал — бүр ч сайн. 💪"
         )
-    intro = coach.start_daily_session(u.id)
-    await update.message.reply_text(intro.text_mn, parse_mode=ParseMode.MARKDOWN)
+    await _send_session_intro(update.effective_chat, u.id)
 
 
-async def cmd_streak(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def cmd_progress(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     u = update.effective_user
     user = db.get_or_create_user(u.id, update.effective_chat.id, u.first_name or "")
     await update.message.reply_text(
-        f"🔥 Стрик: *{user['streak']} өдөр*\n"
-        f"🏆 Дээд амжилт: {user['best_streak']} өдөр\n"
-        f"✅ Нийт дасгал: {user['sessions_done']}",
-        parse_mode=ParseMode.MARKDOWN,
+        coach.progress_card(user), parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KEYBOARD
     )
 
 
@@ -128,7 +153,7 @@ async def cmd_remind(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(HELP, parse_mode=ParseMode.MARKDOWN)
+    await update.message.reply_text(HELP, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KEYBOARD)
 
 
 async def cmd_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -163,6 +188,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"Sessions total: {s['sessions_total']}\n"
         f"Trained today: {s['trained_today']}\n"
         f"Voice today: {s['voice_seconds_today']}s\n"
+        f"XP total: {s['xp_total']}\n"
         f"Feedback items: {s['feedback']}",
         parse_mode=ParseMode.MARKDOWN,
     )
@@ -217,6 +243,16 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (update.message.text or "").strip()
     if not text:
         return
+    # Big-button routing (Duolingo-style: taps, not typed commands)
+    if text == BTN_TODAY:
+        await cmd_today(update, context)
+        return
+    if text == BTN_PROGRESS:
+        await cmd_progress(update, context)
+        return
+    if text == BTN_HELP:
+        await cmd_help(update, context)
+        return
     await context.bot.send_chat_action(update.effective_chat.id, ChatAction.TYPING)
     await _run_turn(update, context, text, spoken=False)
 
@@ -231,7 +267,11 @@ async def _run_turn(update: Update, context: ContextTypes.DEFAULT_TYPE, transcri
         )
         return
 
-    await update.message.reply_text(coach.format_reply(reply, transcript), parse_mode=ParseMode.MARKDOWN)
+    await update.message.reply_text(
+        coach.format_reply(reply, transcript),
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=NEXT_WORKOUT_KEYBOARD if reply.done else None,
+    )
 
     # Voice model answer: learner HEARS the corrected sentence + coach's next line.
     if config.tts_enabled and spoken:
@@ -260,7 +300,8 @@ async def send_reminders(context: ContextTypes.DEFAULT_TYPE) -> None:
                 await context.bot.send_message(
                     user["chat_id"],
                     "🏋️ Англи хэлний дасгалын цаг боллоо!\n"
-                    f"Стрикээ хадгалъя — 🔥 {user['streak']} өдөр. Эхлэх: /today",
+                    f"Стрикээ хадгалъя — 🔥 {user['streak']} өдөр.",
+                    reply_markup=NEXT_WORKOUT_KEYBOARD,
                 )
             except Exception:  # blocked bot, deleted chat, etc.
                 log.info("Reminder failed for user %s", user["user_id"])
@@ -270,18 +311,33 @@ async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     log.exception("Unhandled error: %s", context.error)
 
 
+async def _post_init(app: Application) -> None:
+    """Populate the '/' command menu (the blue Menu button in Telegram)."""
+    await app.bot.set_my_commands(
+        [
+            BotCommand("today", "🏋️ Өнөөдрийн дасгал"),
+            BotCommand("progress", "🔥 Миний ахиц"),
+            BotCommand("level", "📶 Түвшнээ өөрчлөх"),
+            BotCommand("remind", "⏰ Сануулгын цаг"),
+            BotCommand("feedback", "💬 Санал хүсэлт"),
+            BotCommand("help", "❓ Тусламж"),
+        ]
+    )
+
+
 def build_application() -> Application:
-    app = Application.builder().token(config.telegram_token).build()
+    app = Application.builder().token(config.telegram_token).post_init(_post_init).build()
 
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("today", cmd_today))
-    app.add_handler(CommandHandler("streak", cmd_streak))
+    app.add_handler(CommandHandler(["progress", "streak"], cmd_progress))
     app.add_handler(CommandHandler("level", cmd_level))
     app.add_handler(CommandHandler("remind", cmd_remind))
     app.add_handler(CommandHandler("feedback", cmd_feedback))
     app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler("help", cmd_help))
     app.add_handler(CallbackQueryHandler(on_level_chosen, pattern=r"^level_"))
+    app.add_handler(CallbackQueryHandler(on_new_session, pattern=r"^new_session$"))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
     app.add_error_handler(on_error)

@@ -67,11 +67,14 @@ Local SQLite is dev-only. For a live bot that real testers can use, run it as a 
 
 ## What the bot does
 
-- `/start` — onboarding in Mongolian, pick your level (A1–A2 / B1 / B2+)
-- `/today` — today's workout: a scenario (ordering coffee, job interview, IELTS-style describe-your-hometown, …) chosen for your level, rotating daily
+**Duolingo-grade UX, zero typing needed:** persistent big-button keyboard (🏋️ Өнөөдрийн дасгал / 🔥 Миний ахиц / ❓ Тусламж), populated command menu, and an inline "🔁 Дахин дасгал" button after every finished workout. Picking a level drops you straight into your first lesson.
+
+- `/start` — onboarding in Mongolian, pick your level (A1–A2 / B1 / B2+) → first workout starts immediately
+- `/today` (or the 🏋️ button) — today's workout: a scenario (ordering coffee, job interview, IELTS-style describe-your-hometown, …) chosen for your level, rotating daily
+- **Gamification:** per-turn XP (score-based + completion bonus), 6 ranks (🌱→💎) with progress bars, turn dots (●●○), tiered visual score bars (🟩🟨🟥), streak-milestone celebrations (3/7/14/30/60/100 days)
 - 🎤 answer by **voice note** → Grok STT → coach replies with: what you said, the corrected sentence, one specific tip **in Mongolian**, a 0–100 score, and the next conversation turn — plus a TTS audio reply so you hear the model answer
 - ⌨️ typing works too (voice is just better practice)
-- `/streak` — 🔥 daily streak & totals (sessions complete after ~3 turns)
+- `/progress` (or 🔥 button) — rank, XP progress bar, streak & totals (sessions complete after ~3 turns)
 - `/remind 19` — free daily nudge at 19:00 (Telegram pushes cost nothing)
 - `/feedback ...` — testers' suggestions go to Supabase + your Telegram; `/stats` (admin) shows adoption
 - Built-in **cost guardrail**: per-user daily voice cap (default 300s, `DAILY_VOICE_SECONDS_CAP`)

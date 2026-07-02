@@ -30,8 +30,59 @@ class CoachReply:
     feedback_mn: str
     score: int
     done: bool
+    turn_no: int = 1
+    max_turns: int = 3
+    xp_earned: int = 0
     streak: int | None = None       # set when the session completed
     best_streak: int | None = None
+
+
+# ---------- gamification (Duolingo-style) ----------
+
+RANKS = [
+    (0, "🌱 Шинэхэн"),
+    (100, "🥉 Хичээнгүй"),
+    (300, "🥈 Тууштай"),
+    (700, "🥇 Дадлагатай"),
+    (1500, "🏆 Аварга"),
+    (3000, "💎 Мастер"),
+]
+
+STREAK_MILESTONES = {3, 7, 14, 30, 60, 100}
+
+
+def rank_for(xp: int) -> tuple[str, int, int | None]:
+    """Returns (rank_name, current_threshold, next_threshold or None)."""
+    name, cur = RANKS[0][1], RANKS[0][0]
+    nxt: int | None = None
+    for i, (threshold, rank_name) in enumerate(RANKS):
+        if xp >= threshold:
+            name, cur = rank_name, threshold
+            nxt = RANKS[i + 1][0] if i + 1 < len(RANKS) else None
+    return name, cur, nxt
+
+
+def score_bar(score: int) -> str:
+    """Visual 10-block score bar, colored by tier."""
+    filled = max(0, min(10, round(score / 10)))
+    block = "🟩" if score >= 80 else ("🟨" if score >= 60 else "🟥")
+    return block * filled + "⬜" * (10 - filled)
+
+
+def progress_bar(value: int, total: int, width: int = 10) -> str:
+    filled = 0 if total <= 0 else max(0, min(width, round(width * value / total)))
+    return "▰" * filled + "▱" * (width - filled)
+
+
+def turn_dots(turn: int, max_turns: int) -> str:
+    return "●" * min(turn, max_turns) + "○" * max(0, max_turns - turn)
+
+
+def xp_for_turn(score: int, done: bool) -> int:
+    xp = max(4, round(score / 10))       # 4-10 XP per turn
+    if done:
+        xp += 10                          # session completion bonus
+    return xp
 
 
 def start_daily_session(user_id: int) -> SessionIntro:
@@ -87,9 +138,14 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         feedback_mn=str(data.get("feedback_mn", "")).strip(),
         score=int(data.get("score", 0) or 0),
         done=bool(data.get("done", False)) or turn >= max_turns,
+        turn_no=turn,
+        max_turns=max_turns,
     )
 
     db.record_turn(user_id, f'Learner: "{transcript}" / Coach: "{reply.reply_en}"')
+
+    reply.xp_earned = xp_for_turn(reply.score, reply.done)
+    db.add_xp(user_id, reply.xp_earned)
 
     if reply.done:
         streak, best = db.complete_session(user_id)
@@ -99,20 +155,41 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
 
 def format_reply(reply: CoachReply, transcript: str) -> str:
     """Render a CoachReply as Markdown text (channel adapters may reuse this)."""
-    parts = [f'🗣 *Таны хэлсэн:* _"{transcript}"_']
+    parts = [f"{turn_dots(reply.turn_no, reply.max_turns)}  _{reply.turn_no}/{reply.max_turns}_\n"]
+    parts.append(f'🗣 *Таны хэлсэн:* _"{transcript}"_')
     if reply.corrected and reply.corrected.lower() != transcript.lower():
         parts.append(f'✅ *Зөв хувилбар:* "{reply.corrected}"')
     else:
         parts.append("✅ Маш зөв хэллээ!")
     if reply.feedback_mn:
         parts.append(f"💡 {reply.feedback_mn}")
-    parts.append(f"📊 Оноо: *{reply.score}/100*")
-    if reply.reply_en:
-        parts.append(f"\n🗣 *Тамир:* {reply.reply_en}")
-    if reply.done and reply.streak is not None:
-        parts.append(
-            f"\n🎉 *Өнөөдрийн дасгал дууслаа!* Стрик: 🔥 {reply.streak} өдөр"
-            + (f" (дээд амжилт: {reply.best_streak})" if reply.best_streak else "")
-            + "\nМаргааш мөн адил цагт уулзацгаая! 💪"
-        )
+    parts.append(f"{score_bar(reply.score)}  *{reply.score}*  ⭐ +{reply.xp_earned} XP")
+    if reply.reply_en and not reply.done:
+        parts.append(f"\n💬 *Тамир:* {reply.reply_en}")
+    if reply.done:
+        if reply.reply_en:
+            parts.append(f"\n💬 *Тамир:* {reply.reply_en}")
+        parts.append(f"\n🎉 *Өнөөдрийн дасгал дууслаа!*")
+        if reply.streak is not None:
+            line = f"🔥 Стрик: *{reply.streak} өдөр*"
+            if reply.best_streak and reply.streak >= reply.best_streak and reply.streak > 1:
+                line += " — шинэ дээд амжилт! 🏆"
+            parts.append(line)
+            if reply.streak in STREAK_MILESTONES:
+                parts.append(f"🏅 *{reply.streak} хоногийн стрик!* Гайхалтай тууштай байна! 👏")
     return "\n".join(parts)
+
+
+def progress_card(user) -> str:
+    """Duolingo-style profile/progress card."""
+    xp = user["xp"] or 0
+    rank, cur, nxt = rank_for(xp)
+    lines = [f"🏅 *Зэрэглэл:* {rank}"]
+    if nxt is not None:
+        lines.append(f"{progress_bar(xp - cur, nxt - cur)}  {xp}/{nxt} XP")
+    else:
+        lines.append(f"⭐ {xp} XP — дээд зэрэглэл!")
+    lines.append("")
+    lines.append(f"🔥 Стрик: *{user['streak']} өдөр*  (дээд: {user['best_streak']})")
+    lines.append(f"✅ Нийт дасгал: {user['sessions_done']}")
+    return "\n".join(lines)
