@@ -51,23 +51,51 @@ NEXT_WORKOUT_KEYBOARD = InlineKeyboardMarkup(
 
 WELCOME = (
     "Сайн байна уу, {name}! 👋\n\n"
-    "Би *Тамир* — таны хувийн англи хэлний дасгалжуулагч. 🏋️\n"
-    "Өдөр бүр 5 минутын ярианы дасгал хийж, англиар *ярих* чадвараа хөгжүүлье.\n\n"
-    "1️⃣ Би өдөр бүр нэг богино нөхцөл байдал өгнө\n"
-    "2️⃣ Та 🎤 дуут мессежээр англиар хариулна\n"
-    "3️⃣ Би засвар, зөвлөгөө, оноо, XP өгнө\n\n"
-    "Эхлээд түвшнээ сонгоно уу:"
+    "Би *Тамир* — таны хувийн англи хэлний дасгалжуулагч. 🏋️\n\n"
+    "*Яагаад Talking Gym гэж?*\n"
+    "Хэл сурах нь биеийн тамирын заал шиг: өдөр бүр багахан дасгал → бодит ахиц. "
+    "Өдөрт ердөө *5 минут* — гэхдээ өдөр бүр! 💪\n\n"
+    "🎯 *Танд юу өгөх вэ:*\n"
+    "• Өдөр бүр нэг бодит нөхцөлт яриа (кофе захиалах, ажлын ярилцлага...)\n"
+    "• Дуут хариултад тань засвар + зөвлөгөө *монголоор*\n"
+    "• Оноо, ⭐ XP, зэрэглэл, 🔥 стрик\n\n"
+    "Эхлээд түвшнээ сонгоно уу: 👇"
 )
 
-HELP = (
-    "*Товчлуурууд:*\n"
-    f"{BTN_TODAY} — өдрийн дасгалаа эхлүүлэх\n"
-    f"{BTN_PROGRESS} — стрик, XP, зэрэглэлээ харах\n\n"
-    "*Тушаалууд:*\n"
-    "/remind 19 — сануулгын цаг (0-23), /remind off — унтраах\n"
+QUICK_TIPS = (
+    "📋 *Товч заавар:*\n"
+    "1️⃣ Би нөхцөл байдал өгнө — та дүрдээ орно\n"
+    "2️⃣ Хариугаа 🎤 *дуут мессежээр* илгээнэ (10–30 секунд ярь)\n"
+    "3️⃣ Би засвар, зөвлөгөө, XP өгнө — 3 солилцоод дасгал дуусна\n\n"
+    "Бүү сандар — *алдаа гаргах нь дасгалын хэсэг!* 😊\n"
+    "За, эхний дасгал: 👇"
+)
+
+GUIDE = (
+    "📖 *Talking Gym — хэрэглэх заавар*\n\n"
+    "🏋️ *Дасгал хэрхэн хийх вэ*\n"
+    f"1. «{BTN_TODAY}» товчийг дарна\n"
+    "2. Би нөхцөл байдал өгнө (жишээ: кафед кофе захиалах)\n"
+    "3. Та дүрдээ орж, хариугаа 🎤 *дуут мессежээр* англиар хэлнэ\n"
+    "    💡 Микрофоноо дараад 10–30 секунд яриарай\n"
+    "4. Би хариу өгнө:\n"
+    "    ✅ Зөв хувилбар — өгүүлбэрийн тань сайжруулсан хэлбэр\n"
+    "    💡 Зөвлөгөө — монголоор, нэг л гол засвар\n"
+    "    🟩 Оноо (0–100) + ⭐ XP\n"
+    "    🔊 Дуут хариу — зөв хэллэгийг чихээрээ сонсоорой\n"
+    "5. Гурван солилцоо = нэг дасгал. Өдөрт нэг дасгал л хангалттай!\n\n"
+    "🔥 *Стрик ба XP*\n"
+    "• Өдөр бүр дасгал хийвэл стрик өснө — нэг өдөр тасалвал 1-ээс дахин эхэлнэ\n"
+    "• XP цуглуулж зэрэглэл ахина: 🌱 → 🥉 → 🥈 → 🥇 → 🏆 → 💎\n"
+    f"• Ахицаа «{BTN_PROGRESS}» товчоор хараарай\n\n"
+    "⚙️ *Тохиргоо*\n"
+    "/remind 19 — өдөр бүр 19:00 цагт сануулна (/remind off — унтраана)\n"
     "/level — түвшнээ өөрчлөх\n"
-    "/feedback — санал хүсэлт илгээх\n\n"
-    "Дасгалын үеэр хариугаа 🎤 *дуут мессежээр* (эсвэл бичиж) илгээгээрэй."
+    "/feedback [санал] — бидэнд санал хүсэлт илгээх\n\n"
+    "❓ *Түгээмэл асуулт*\n"
+    "• *Бичээд хариулж болох уу?* Болно, гэхдээ ярих нь хамаагүй илүү үр дүнтэй!\n"
+    "• *Өдөрт хэд хийж болох вэ?* Хүссэн хэрээрээ — дуут дасгал өдрийн хязгаартай.\n"
+    "• *Буруу ярихаас эмээж байна...* Бүү ай! Тамир хэзээ ч шүүмжлэхгүй, зөвхөн тусална. 💪"
 )
 
 
@@ -105,7 +133,8 @@ async def on_level_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
     db.set_level(query.from_user.id, level)
     await query.edit_message_text(f"Түвшин: {label} ✅")
-    # Duolingo-style: no ceremony — drop the learner straight into the first workout.
+    # Duolingo-style: a 3-line primer, then straight into the first workout.
+    await query.message.chat.send_message(QUICK_TIPS, parse_mode=ParseMode.MARKDOWN)
     await _send_session_intro(query.message.chat, query.from_user.id)
 
 
@@ -153,7 +182,7 @@ async def cmd_remind(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(HELP, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KEYBOARD)
+    await update.message.reply_text(GUIDE, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KEYBOARD)
 
 
 async def cmd_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -312,17 +341,35 @@ async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def _post_init(app: Application) -> None:
-    """Populate the '/' command menu (the blue Menu button in Telegram)."""
+    """Populate the '/' command menu and the bot's profile texts."""
     await app.bot.set_my_commands(
         [
             BotCommand("today", "🏋️ Өнөөдрийн дасгал"),
             BotCommand("progress", "🔥 Миний ахиц"),
+            BotCommand("guide", "📖 Хэрэглэх заавар"),
             BotCommand("level", "📶 Түвшнээ өөрчлөх"),
             BotCommand("remind", "⏰ Сануулгын цаг"),
             BotCommand("feedback", "💬 Санал хүсэлт"),
-            BotCommand("help", "❓ Тусламж"),
         ]
     )
+    # Profile texts: what people see BEFORE pressing Start (empty chat + share card).
+    # Telegram rate-limits changes to these — never let a failure block startup.
+    try:
+        await app.bot.set_my_short_description(
+            "Хувийн AI англи хэлний дасгалжуулагч 🏋️ Өдөрт 5 минут ярианы дасгал — засвар, оноо, стрик."
+        )
+        await app.bot.set_my_description(
+            "Би Тамир — таны хувийн англи хэлний дасгалжуулагч. 🏋️\n\n"
+            "Өдөр бүр 5 минутын ярианы дасгал: би бодит нөхцөл байдал өгнө, "
+            "та 🎤 дуут мессежээр англиар хариулна, би засвар, зөвлөгөө, оноо өгнө.\n\n"
+            "🗣 Ярианы дадал — жинхэнэ нөхцөлт яриагаар\n"
+            "💡 Зөвлөгөө монголоор\n"
+            "🔊 Зөв хэллэгийг дуугаар сонсоно\n"
+            "🔥 Стрик, XP, зэрэглэл\n\n"
+            "«Start» дарж эхлээрэй!"
+        )
+    except Exception:
+        log.info("Profile texts unchanged (rate-limited or identical)")
 
 
 def build_application() -> Application:
@@ -335,7 +382,7 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("remind", cmd_remind))
     app.add_handler(CommandHandler("feedback", cmd_feedback))
     app.add_handler(CommandHandler("stats", cmd_stats))
-    app.add_handler(CommandHandler("help", cmd_help))
+    app.add_handler(CommandHandler(["help", "guide"], cmd_help))
     app.add_handler(CallbackQueryHandler(on_level_chosen, pattern=r"^level_"))
     app.add_handler(CallbackQueryHandler(on_new_session, pattern=r"^new_session$"))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))
