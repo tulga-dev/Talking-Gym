@@ -30,6 +30,8 @@ class CoachReply:
     feedback_mn: str
     score: int
     done: bool
+    suggested_en: str = ""          # model answer for the coach's next question
+    suggested_mn: str = ""          # its Mongolian meaning
     turn_no: int = 1
     max_turns: int = 3
     xp_earned: int = 0
@@ -89,14 +91,27 @@ def start_daily_session(user_id: int) -> SessionIntro:
     user = db.get_user(user_id)
     scenario = pick_scenario(user["level"], user["sessions_done"])
     db.start_session(user_id, scenario.id)
-    text = (
-        f"🏋️ *Өнөөдрийн дасгал: {scenario.title_mn}*\n\n"
-        f"{scenario.setup_mn}\n\n"
-        f"🗣 *Тамир:* {scenario.opener_en}\n\n"
-        f"Хариугаа 🎤 *дуут мессежээр* илгээгээрэй "
-        f"(бичиж болно, гэхдээ ярих нь илүү үр дүнтэй!)"
-    )
-    return SessionIntro(scenario=scenario, text_mn=text)
+
+    parts = [
+        f"🏋️ *Өнөөдрийн дасгал: {scenario.title_mn}*",
+        f"\n📖 {scenario.setup_mn}",
+        f"\n💬 *Тамир:* {scenario.opener_en}",
+        f"🇲🇳 _{scenario.opener_mn}_",
+    ]
+    if user["level"] != "advanced":
+        # Beginners must never face a question they can't answer:
+        # give a model answer to read aloud and adapt.
+        parts.append(
+            f'\n📝 *Жишээ хариулт* — уншаад, өөрийн мэдээллээр өөрчлөөрэй:\n"{scenario.example_en}"'
+        )
+        parts.append(f"🇲🇳 _{scenario.example_mn}_")
+        parts.append(
+            "\n🎤 Одоо дуут мессежээр хэлээрэй! Жишээг шууд уншсан ч болно — "
+            "чанга уншина гэдэг чинь дасгал шүү! 💪"
+        )
+    else:
+        parts.append("\n🎤 Хариугаа дуут мессежээр илгээгээрэй!")
+    return SessionIntro(scenario=scenario, text_mn="\n".join(parts))
 
 
 async def handle_turn(user_id: int, transcript: str) -> CoachReply:
@@ -138,6 +153,8 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         feedback_mn=str(data.get("feedback_mn", "")).strip(),
         score=int(data.get("score", 0) or 0),
         done=bool(data.get("done", False)) or turn >= max_turns,
+        suggested_en=str(data.get("suggested_en", "")).strip(),
+        suggested_mn=str(data.get("suggested_mn", "")).strip(),
         turn_no=turn,
         max_turns=max_turns,
     )
@@ -166,6 +183,10 @@ def format_reply(reply: CoachReply, transcript: str) -> str:
     parts.append(f"{score_bar(reply.score)}  *{reply.score}*  ⭐ +{reply.xp_earned} XP")
     if reply.reply_en and not reply.done:
         parts.append(f"\n💬 *Тамир:* {reply.reply_en}")
+        if reply.suggested_en:
+            parts.append(f'📝 *Жишээ:* "{reply.suggested_en}"')
+            if reply.suggested_mn:
+                parts.append(f"🇲🇳 _{reply.suggested_mn}_")
     if reply.done:
         if reply.reply_en:
             parts.append(f"\n💬 *Тамир:* {reply.reply_en}")

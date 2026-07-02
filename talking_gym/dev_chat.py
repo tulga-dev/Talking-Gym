@@ -21,6 +21,8 @@ MOCK_REPLY = {
     "feedback_mn": "«I like play» биш «I like playing» гэж хэлээрэй — like-ийн дараа үйл үг -ing авдаг.",
     "score": 78,
     "done": False,
+    "suggested_en": "On weekends, I usually meet my friends and we watch movies together.",
+    "suggested_mn": "Амралтын өдрөөр би ихэвчлэн найзуудтайгаа уулзаж, хамт кино үздэг.",
 }
 
 
