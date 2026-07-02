@@ -100,10 +100,31 @@ GUIDE = (
 )
 
 
+REMIND_ASK = (
+    "⏰ *Өдөр бүр хэдэн цагт сануулах вэ?*\n"
+    "Стрикээ хадгалахад өдөр бүрийн сануулга их тусалдаг шүү! 🔥"
+)
+
+REMIND_HOURS = [(8, "🌅 08:00"), (13, "🌞 13:00"), (19, "🌆 19:00"), (21, "🌙 21:00")]
+
+
 def _level_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [[InlineKeyboardButton(label, callback_data=key)] for key, (_, label) in LEVELS.items()]
     )
+
+
+def _remind_keyboard() -> InlineKeyboardMarkup:
+    row = [InlineKeyboardButton(label, callback_data=f"remindh_{h}") for h, label in REMIND_HOURS]
+    return InlineKeyboardMarkup(
+        [row[:2], row[2:], [InlineKeyboardButton("🔕 Сануулга хэрэггүй", callback_data="remindh_off")]]
+    )
+
+
+def _needs_onboarding(user) -> bool:
+    """True for users who have never finished (or started) a session — they
+    should pick a level first instead of silently defaulting to beginner."""
+    return user["sessions_done"] == 0 and db.get_active_session(user["user_id"]) is None
 
 
 async def _send_session_intro(chat, user_id: int) -> None:
@@ -131,9 +152,31 @@ async def on_level_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     query = update.callback_query
     await query.answer()
     level, label = LEVELS[query.data]
-    db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
+    user = db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
     db.set_level(query.from_user.id, level)
     await query.edit_message_text(f"Түвшин: {label} ✅")
+    if user["sessions_done"] == 0:
+        # Onboarding continues: pick the daily reminder time next.
+        await query.message.chat.send_message(
+            REMIND_ASK, parse_mode=ParseMode.MARKDOWN, reply_markup=_remind_keyboard()
+        )
+    # Existing users just changed their level — nothing else to do.
+
+
+async def on_remind_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+    db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
+    choice = query.data.split("_", 1)[1]
+    if choice == "off":
+        db.set_reminder_hour(query.from_user.id, None)
+        await query.edit_message_text("🔕 За, сануулгагүй. Хэрэгтэй болбол: /remind 19")
+    else:
+        hour = int(choice)
+        db.set_reminder_hour(query.from_user.id, hour)
+        await query.edit_message_text(
+            f"⏰ Болно! Өдөр бүр {hour:02d}:00 цагт сануулна. (Өөрчлөх: /remind)"
+        )
     # Duolingo-style: a 3-line primer, then straight into the first workout.
     await query.message.chat.send_message(QUICK_TIPS, parse_mode=ParseMode.MARKDOWN)
     await _send_session_intro(query.message.chat, query.from_user.id)
@@ -142,13 +185,19 @@ async def on_level_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def on_new_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer("Шинэ дасгал! 🏋️")
-    db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
+    user = db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
+    if _needs_onboarding(user):
+        await query.message.chat.send_message("Эхлээд түвшнээ сонгоно уу:", reply_markup=_level_keyboard())
+        return
     await _send_session_intro(query.message.chat, query.from_user.id)
 
 
 async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     u = update.effective_user
-    db.get_or_create_user(u.id, update.effective_chat.id, u.first_name or "")
+    user = db.get_or_create_user(u.id, update.effective_chat.id, u.first_name or "")
+    if _needs_onboarding(user):
+        await update.message.reply_text("Эхлээд түвшнээ сонгоно уу:", reply_markup=_level_keyboard())
+        return
     if db.did_session_today(u.id) and db.get_active_session(u.id) is None:
         await update.message.reply_text(
             "Өнөөдрийнхөө дасгалыг хийчихсэн байна! 🎉 Нэмэлт дасгал — бүр ч сайн. 💪"
@@ -385,6 +434,7 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler(["help", "guide"], cmd_help))
     app.add_handler(CallbackQueryHandler(on_level_chosen, pattern=r"^level_"))
+    app.add_handler(CallbackQueryHandler(on_remind_chosen, pattern=r"^remindh_"))
     app.add_handler(CallbackQueryHandler(on_new_session, pattern=r"^new_session$"))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
