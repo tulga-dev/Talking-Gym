@@ -30,6 +30,7 @@ _SQLITE_SCHEMA = [
         sessions_done INTEGER DEFAULT 0,
         reminder_hour INTEGER,
         xp            INTEGER DEFAULT 0,
+        channel       TEXT DEFAULT 'telegram',
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -67,6 +68,7 @@ _PG_SCHEMA = [
         sessions_done INTEGER DEFAULT 0,
         reminder_hour INTEGER,
         xp            INTEGER DEFAULT 0,
+        channel       TEXT DEFAULT 'telegram',
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -169,15 +171,20 @@ def init_db() -> None:
 
 def _migrate() -> None:
     """Additive migrations for databases created before a column existed."""
-    if IS_POSTGRES:
-        with _conn() as con:
-            con.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0")
-    else:
-        try:
+    statements = [
+        "ALTER TABLE users ADD COLUMN {} xp INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN {} channel TEXT DEFAULT 'telegram'",
+    ]
+    for template in statements:
+        if IS_POSTGRES:
             with _conn() as con:
-                con.execute("ALTER TABLE users ADD COLUMN xp INTEGER DEFAULT 0")
-        except sqlite3.OperationalError:
-            pass  # column already exists
+                con.execute(template.format("IF NOT EXISTS"))
+        else:
+            try:
+                with _conn() as con:
+                    con.execute(template.format(""))
+            except sqlite3.OperationalError:
+                pass  # column already exists
 
 
 def _today() -> date:
@@ -186,7 +193,7 @@ def _today() -> date:
 
 # ---------- users ----------
 
-def get_or_create_user(user_id: int, chat_id: int, name: str):
+def get_or_create_user(user_id: int, chat_id: int, name: str, channel: str = "telegram"):
     with _conn() as con:
         row = con.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchone()
         if row:
@@ -194,8 +201,10 @@ def get_or_create_user(user_id: int, chat_id: int, name: str):
                 con.execute("UPDATE users SET chat_id=? WHERE user_id=?", (chat_id, user_id))
             return row
         con.execute(
-            "INSERT INTO users (user_id, chat_id, name, reminder_hour, created_at) VALUES (?,?,?,?,?)",
-            (user_id, chat_id, name, config.default_reminder_hour, datetime.utcnow().isoformat()),
+            "INSERT INTO users (user_id, chat_id, name, reminder_hour, channel, created_at) "
+            "VALUES (?,?,?,?,?,?)",
+            (user_id, chat_id, name, config.default_reminder_hour, channel,
+             datetime.utcnow().isoformat()),
         )
         return con.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchone()
 

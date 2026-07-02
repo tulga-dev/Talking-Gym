@@ -393,17 +393,22 @@ async def _run_turn(update: Update, context: ContextTypes.DEFAULT_TYPE, transcri
 
 async def send_reminders(context: ContextTypes.DEFAULT_TYPE) -> None:
     """Runs hourly; nudges every user whose reminder hour is now and who hasn't trained today."""
+    from . import messenger  # local import: messenger never imports telegram_bot
+
     now_hour = dt.datetime.now(config.tz).hour
     for user in db.all_users_with_reminders():
         if user["reminder_hour"] == now_hour and not db.did_session_today(user["user_id"]):
             try:
-                await context.bot.send_message(
-                    user["chat_id"],
-                    "🏋️ Англи хэлний дасгалын цаг боллоо!\n"
-                    f"Стрикээ хадгалъя — 🔥 {user['streak']} өдөр.",
-                    reply_markup=NEXT_WORKOUT_KEYBOARD,
-                )
-            except Exception:  # blocked bot, deleted chat, etc.
+                if user["channel"] == "messenger":
+                    await messenger.send_reminder(user)
+                else:
+                    await context.bot.send_message(
+                        user["chat_id"],
+                        "🏋️ Англи хэлний дасгалын цаг боллоо!\n"
+                        f"Стрикээ хадгалъя — 🔥 {user['streak']} өдөр.",
+                        reply_markup=NEXT_WORKOUT_KEYBOARD,
+                    )
+            except Exception:  # blocked bot, deleted chat, out-of-window, etc.
                 log.info("Reminder failed for user %s", user["user_id"])
 
 

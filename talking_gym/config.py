@@ -60,6 +60,17 @@ class Config:
     coach_name_en: str = os.getenv("COACH_NAME_EN", "Bagsh")
     coach_name_mn: str = os.getenv("COACH_NAME_MN", "Багш")
 
+    # --- Facebook Messenger channel (optional; enabled when page token is set) ---
+    messenger_page_token: str = os.getenv("MESSENGER_PAGE_TOKEN", "")
+    messenger_verify_token: str = os.getenv("MESSENGER_VERIFY_TOKEN", "talking-gym-verify")
+    messenger_app_secret: str = os.getenv("MESSENGER_APP_SECRET", "")
+    graph_api_version: str = os.getenv("GRAPH_API_VERSION", "v21.0")
+    web_port: int = int(os.getenv("PORT", "8080"))
+
+    @property
+    def messenger_enabled(self) -> bool:
+        return bool(self.messenger_page_token)
+
     @property
     def tz(self) -> ZoneInfo:
         return ZoneInfo(self.tz_name)

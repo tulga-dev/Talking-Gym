@@ -24,6 +24,13 @@ jobs:
             XAI_API_KEY="${{ secrets.XAI_API_KEY }}" \
             SUPABASE_DB_URL="${{ secrets.SUPABASE_DB_URL }}" \
             ADMIN_CHAT_ID="${{ secrets.ADMIN_CHAT_ID }}"
+          # Optional Messenger channel secrets — staged only when present
+          if [ -n "${{ secrets.MESSENGER_PAGE_TOKEN }}" ]; then
+            flyctl secrets set --stage -a talking-gym-mn \
+              MESSENGER_PAGE_TOKEN="${{ secrets.MESSENGER_PAGE_TOKEN }}" \
+              MESSENGER_VERIFY_TOKEN="${{ secrets.MESSENGER_VERIFY_TOKEN }}" \
+              MESSENGER_APP_SECRET="${{ secrets.MESSENGER_APP_SECRET }}"
+          fi
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 

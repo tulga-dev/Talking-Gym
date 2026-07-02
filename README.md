@@ -80,6 +80,19 @@ Local SQLite is dev-only. For a live bot that real testers can use, run it as a 
 - `/feedback ...` — testers' suggestions go to Supabase + your Telegram; `/stats` (admin) shows adoption
 - Built-in **cost guardrail**: per-user daily voice cap (default 300s, `DAILY_VOICE_SECONDS_CAP`)
 
+## Facebook Messenger channel (the 83%-of-Mongolia channel)
+
+The bot also serves Messenger via a webhook (same process, same brain, plain-text rendering). To activate:
+
+1. Create a **Facebook Page** for Talking Gym (the bot speaks as the Page).
+2. [developers.facebook.com](https://developers.facebook.com) → Create App (Business) → add the **Messenger** product → connect your Page → generate a **Page access token**.
+3. App settings → Basic → copy the **App secret** (used to verify webhook signatures).
+4. Add GitHub repo secrets: `MESSENGER_PAGE_TOKEN`, `MESSENGER_APP_SECRET`, `MESSENGER_VERIFY_TOKEN` (any string you invent), then re-run the deploy workflow.
+5. Messenger product → Webhooks → Callback URL `https://talking-gym-mn.fly.dev/webhooks/messenger`, Verify token = the same string → subscribe the Page to `messages` and `messaging_postbacks`.
+6. Test from your own account (works immediately for app admins/testers). Public access needs Meta's `pages_messaging` review (a few days).
+
+Users get the same coach: persistent menu (🏋️/🔥/❓), quick-reply onboarding, voice both ways, streaks/XP. Feedback: users type `санал: ...`.
+
 ## Architecture
 
 ```
@@ -97,10 +110,11 @@ talking_gym/
     tts.py                   Grok TTS  (POST /v1/tts)
   channels/
     telegram_bot.py          Telegram adapter (handlers, reminders, voice pipeline)
+    messenger.py             Facebook Messenger adapter (webhook server, Send API)
   dev_chat.py                console REPL (+ --mock for offline dev)
 ```
 
-The **coach engine knows nothing about Telegram** — adding Facebook Messenger (83% of Mongolians) later means writing one new adapter in `channels/`, per the channel-agnostic recommendation in the market research.
+The **coach engine knows nothing about the channels** — Telegram polls, Messenger receives webhooks, and both call the same `coach.py`. main.py runs the poller and the aiohttp web server in one asyncio loop.
 
 ## Roadmap (from the research)
 
