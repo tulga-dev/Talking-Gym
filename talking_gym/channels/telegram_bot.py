@@ -28,9 +28,9 @@ from ..providers import stt, tts
 log = logging.getLogger(__name__)
 
 LEVELS = {
-    "level_beginner": ("beginner", "🌱 Анхан (A1–A2)"),
-    "level_intermediate": ("intermediate", "🌿 Дунд (B1)"),
-    "level_advanced": ("advanced", "🌳 Ахисан (B2+)"),
+    "beginner": "🌱 Анхан (A1–A2)",
+    "intermediate": "🌿 Дунд (B1)",
+    "advanced": "🌳 Ахисан (B2+)",
 }
 
 # Persistent big-button keyboard — users should never need to type a command.
@@ -108,9 +108,12 @@ REMIND_ASK = (
 REMIND_HOURS = [(8, "🌅 08:00"), (13, "🌞 13:00"), (19, "🌆 19:00"), (21, "🌙 21:00")]
 
 
-def _level_keyboard() -> InlineKeyboardMarkup:
+def _level_keyboard(onboarding: bool) -> InlineKeyboardMarkup:
+    """'olevel:' buttons continue into full onboarding (reminder -> first lesson);
+    'level:' buttons (from /level) just change the level."""
+    prefix = "olevel" if onboarding else "level"
     return InlineKeyboardMarkup(
-        [[InlineKeyboardButton(label, callback_data=key)] for key, (_, label) in LEVELS.items()]
+        [[InlineKeyboardButton(label, callback_data=f"{prefix}:{lv}")] for lv, label in LEVELS.items()]
     )
 
 
@@ -140,27 +143,28 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         WELCOME.format(name=u.first_name or ""),
         parse_mode=ParseMode.MARKDOWN,
-        reply_markup=_level_keyboard(),
+        reply_markup=_level_keyboard(onboarding=True),
     )
 
 
 async def cmd_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Түвшнээ сонгоно уу:", reply_markup=_level_keyboard())
+    await update.message.reply_text("Түвшнээ сонгоно уу:", reply_markup=_level_keyboard(onboarding=False))
 
 
 async def on_level_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    level, label = LEVELS[query.data]
-    user = db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
+    prefix, level = query.data.split(":", 1)
+    label = LEVELS[level]
+    db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
     db.set_level(query.from_user.id, level)
     await query.edit_message_text(f"Түвшин: {label} ✅")
-    if user["sessions_done"] == 0:
+    if prefix == "olevel":
         # Onboarding continues: pick the daily reminder time next.
         await query.message.chat.send_message(
             REMIND_ASK, parse_mode=ParseMode.MARKDOWN, reply_markup=_remind_keyboard()
         )
-    # Existing users just changed their level — nothing else to do.
+    # Plain /level change: done.
 
 
 async def on_remind_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -187,7 +191,9 @@ async def on_new_session(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await query.answer("Шинэ дасгал! 🏋️")
     user = db.get_or_create_user(query.from_user.id, query.message.chat.id, query.from_user.first_name or "")
     if _needs_onboarding(user):
-        await query.message.chat.send_message("Эхлээд түвшнээ сонгоно уу:", reply_markup=_level_keyboard())
+        await query.message.chat.send_message(
+            "Эхлээд түвшнээ сонгоно уу:", reply_markup=_level_keyboard(onboarding=True)
+        )
         return
     await _send_session_intro(query.message.chat, query.from_user.id)
 
@@ -196,7 +202,9 @@ async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     u = update.effective_user
     user = db.get_or_create_user(u.id, update.effective_chat.id, u.first_name or "")
     if _needs_onboarding(user):
-        await update.message.reply_text("Эхлээд түвшнээ сонгоно уу:", reply_markup=_level_keyboard())
+        await update.message.reply_text(
+            "Эхлээд түвшнээ сонгоно уу:", reply_markup=_level_keyboard(onboarding=True)
+        )
         return
     if db.did_session_today(u.id) and db.get_active_session(u.id) is None:
         await update.message.reply_text(
@@ -358,12 +366,9 @@ async def _run_turn(update: Update, context: ContextTypes.DEFAULT_TYPE, transcri
         if speak_text:
             try:
                 audio = await tts.speak(speak_text)
-                await update.message.reply_audio(
-                    audio=io.BytesIO(audio),
-                    filename="coach.mp3",
-                    title=f"{config.coach_name_mn} 🗣",
-                    performer="Talking Gym",
-                )
+                # Voice note, NOT audio file: audio files land in Telegram's music
+                # player, which queues every audio in the chat as a playlist.
+                await update.message.reply_voice(voice=io.BytesIO(audio))
             except ProviderError:
                 log.warning("TTS failed; text-only reply sent")
 
@@ -433,7 +438,7 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("feedback", cmd_feedback))
     app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler(["help", "guide"], cmd_help))
-    app.add_handler(CallbackQueryHandler(on_level_chosen, pattern=r"^level_"))
+    app.add_handler(CallbackQueryHandler(on_level_chosen, pattern=r"^o?level:"))
     app.add_handler(CallbackQueryHandler(on_remind_chosen, pattern=r"^remindh_"))
     app.add_handler(CallbackQueryHandler(on_new_session, pattern=r"^new_session$"))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))
