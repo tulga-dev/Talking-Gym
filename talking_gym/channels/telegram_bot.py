@@ -132,7 +132,7 @@ def _needs_onboarding(user) -> bool:
 
 async def _send_session_intro(chat, user_id: int) -> None:
     intro = coach.start_daily_session(user_id)
-    await chat.send_message(intro.text_mn, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KEYBOARD)
+    await chat.send_message(intro.text_mn, parse_mode=ParseMode.HTML, reply_markup=MAIN_KEYBOARD)
 
 
 # ---------- commands & buttons ----------
@@ -217,7 +217,7 @@ async def cmd_progress(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     u = update.effective_user
     user = db.get_or_create_user(u.id, update.effective_chat.id, u.first_name or "")
     await update.message.reply_text(
-        coach.progress_card(user), parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KEYBOARD
+        coach.progress_card(user), parse_mode=ParseMode.HTML, reply_markup=MAIN_KEYBOARD
     )
 
 
@@ -356,7 +356,7 @@ async def _run_turn(update: Update, context: ContextTypes.DEFAULT_TYPE, transcri
 
     await update.message.reply_text(
         coach.format_reply(reply, transcript),
-        parse_mode=ParseMode.MARKDOWN,
+        parse_mode=ParseMode.HTML,
         reply_markup=NEXT_WORKOUT_KEYBOARD if reply.done else None,
     )
 

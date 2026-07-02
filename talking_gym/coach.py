@@ -3,7 +3,12 @@
 Knows nothing about Telegram. A channel adapter (telegram_bot.py, later
 messenger.py) calls start_daily_session() and handle_turn() and renders
 the returned CoachReply however it likes.
+
+Rendered texts use Telegram-compatible HTML (send with parse_mode=HTML):
+bold for the load-bearing items, italics for translations, and
+<blockquote> to make example answers unmissable.
 """
+import html
 import logging
 from dataclasses import dataclass
 
@@ -87,26 +92,31 @@ def xp_for_turn(score: int, done: bool) -> int:
     return xp
 
 
+def _esc(text: str) -> str:
+    return html.escape(text, quote=False)
+
+
 def start_daily_session(user_id: int) -> SessionIntro:
     user = db.get_user(user_id)
     scenario = pick_scenario(user["level"], user["sessions_done"])
     db.start_session(user_id, scenario.id)
 
     parts = [
-        f"🏋️ *Өнөөдрийн дасгал: {scenario.title_mn}*",
-        f"\n📖 {scenario.setup_mn}",
-        f"\n💬 *{config.coach_name_mn}:* {scenario.opener_en}",
-        f"🇲🇳 _{scenario.opener_mn}_",
+        f"🏋️ <b>Өнөөдрийн дасгал: {_esc(scenario.title_mn)}</b>",
+        f"\n📖 {_esc(scenario.setup_mn)}",
+        f"\n💬 <b>{_esc(config.coach_name_mn)}:</b> {_esc(scenario.opener_en)}",
+        f"🇲🇳 <i>{_esc(scenario.opener_mn)}</i>",
     ]
     if user["level"] != "advanced":
         # Beginners must never face a question they can't answer:
         # give a model answer to read aloud and adapt.
+        parts.append("\n📝 <b>ЖИШЭЭ ХАРИУЛТ</b> — уншаад, өөрийн мэдээллээр өөрчлөөрэй:")
         parts.append(
-            f"\n📝 *Жишээ хариулт* — уншаад, өөрийн мэдээллээр өөрчлөөрэй:\n`{scenario.example_en}`"
+            f"<blockquote>🗣 <b>{_esc(scenario.example_en)}</b>\n"
+            f"🇲🇳 <i>{_esc(scenario.example_mn)}</i></blockquote>"
         )
-        parts.append(f"🇲🇳 _{scenario.example_mn}_")
         parts.append(
-            "\n🎤 Одоо дуут мессежээр хэлээрэй! Жишээг шууд уншсан ч болно — "
+            "🎤 Одоо дуут мессежээр хэлээрэй! Жишээг шууд уншсан ч болно — "
             "чанга уншина гэдэг чинь дасгал шүү! 💪"
         )
     else:
@@ -171,47 +181,48 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
 
 
 def format_reply(reply: CoachReply, transcript: str) -> str:
-    """Render a CoachReply as Markdown text (channel adapters may reuse this)."""
-    parts = [f"{turn_dots(reply.turn_no, reply.max_turns)}  _{reply.turn_no}/{reply.max_turns}_\n"]
-    parts.append(f'🗣 *Таны хэлсэн:* _"{transcript}"_')
+    """Render a CoachReply as Telegram HTML (channel adapters may reuse this)."""
+    parts = [f"{turn_dots(reply.turn_no, reply.max_turns)}  <i>{reply.turn_no}/{reply.max_turns}</i>\n"]
+    parts.append(f'🗣 Таны хэлсэн: <i>"{_esc(transcript)}"</i>')
     if reply.corrected and reply.corrected.lower() != transcript.lower():
-        parts.append(f'✅ *Зөв хувилбар:* "{reply.corrected}"')
+        parts.append(f'✅ Зөв хувилбар: <b>"{_esc(reply.corrected)}"</b>')
     else:
         parts.append("✅ Маш зөв хэллээ!")
     if reply.feedback_mn:
-        parts.append(f"💡 {reply.feedback_mn}")
-    parts.append(f"{score_bar(reply.score)}  *{reply.score}*  ⭐ +{reply.xp_earned} XP")
+        parts.append(f"💡 {_esc(reply.feedback_mn)}")
+    parts.append(f"{score_bar(reply.score)}  <b>{reply.score}</b>  ⭐ +{reply.xp_earned} XP")
     if reply.reply_en and not reply.done:
-        parts.append(f"\n💬 *{config.coach_name_mn}:* {reply.reply_en}")
+        parts.append(f"\n💬 <b>{_esc(config.coach_name_mn)}:</b> {_esc(reply.reply_en)}")
         if reply.suggested_en:
-            # backticks inside a code span would break Markdown parsing
-            parts.append(f"📝 *Жишээ:*\n`{reply.suggested_en.replace('`', chr(39))}`")
+            parts.append("📝 <b>ЖИШЭЭ</b> — уншаад хэлээрэй:")
+            block = f"🗣 <b>{_esc(reply.suggested_en)}</b>"
             if reply.suggested_mn:
-                parts.append(f"🇲🇳 _{reply.suggested_mn}_")
+                block += f"\n🇲🇳 <i>{_esc(reply.suggested_mn)}</i>"
+            parts.append(f"<blockquote>{block}</blockquote>")
     if reply.done:
         if reply.reply_en:
-            parts.append(f"\n💬 *{config.coach_name_mn}:* {reply.reply_en}")
-        parts.append(f"\n🎉 *Өнөөдрийн дасгал дууслаа!*")
+            parts.append(f"\n💬 <b>{_esc(config.coach_name_mn)}:</b> {_esc(reply.reply_en)}")
+        parts.append("\n🎉 <b>Өнөөдрийн дасгал дууслаа!</b>")
         if reply.streak is not None:
-            line = f"🔥 Стрик: *{reply.streak} өдөр*"
+            line = f"🔥 Стрик: <b>{reply.streak} өдөр</b>"
             if reply.best_streak and reply.streak >= reply.best_streak and reply.streak > 1:
                 line += " — шинэ дээд амжилт! 🏆"
             parts.append(line)
             if reply.streak in STREAK_MILESTONES:
-                parts.append(f"🏅 *{reply.streak} хоногийн стрик!* Гайхалтай тууштай байна! 👏")
+                parts.append(f"🏅 <b>{reply.streak} хоногийн стрик!</b> Гайхалтай тууштай байна! 👏")
     return "\n".join(parts)
 
 
 def progress_card(user) -> str:
-    """Duolingo-style profile/progress card."""
+    """Duolingo-style profile/progress card (Telegram HTML)."""
     xp = user["xp"] or 0
     rank, cur, nxt = rank_for(xp)
-    lines = [f"🏅 *Зэрэглэл:* {rank}"]
+    lines = [f"🏅 Зэрэглэл: <b>{rank}</b>"]
     if nxt is not None:
         lines.append(f"{progress_bar(xp - cur, nxt - cur)}  {xp}/{nxt} XP")
     else:
         lines.append(f"⭐ {xp} XP — дээд зэрэглэл!")
     lines.append("")
-    lines.append(f"🔥 Стрик: *{user['streak']} өдөр*  (дээд: {user['best_streak']})")
+    lines.append(f"🔥 Стрик: <b>{user['streak']} өдөр</b>  (дээд: {user['best_streak']})")
     lines.append(f"✅ Нийт дасгал: {user['sessions_done']}")
     return "\n".join(lines)

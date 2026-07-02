@@ -6,6 +6,7 @@ without any API key, using a canned mock LLM).
 """
 import asyncio
 import json
+import re
 import sys
 
 # Windows consoles often default to cp1252, which can't print Mongolian Cyrillic.
@@ -43,8 +44,11 @@ async def run() -> None:
     user_id = 1
     db.get_or_create_user(user_id, chat_id=1, name="Dev")
 
+    def plain(text: str) -> str:
+        return re.sub(r"<[^>]+>", "", text)
+
     intro = coach.start_daily_session(user_id)
-    print(intro.text_mn.replace("*", "").replace("_", ""))
+    print(plain(intro.text_mn))
     print("\n(type your English answers; 'q' to quit)\n")
 
     while True:
@@ -55,7 +59,7 @@ async def run() -> None:
         if not text or text.lower() == "q":
             break
         reply = await coach.handle_turn(user_id, text)
-        print("\n" + coach.format_reply(reply, text).replace("*", "").replace("_", "") + "\n")
+        print("\n" + plain(coach.format_reply(reply, text)) + "\n")
         if reply.done:
             break
 
