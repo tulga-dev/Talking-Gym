@@ -95,7 +95,7 @@ def start_daily_session(user_id: int) -> SessionIntro:
     parts = [
         f"🏋️ *Өнөөдрийн дасгал: {scenario.title_mn}*",
         f"\n📖 {scenario.setup_mn}",
-        f"\n💬 *Тамир:* {scenario.opener_en}",
+        f"\n💬 *{config.coach_name_mn}:* {scenario.opener_en}",
         f"🇲🇳 _{scenario.opener_mn}_",
     ]
     if user["level"] != "advanced":
@@ -182,14 +182,14 @@ def format_reply(reply: CoachReply, transcript: str) -> str:
         parts.append(f"💡 {reply.feedback_mn}")
     parts.append(f"{score_bar(reply.score)}  *{reply.score}*  ⭐ +{reply.xp_earned} XP")
     if reply.reply_en and not reply.done:
-        parts.append(f"\n💬 *Тамир:* {reply.reply_en}")
+        parts.append(f"\n💬 *{config.coach_name_mn}:* {reply.reply_en}")
         if reply.suggested_en:
             parts.append(f'📝 *Жишээ:* "{reply.suggested_en}"')
             if reply.suggested_mn:
                 parts.append(f"🇲🇳 _{reply.suggested_mn}_")
     if reply.done:
         if reply.reply_en:
-            parts.append(f"\n💬 *Тамир:* {reply.reply_en}")
+            parts.append(f"\n💬 *{config.coach_name_mn}:* {reply.reply_en}")
         parts.append(f"\n🎉 *Өнөөдрийн дасгал дууслаа!*")
         if reply.streak is not None:
             line = f"🔥 Стрик: *{reply.streak} өдөр*"

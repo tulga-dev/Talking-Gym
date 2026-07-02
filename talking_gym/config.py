@@ -56,6 +56,10 @@ class Config:
     # Founder chat: receives /feedback forwards, may call /stats.
     admin_chat_id: int | None = field(default_factory=_admin_chat_id)
 
+    # Coach persona name (English + Mongolian Cyrillic rendering).
+    coach_name_en: str = os.getenv("COACH_NAME_EN", "Bastard")
+    coach_name_mn: str = os.getenv("COACH_NAME_MN", "Бастард")
+
     @property
     def tz(self) -> ZoneInfo:
         return ZoneInfo(self.tz_name)

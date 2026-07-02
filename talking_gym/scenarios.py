@@ -6,6 +6,8 @@ adapt — beginners should never face a question they can't answer.
 """
 from dataclasses import dataclass
 
+from .config import config
+
 
 @dataclass(frozen=True)
 class Scenario:
@@ -27,8 +29,8 @@ SCENARIOS: list[Scenario] = [
         level="beginner",
         title_mn="Өөрийгөө танилцуулах",
         setup_mn="Та шинэ хүнтэй танилцаж байна.",
-        opener_en="Hi! I'm Tamir. Nice to meet you! What's your name, and what do you do?",
-        opener_mn="Сайн уу! Би Тамир. Танилцахад таатай байна! Таныг хэн гэдэг вэ, юу хийдэг вэ?",
+        opener_en=f"Hi! I'm {config.coach_name_en}. Nice to meet you! What's your name, and what do you do?",
+        opener_mn=f"Сайн уу! Би {config.coach_name_mn}. Танилцахад таатай байна! Таныг хэн гэдэг вэ, юу хийдэг вэ?",
         example_en="My name is Bat. I'm a student at university. I like playing basketball and listening to music.",
         example_mn="Намайг Бат гэдэг. Би их сургуулийн оюутан. Би сагсан бөмбөг тоглох, хөгжим сонсох дуртай.",
         focus="self-introduction: name, job/study, hobbies; present simple",
