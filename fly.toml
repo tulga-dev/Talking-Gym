@@ -1,0 +1,18 @@
+# Fly.io config — Talking Gym runs as a single long-polling worker.
+# No HTTP service: nothing listens, so no ports/health checks here.
+# Deploys go through GitHub Actions (.github/workflows/deploy.yml),
+# which stages app secrets from GitHub repo secrets on every push.
+
+app = "talking-gym-mn"
+primary_region = "hkg"   # closest Fly region to Mongolia
+
+[build]
+  # uses ./Dockerfile
+
+[processes]
+  bot = "python main.py"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  processes = ["bot"]

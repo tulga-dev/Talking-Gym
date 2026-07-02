@@ -54,11 +54,12 @@ Local SQLite is dev-only. For a live bot that real testers can use, run it as a 
 - Dashboard → **Connect** → copy the **Transaction pooler** URI (port `6543`, IPv4-friendly — works on all hosts)
 - That URI (with your DB password filled in) is your `SUPABASE_DB_URL`. **Tables are created automatically on first boot** — no SQL to run.
 
-**2. Runtime — Railway (simplest):**
-- [railway.app](https://railway.app) → New Project → **Deploy from GitHub repo** → pick `tulga-dev/Talking-Gym` (it detects the Dockerfile)
-- Variables → add `TELEGRAM_BOT_TOKEN`, `XAI_API_KEY`, `SUPABASE_DB_URL`, `ADMIN_CHAT_ID`
-- Deploy. The bot uses long polling — no domain, no port, nothing to expose. **Run exactly 1 replica** (two pollers on one token conflict).
-- Any Docker host works the same: `docker build -t talking-gym . && docker run --env-file .env talking-gym`
+**2. Runtime — Fly.io via GitHub Actions (configured):**
+- Every push to `main` auto-deploys app **`talking-gym-mn`** (region `hkg`) through [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+- Required GitHub repo secrets: `TELEGRAM_BOT_TOKEN`, `XAI_API_KEY`, `SUPABASE_DB_URL`, `ADMIN_CHAT_ID`, `FLY_API_TOKEN` (a Fly deploy token: `flyctl tokens create deploy -a talking-gym-mn`). App secrets are re-staged from GitHub secrets on every deploy — GitHub is the single source of truth.
+- Deploys run `--ha=false`: the bot long-polls, so **exactly 1 machine** (two pollers on one token conflict). No domain, no port, nothing to expose.
+- Ops: `flyctl status -a talking-gym-mn` · `flyctl logs -a talking-gym-mn` · `flyctl machine restart -a talking-gym-mn`
+- Alternatives: Railway (deploy from GitHub repo, add the same env vars) or any Docker host: `docker build -t talking-gym . && docker run --env-file .env talking-gym`
 
 **3. Invite testers:**
 - Share your bot's `t.me/...` link
