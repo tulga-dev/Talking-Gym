@@ -351,6 +351,16 @@ def _file_route(filename: str, content_type: str | None = None):
     return handler
 
 
+def _media_route(filename: str):
+    """Static media with long-lived caching (immutable, versioned by filename)."""
+    path = _WEB_DIR / filename
+
+    async def handler(request: web.Request) -> web.FileResponse:
+        return web.FileResponse(path, headers={"Cache-Control": "public, max-age=604800"})
+
+    return handler
+
+
 @web.middleware
 async def _error_middleware(request: web.Request, handler):
     """Unhandled exceptions become logged JSON 500s instead of HTML stack
@@ -380,6 +390,9 @@ async def start_web_server() -> web.AppRunner:
     app.router.add_get("/app/sw.js", _file_route("sw.js", "text/javascript"))
     app.router.add_get("/app/icon-192.png", _file_route("icon-192.png"))
     app.router.add_get("/app/icon-512.png", _file_route("icon-512.png"))
+    # Sarah call-video loops (Pexels stock, free license) — cache aggressively
+    app.router.add_get("/app/sarah-idle.mp4", _media_route("sarah-idle.mp4"))
+    app.router.add_get("/app/sarah-talk.mp4", _media_route("sarah-talk.mp4"))
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", config.web_port)

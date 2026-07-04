@@ -96,6 +96,8 @@
   #call-overlay{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100dvh;z-index:60;background:#0C121D;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 18px);gap:12px}
   .call-video{position:relative;flex:1;min-height:0;border-radius:22px;overflow:hidden;background:#232F44;box-shadow:0 14px 40px rgba(0,0,0,.5)}
   .call-video svg{position:absolute;inset:0;width:100%;height:100%}
+  .call-feed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease}
+  .call-feed.on{opacity:1}
   #av-body{animation:breathe 4.6s ease-in-out infinite;transform-origin:180px 480px}
   @keyframes breathe{50%{transform:translateY(3px)}}
   .call-topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 14px 26px;background:linear-gradient(180deg,rgba(6,10,18,.72),rgba(6,10,18,0))}
@@ -570,6 +572,8 @@
         </g>
       </g>
     </svg>
+    <video id="vid-idle" class="call-feed" loop muted playsinline preload="none"></video>
+    <video id="vid-talk" class="call-feed" loop muted playsinline preload="none"></video>
     <div class="call-topbar">
       <div class="ct-left"><span class="ct-name">Sarah</span><span class="ct-sub">Talking Gym</span></div>
       <div class="ct-right"><span class="ct-timer" id="call-timer">00:00</span>
@@ -1552,11 +1556,36 @@
     var v = $('call-self'); v.srcObject = null; v.hidden = true;
   }
 
+  /* Real video feed: two stock loops of Sarah (listening / talking) that
+     crossfade with the call state. The illustrated SVG stays underneath as
+     the fallback if the videos fail to load. */
+  var vidReady = false, vidFailed = false;
+  function initCallVideo(){
+    if (vidReady || vidFailed) return;
+    var vi = $('vid-idle'), vt = $('vid-talk'), pending = 2;
+    function ok(){ if (--pending <= 0 && !vidFailed) { vidReady = true; syncFeed(); } }
+    function fail(){ vidFailed = true; vi.classList.remove('on'); vt.classList.remove('on'); }
+    vi.addEventListener('canplay', ok, {once:true});
+    vt.addEventListener('canplay', ok, {once:true});
+    vi.addEventListener('error', fail, {once:true});
+    vt.addEventListener('error', fail, {once:true});
+    vi.src = '/app/sarah-idle.mp4';
+    vt.src = '/app/sarah-talk.mp4';
+    vi.play().catch(function(){});
+    vt.play().catch(function(){});
+  }
+  function syncFeed(){
+    if (!vidReady || vidFailed) return;
+    var speaking = $('sarah-av').classList.contains('speaking');
+    $('vid-talk').classList.toggle('on', speaking);
+    $('vid-idle').classList.toggle('on', !speaking);
+  }
   function callState(cls, text){
     var av = $('sarah-av'); av.classList.remove('speaking','listening');
     if (cls) av.classList.add(cls);
     $('call-state').textContent = text;
     $('call-send').disabled = (cls !== 'listening');
+    syncFeed();
   }
   function callCaption(en, rom, mn){
     $('cap-en').textContent = en || '';
@@ -1581,8 +1610,11 @@
     callState('', d().callConnecting);
     callCaption('', '', '');
     startCallTimer();
+    initCallVideo();
     startFaceLoops();
     startSelfCam();
+    var vi = $('vid-idle'), vt = $('vid-talk');
+    vi.play().catch(function(){}); vt.play().catch(function(){});
     getMicStream().then(function(stream){
       try {
         callAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1680,6 +1712,7 @@
     if (callAudioCtx) { try { callAudioCtx.close(); } catch(e){} callAudioCtx = null; }
     callAnalyser = null;
     releaseMic();
+    try { $('vid-idle').pause(); $('vid-talk').pause(); } catch(e){}
     $('call-overlay').hidden = true;
     refreshMe();
   }
