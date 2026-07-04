@@ -841,6 +841,7 @@
 
   var screens = ['home','lesson','path','prog','prof'];
   function show(id){
+    if (id !== 'lesson' && typeof releaseMic === 'function') releaseMic();
     screens.forEach(function(s){
       var el = $('scr-'+s);
       if(el) el.classList.toggle('active', s===id);
@@ -1019,6 +1020,26 @@
     }
     return '';
   }
+  /* One persistent mic stream per lesson. Opening/closing the device every
+     turn makes some Windows/Bluetooth audio drivers eventually deliver a
+     silent stream (reported: recordings go empty from ~the 4th turn). */
+  var micStream = null;
+  function getMicStream(){
+    if (micStream && micStream.getTracks().some(function(t){ return t.readyState === 'live' && !t.muted; })) {
+      return Promise.resolve(micStream);
+    }
+    releaseMic();  // dead or muted track — reopen the device fresh
+    return navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+      micStream = s;
+      return s;
+    });
+  }
+  function releaseMic(){
+    if (micStream) {
+      try { micStream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+      micStream = null;
+    }
+  }
   function startRecording(hold){
     unlockVoice();
     voiceEl.pause();   // don't record over Sarah's voice
@@ -1028,14 +1049,14 @@
     holdMode = hold;
     releasedEarly = false;
     micState('busy');   // feedback while the mic permission/stream resolves
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    getMicStream().then(function(stream){
       chunks = [];
       recStart = Date.now();
       var mime = pickMime();
       mediaRecorder = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream);
       mediaRecorder.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
       mediaRecorder.onstop = function(){
-        stream.getTracks().forEach(function(t){ t.stop(); });
+        // Keep the stream open for the rest of the lesson (releaseMic() closes it).
         var type = (mediaRecorder.mimeType || 'audio/webm').split(';')[0];
         var blob = new Blob(chunks, {type:type});
         // Too short = accidental tap; don't send half-words to the coach.
@@ -1130,6 +1151,7 @@
     addFeedback(j);
     if (j.done) {
       session = null;
+      releaseMic();   // lesson over — turn the tab's recording indicator off
       if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true);
       else if (j.tts_b64) playB64(j.tts_b64);
       $('mic-zone').hidden = true;

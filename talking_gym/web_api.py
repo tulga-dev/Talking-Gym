@@ -259,6 +259,9 @@ async def api_turn(request: web.Request) -> web.Response:
         db.add_voice_seconds(uid, est_seconds)
         spoken = True
         if not transcript:
+            # Diagnostic breadcrumb: silent uploads have been reported on
+            # desktop from repeated mic open/close cycles.
+            log.warning("Empty transcript: %d bytes, mime=%s, user=%s", len(audio), mime, uid)
             return _err(422, "empty_transcript")
         sess = db.get_active_session(uid)
         if sess is not None:
