@@ -32,6 +32,7 @@ _SQLITE_SCHEMA = [
         xp            INTEGER DEFAULT 0,
         channel       TEXT DEFAULT 'telegram',
         track         TEXT DEFAULT 'business',
+        target_lang   TEXT DEFAULT 'en',
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -76,6 +77,7 @@ _PG_SCHEMA = [
         xp            INTEGER DEFAULT 0,
         channel       TEXT DEFAULT 'telegram',
         track         TEXT DEFAULT 'business',
+        target_lang   TEXT DEFAULT 'en',
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -187,6 +189,7 @@ def _migrate() -> None:
         "ALTER TABLE users ADD COLUMN {} xp INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN {} channel TEXT DEFAULT 'telegram'",
         "ALTER TABLE users ADD COLUMN {} track TEXT DEFAULT 'business'",
+        "ALTER TABLE users ADD COLUMN {} target_lang TEXT DEFAULT 'en'",
         "ALTER TABLE users ADD COLUMN {} email TEXT",
         "ALTER TABLE users ADD COLUMN {} password_hash TEXT",
         "ALTER TABLE users ADD COLUMN {} google_sub TEXT",
@@ -238,6 +241,11 @@ def set_level(user_id: int, level: str) -> None:
 def set_track(user_id: int, track: str) -> None:
     with _conn() as con:
         con.execute("UPDATE users SET track=? WHERE user_id=?", (track, user_id))
+
+
+def set_target_lang(user_id: int, target_lang: str) -> None:
+    with _conn() as con:
+        con.execute("UPDATE users SET target_lang=? WHERE user_id=?", (target_lang, user_id))
 
 
 def set_auth(user_id: int, email: str | None = None, password_hash: str | None = None,

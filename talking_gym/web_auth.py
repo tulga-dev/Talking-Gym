@@ -83,9 +83,13 @@ async def api_auth_register(request: web.Request) -> web.Response:
         name = email.split("@")[0][:30]
     if db.user_by_email(email):
         return _err(409, "email_taken")
+    target_lang = body.get("target_lang", "en")
+    if target_lang not in ("en", "ko", "zh", "ja"):
+        target_lang = "en"
     uid = new_user_id()
     db.get_or_create_user(uid, uid, name, channel="pwa")
     db.set_level(uid, level)
+    db.set_target_lang(uid, target_lang)
     db.set_auth(uid, email=email, password_hash=hash_password(password))
     return web.json_response({"token": issue_token(uid)})
 

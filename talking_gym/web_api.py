@@ -12,6 +12,7 @@ from aiohttp import web
 
 from . import coach, db
 from .config import config
+from .langs import lang_meta, target_of
 from .providers import ProviderError
 from .providers import stt, tts
 from .scenarios import by_id, pick_scenario
@@ -22,6 +23,15 @@ MAX_AUDIO_BYTES = 4 * 1024 * 1024  # ~4MB ≈ well over a minute of opus
 
 # Slower speech for lower levels — easier to follow, feels like a patient tutor.
 LEVEL_SPEED = {"beginner": 0.8, "intermediate": 0.9, "advanced": 1.0}
+
+# Spoken scaffolds, in the target language, so the audio stays immersive:
+# (correction preface, next-question cue). {c}/{r} = corrected / reply text.
+SPEECH_CUES = {
+    "en": ("You could say it like this... {c}", "Okay... next question. {r}"),
+    "ko": ("이렇게 말할 수 있어요... {c}", "좋아요... 다음 질문이에요. {r}"),
+    "zh": ("你可以这样说…… {c}", "好的…… 下一个问题。{r}"),
+    "ja": ("こう言えます… {c}", "はい… 次の質問です。{r}"),
+}
 
 
 def _speech_alike(a: str, b: str) -> bool:
@@ -55,22 +65,27 @@ def _me_payload(user) -> dict:
         "rank_cur_xp": cur,
         "reminder_hour": user["reminder_hour"],
         "turns_per_session": config.turns_per_session,
+        "target_lang": target_of(user),
         "trained_today": db.did_session_today(user["user_id"]),
         "voice_seconds_today": db.voice_seconds_today(user["user_id"]),
         "voice_seconds_cap": config.daily_voice_seconds_cap,
     }
 
 
-def _scenario_payload(sc, level: str) -> dict:
+async def _scenario_payload(sc, user) -> dict:
+    """Scenario for the client, with opener/example in the user's target
+    language (keys keep their legacy _en names but carry target-lang text)."""
+    level = user["level"]
     show_example = level != "advanced"
+    loc = await coach.localize_scenario(sc, target_of(user))
     return {
         "id": sc.id,
         "title_mn": sc.title_mn,
         "setup_mn": sc.setup_mn,
-        "opener_en": sc.opener_en,
-        "opener_mn": sc.opener_mn,
-        "example_en": sc.example_en if show_example else "",
-        "example_mn": sc.example_mn if show_example else "",
+        "opener_en": loc["opener"],
+        "opener_mn": loc["opener_mn"],
+        "example_en": loc["example"] if show_example else "",
+        "example_mn": loc["example_mn"] if show_example else "",
         "max_turns": config.turns_per_session,
     }
 
@@ -110,6 +125,8 @@ async def api_profile(request: web.Request) -> web.Response:
         return _err(400, "bad_json")
     if body.get("level") in ("beginner", "intermediate", "advanced"):
         db.set_level(user["user_id"], body["level"])
+    if body.get("target_lang") in ("en", "ko", "zh", "ja"):
+        db.set_target_lang(user["user_id"], body["target_lang"])
     if isinstance(body.get("track"), str) and body["track"] in (
         "business", "sales", "logistics", "travel", "movies", "daily", "dating"
     ):
@@ -120,18 +137,18 @@ async def api_profile(request: web.Request) -> web.Response:
     return web.json_response(_me_payload(db.get_user(user["user_id"])))
 
 
-_opener_cache: dict[tuple, str] = {}  # (scenario id, speed) -> b64; openers are static
+_opener_cache: dict[tuple, str] = {}  # (scenario, lang, speed) -> b64; openers are static
 
 
-async def _opener_tts(sc, level: str) -> str | None:
+async def _opener_tts(sc_id: str, opener_text: str, target_lang: str, level: str) -> str | None:
     if not config.tts_enabled:
         return None
     speed = LEVEL_SPEED.get(level, 1.0)
-    key = (sc.id, speed)
+    key = (sc_id, target_lang, speed)
     if key in _opener_cache:
         return _opener_cache[key]
     try:
-        audio = await tts.speak(sc.opener_en[:400], speed=speed)
+        audio = await tts.speak(opener_text[:400], language=target_lang, speed=speed)
     except ProviderError:
         return None
     b64 = base64.b64encode(audio).decode()
@@ -143,23 +160,26 @@ async def api_session_start(request: web.Request) -> web.Response:
     user = _user_from(request)
     if user is None:
         return _err(401, "unauthorized")
+    target = target_of(user)
     active = db.get_active_session(user["user_id"])
     if active and active["turns"] > 0:
         # resume mid-session instead of silently restarting the conversation
         sc = by_id(active["scenario_id"])
+        payload = await _scenario_payload(sc, user)
         return web.json_response({
-            "scenario": _scenario_payload(sc, user["level"]),
+            "scenario": payload,
             "turn": active["turns"] + 1,
             "resumed": True,
-            "tts_b64": await _opener_tts(sc, user["level"]),
+            "tts_b64": await _opener_tts(sc.id, payload["opener_en"], target, user["level"]),
         })
     sc = pick_scenario(user["level"], user["sessions_done"])
     db.start_session(user["user_id"], sc.id)
+    payload = await _scenario_payload(sc, user)
     return web.json_response({
-        "scenario": _scenario_payload(sc, user["level"]),
+        "scenario": payload,
         "turn": 1,
         "resumed": False,
-        "tts_b64": await _opener_tts(sc, user["level"]),
+        "tts_b64": await _opener_tts(sc.id, payload["opener_en"], target, user["level"]),
     })
 
 
@@ -173,7 +193,7 @@ async def api_session_state(request: web.Request) -> web.Response:
     if session:
         sc = by_id(session["scenario_id"])
         payload["active"] = {
-            "scenario": _scenario_payload(sc, user["level"]),
+            "scenario": await _scenario_payload(sc, user),
             "turn": session["turns"] + 1,
         }
     nxt = pick_scenario(user["level"], user["sessions_done"])
@@ -187,6 +207,7 @@ async def api_turn(request: web.Request) -> web.Response:
     if user is None:
         return _err(401, "unauthorized")
     uid = user["user_id"]
+    target = target_of(user)
 
     transcript = ""
     spoken = False
@@ -209,7 +230,8 @@ async def api_turn(request: web.Request) -> web.Response:
         filename = field.filename or "voice.webm"
         mime = field.headers.get("Content-Type", "audio/webm")
         try:
-            transcript = await stt.transcribe(audio, filename=filename, mime=mime)
+            transcript = await stt.transcribe(audio, filename=filename, mime=mime,
+                                              language=lang_meta(target)["stt"])
         except ProviderError:
             return _err(502, "stt_failed")
         except Exception:
@@ -250,19 +272,20 @@ async def api_turn(request: web.Request) -> web.Response:
     }
 
     if spoken and config.tts_enabled:
+        pre, cue = SPEECH_CUES.get(target, SPEECH_CUES["en"])
         speak_parts = []
         # Only model the correction aloud when it actually differs from what
         # the learner said — repeating a perfect sentence back sounds robotic.
         if reply.corrected and not _speech_alike(reply.corrected, transcript):
-            speak_parts.append(f"You could say it like this... {reply.corrected}")
+            speak_parts.append(pre.format(c=reply.corrected))
         if reply.reply_en:
             # Spoken cue so the correction and the question don't blur together.
-            speak_parts.append(reply.reply_en if reply.done
-                               else f"Okay... next question. {reply.reply_en}")
+            speak_parts.append(reply.reply_en if reply.done else cue.format(r=reply.reply_en))
         if speak_parts:
             try:
                 audio_out = await tts.speak(
                     " ... ".join(speak_parts)[:500],
+                    language=target,
                     speed=LEVEL_SPEED.get(user["level"], 1.0),
                 )
                 out["tts_b64"] = base64.b64encode(audio_out).decode()

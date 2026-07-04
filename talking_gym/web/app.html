@@ -140,6 +140,9 @@
   .lvl-pick{display:flex;gap:8px;margin-bottom:12px}
   .lvl-pick button{flex:1;font-size:12px;font-weight:800;padding:11px 6px;border-radius:16px;background:#fff;color:var(--mut);box-shadow:inset 0 0 0 2px var(--line)}
   .lvl-pick button.on{background:var(--green);color:#fff;box-shadow:none}
+  .lang-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .lang-pick button{font-size:13px;font-weight:800;padding:12px 8px;border-radius:16px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line);display:flex;align-items:center;justify-content:center;gap:7px}
+  .lang-pick button.on{background:var(--blue);color:#fff;box-shadow:none}
 
   .wk-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:5px}
   .wk-grid .m{background:var(--sky);border-radius:14px;padding:10px 12px}
@@ -251,6 +254,13 @@
   <div id="reg-extra">
     <label data-i18n="obName">Таны нэр</label>
     <input id="ob-name" maxlength="40" autocomplete="name">
+    <label data-i18n="obLang">Ямар хэл сурах вэ?</label>
+    <div class="lang-pick" id="ob-langs">
+      <button type="button" data-tlang="en" class="on">🇬🇧 English</button>
+      <button type="button" data-tlang="ko">🇰🇷 한국어</button>
+      <button type="button" data-tlang="zh">🇨🇳 中文</button>
+      <button type="button" data-tlang="ja">🇯🇵 日本語</button>
+    </div>
     <label data-i18n="obLevel">Түвшин</label>
     <div class="lvl-pick" id="ob-levels">
       <button data-lvl="beginner" class="on" data-i18n="lvB">Анхан</button>
@@ -367,6 +377,7 @@
   <div class="scr" id="scr-prof">
     <div class="app-h"><div class="hi"><span id="prof-name"></span><span class="sub2" id="prof-sub"></span></div><span class="pill hot"><svg class="i"><use href="#i-flame"/></svg><span id="p-streak2">0</span></span></div>
     <div class="acard">
+      <div class="setrow" id="row-tlang"><svg class="i"><use href="#i-msg"/></svg><span class="lbl2" data-i18n="sStudy">Судлах хэл</span><span class="val" id="tlang-val"></span></div>
       <div class="setrow" id="row-rem"><svg class="i"><use href="#i-clock"/></svg><span class="lbl2" data-i18n="sRem">Сануулга</span><span class="val" id="rem-val">—</span></div>
       <div class="setrow" id="row-lang"><svg class="i"><use href="#i-globe"/></svg><span class="lbl2" data-i18n="sLang">Апп-ын хэл</span><span class="val" id="lang-row-val"></span></div>
       <div class="setrow" id="row-logout"><svg class="i"><use href="#i-out"/></svg><span class="lbl2" data-i18n="sOut">Гарах</span><span class="val">→</span></div>
@@ -409,7 +420,7 @@
     mn: {
       obT:"Talking Gym-д тавтай морил", obS:"Өдөрт 5 минут — англиар ярьж сур",
       obTabReg:"Бүртгүүлэх", obTabLog:"Нэвтрэх", obOr:"эсвэл имэйлээр",
-      obEmail:"Имэйл", obPass:"Нууц үг (6+ тэмдэгт)", obName:"Таны нэр", obLevel:"Түвшин",
+      obEmail:"Имэйл", obPass:"Нууц үг (6+ тэмдэгт)", obName:"Таны нэр", obLevel:"Түвшин", obLang:"Ямар хэл сурах вэ?",
       lvB:"Анхан", lvI:"Дунд", lvA:"Ахисан",
       errEmail:"Имэйлээ зөв оруулаарай", errPass:"Нууц үг 6-аас дээш тэмдэгт", errName:"Нэрээ оруулаарай",
       errTaken:"Энэ имэйл бүртгэлтэй байна — Нэвтрэх дээр дараарай", errLogin:"Имэйл эсвэл нууц үг буруу",
@@ -440,7 +451,7 @@
       mStreak:"одоогийн стрик", mBest:"дээд стрик", mSessions:"нийт дасгал", mVoice:"өнөөдөр ярьсан",
       shareB:"Амжилтаа хуваалцах",
       soonProg:"Удахгүй: алдааны сан, долоо хоногийн лиг, дэлгэрэнгүй тайлан",
-      sRem:"Сануулга", sLang:"Апп-ын хэл", sOut:"Гарах",
+      sRem:"Сануулга", sStudy:"Судлах хэл", sLang:"Апп-ын хэл", sOut:"Гарах",
       pBadge:"Удахгүй", perMo:"/сар",
       pGym1:"Өдөр бүр дуут дасгал + давталт", pGym2:"Бүх мэргэжлийн зам",
       pPr1:"AI видео дуудлага + ярилцлагын симуляци", pPr2:"IELTS Speaking оноо",
@@ -448,7 +459,7 @@
       tbHome:"Нүүр", tbPath:"Зам", tbTrain:"Дасгал", tbProg:"Ахиц", tbMe:"Би",
       langBtn:"EN", langRowVal:"Монгол",
       tstPlan:"Төлбөр удахгүй — QPay холболт хийгдэж байна",
-      tstTrack:"Зам хадгалагдлаа:", tstLvl:"Түвшин солигдлоо", tstRem:"Сануулга:",
+      tstTrack:"Зам хадгалагдлаа:", tstLvl:"Түвшин солигдлоо", tstRem:"Сануулга:", tstStudy:"Судлах хэл:",
       tstCopied:"Линк хуулагдлаа ✓", tstShared:"Хуваалцлаа ✓",
       tstCap:"Өнөөдрийн дуут хязгаарт хүрлээ — бичгээр үргэлжлүүлээрэй",
       tstEmpty:"Дуу сонсогдсонгүй — тод, ойрхон яриарай",
@@ -460,7 +471,7 @@
     en: {
       obT:"Welcome to Talking Gym", obS:"5 minutes a day — learn to speak English",
       obTabReg:"Sign up", obTabLog:"Log in", obOr:"or with email",
-      obEmail:"Email", obPass:"Password (6+ characters)", obName:"Your name", obLevel:"Level",
+      obEmail:"Email", obPass:"Password (6+ characters)", obName:"Your name", obLevel:"Level", obLang:"Which language do you want to learn?",
       lvB:"Beginner", lvI:"Intermediate", lvA:"Advanced",
       errEmail:"Please enter a valid email", errPass:"Password must be 6+ characters", errName:"Please enter your name",
       errTaken:"This email is already registered — tap Log in", errLogin:"Wrong email or password",
@@ -491,7 +502,7 @@
       mStreak:"current streak", mBest:"best streak", mSessions:"total workouts", mVoice:"spoken today",
       shareB:"Share your progress",
       soonProg:"Coming soon: mistake bank, weekly league, detailed reports",
-      sRem:"Reminder", sLang:"App language", sOut:"Log out",
+      sRem:"Reminder", sStudy:"Study language", sLang:"App language", sOut:"Log out",
       pBadge:"Coming soon", perMo:"/mo",
       pGym1:"Daily voice workouts + review", pGym2:"All profession paths",
       pPr1:"AI video calls + interview simulation", pPr2:"IELTS Speaking scores",
@@ -499,7 +510,7 @@
       tbHome:"Home", tbPath:"Path", tbTrain:"Train", tbProg:"Progress", tbMe:"Me",
       langBtn:"МН", langRowVal:"English",
       tstPlan:"Payments coming soon — QPay integration in progress",
-      tstTrack:"Path saved:", tstLvl:"Level changed", tstRem:"Reminder:",
+      tstTrack:"Path saved:", tstLvl:"Level changed", tstRem:"Reminder:", tstStudy:"Study language:",
       tstCopied:"Link copied ✓", tstShared:"Shared ✓",
       tstCap:"Daily voice cap reached — continue by typing",
       tstEmpty:"Couldn't hear you — speak clearly, close to the mic",
@@ -731,6 +742,8 @@
     $('prof-sub').textContent = trackLabel(me.track) + ' · ' + LVL_LABEL[me.level][lang] + ' · ' + me.xp + ' XP';
     $('rem-val').textContent = (me.reminder_hour === null || me.reminder_hour === undefined)
       ? d().remOff : (('0' + me.reminder_hour).slice(-2) + ':00');
+    var tl = TLANGS[me.target_lang] || TLANGS.en;
+    $('tlang-val').textContent = tl.f + ' ' + tl.n;
   }
   function refreshMe(){
     return req('/api/me').then(function(j){ me = j; renderMe(); });
@@ -761,6 +774,9 @@
   /* ---------- onboarding / auth ---------- */
   var authMode = 'reg';
   var obLevel = 'beginner';
+  var obTarget = 'en';
+  var TLANGS = {en:{f:'🇬🇧',n:'English'}, ko:{f:'🇰🇷',n:'한국어'}, zh:{f:'🇨🇳',n:'中文'}, ja:{f:'🇯🇵',n:'日本語'}};
+  var TLANG_ORDER = ['en','ko','zh','ja'];
   function setAuthMode(m){
     authMode = m;
     $('tab-reg').classList.toggle('on', m === 'reg');
@@ -775,6 +791,12 @@
     b.addEventListener('click', function(){
       obLevel = b.getAttribute('data-lvl');
       document.querySelectorAll('#ob-levels [data-lvl]').forEach(function(x){ x.classList.toggle('on', x===b); });
+    });
+  });
+  document.querySelectorAll('#ob-langs [data-tlang]').forEach(function(b){
+    b.addEventListener('click', function(){
+      obTarget = b.getAttribute('data-tlang');
+      document.querySelectorAll('#ob-langs [data-tlang]').forEach(function(x){ x.classList.toggle('on', x===b); });
     });
   });
   function finishAuth(tok){
@@ -794,7 +816,7 @@
       var name = $('ob-name').value.trim();
       if (!name) { err.textContent = d().errName; return; }
       path = '/api/auth/register';
-      body = {email:email, password:pass, name:name, level:obLevel};
+      body = {email:email, password:pass, name:name, level:obLevel, target_lang:obTarget};
     } else {
       path = '/api/auth/login';
       body = {email:email, password:pass};
@@ -1068,6 +1090,13 @@
     req('/api/profile', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({reminder_hour: next})})
       .then(function(j){ me = j; renderMe();
         toast(d().tstRem + ' ' + (next === null ? d().remOff : ('0' + next).slice(-2) + ':00')); })
+      .catch(function(){ toast(d().tstErr); });
+  });
+  $('row-tlang').addEventListener('click', function(){
+    var i = TLANG_ORDER.indexOf(me.target_lang);
+    var next = TLANG_ORDER[(i + 1) % TLANG_ORDER.length];
+    req('/api/profile', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({target_lang: next})})
+      .then(function(j){ me = j; session = null; renderMe(); refreshNext(); toast(d().tstStudy + ' ' + (TLANGS[next] || TLANGS.en).n); })
       .catch(function(){ toast(d().tstErr); });
   });
   $('row-logout').addEventListener('click', function(){ doLogout(false); });

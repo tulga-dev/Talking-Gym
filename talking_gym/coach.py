@@ -14,7 +14,9 @@ from dataclasses import dataclass
 
 from . import db
 from .config import config
-from .prompts import FINISH_HINT, SYSTEM_PROMPT, TURN_TEMPLATE
+from .langs import lang_meta, target_of
+from .prompts import (FINISH_HINT, LOCALIZE_SYSTEM, LOCALIZE_TEMPLATE,
+                      TURN_TEMPLATE, system_prompt)
 from .providers import ProviderError
 from .providers import llm
 from .scenarios import Scenario, by_id, pick_scenario
@@ -124,6 +126,47 @@ def start_daily_session(user_id: int) -> SessionIntro:
     return SessionIntro(scenario=scenario, text_mn="\n".join(parts))
 
 
+# Generated opener/example per (scenario, target language) — static, so cache
+# them for the process lifetime instead of regenerating every session.
+_loc_cache: dict[tuple, dict] = {}
+
+
+async def localize_scenario(scenario: Scenario, target_lang: str) -> dict:
+    """The scenario's opener + model answer in the target language (+ Mongolian
+    translations). English uses the authored text; other languages are
+    LLM-generated once and cached, with an English fallback on any failure."""
+    authored = {
+        "opener": scenario.opener_en, "opener_mn": scenario.opener_mn,
+        "example": scenario.example_en, "example_mn": scenario.example_mn,
+    }
+    if target_lang == "en":
+        return authored
+    key = (scenario.id, target_lang)
+    if key in _loc_cache:
+        return _loc_cache[key]
+    prompt = LOCALIZE_TEMPLATE.format(
+        lang=lang_meta(target_lang)["name_en"],
+        setup_mn=scenario.setup_mn,
+        coach=config.coach_name_en,
+        opener_en=scenario.opener_en,
+        example_en=scenario.example_en,
+        level="beginner",
+    )
+    try:
+        data = llm.parse_json_block(await llm.chat(LOCALIZE_SYSTEM, prompt))
+        loc = {
+            "opener": str(data.get("opener", "")).strip() or authored["opener"],
+            "opener_mn": str(data.get("opener_mn", "")).strip() or authored["opener_mn"],
+            "example": str(data.get("example", "")).strip() or authored["example"],
+            "example_mn": str(data.get("example_mn", "")).strip() or authored["example_mn"],
+        }
+    except Exception:
+        log.warning("Scenario localization failed for %s/%s; using English", scenario.id, target_lang)
+        loc = authored
+    _loc_cache[key] = loc
+    return loc
+
+
 async def handle_turn(user_id: int, transcript: str) -> CoachReply:
     """Run one learner turn through the LLM coach; manage session lifecycle."""
     session = db.get_active_session(user_id)
@@ -134,13 +177,16 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
 
     user = db.get_user(user_id)
     scenario = by_id(session["scenario_id"])
+    target_lang = target_of(user)
+    lang_name = lang_meta(target_lang)["name_en"]
+    loc = await localize_scenario(scenario, target_lang)
     turn = session["turns"] + 1
     max_turns = config.turns_per_session
     finish_hint = FINISH_HINT if turn >= max_turns else ""
 
     prompt = TURN_TEMPLATE.format(
         title=scenario.title_mn,
-        opener=scenario.opener_en,
+        opener=loc["opener"],
         focus=scenario.focus,
         level=user["level"],
         turn=turn,
@@ -150,7 +196,7 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         transcript=transcript,
     )
 
-    raw = await llm.chat(SYSTEM_PROMPT, prompt)
+    raw = await llm.chat(system_prompt(lang_name), prompt)
     try:
         data = llm.parse_json_block(raw)
     except ProviderError:

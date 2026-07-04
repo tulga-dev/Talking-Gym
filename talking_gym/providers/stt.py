@@ -17,14 +17,16 @@ _TIMEOUT = httpx.Timeout(120.0, connect=10.0)
 _client = httpx.AsyncClient(timeout=_TIMEOUT)
 
 
-async def transcribe(audio: bytes, filename: str = "voice.ogg", mime: str = "audio/ogg") -> str:
+async def transcribe(audio: bytes, filename: str = "voice.ogg", mime: str = "audio/ogg",
+                     language: str | None = "en") -> str:
     headers = {"Authorization": f"Bearer {config.xai_api_key}"}
     files = {"file": (filename, audio, mime)}
-    data = {
-        "model": config.stt_model,
-        "format": "json",
-        "language": config.stt_language,
-    }
+    data = {"model": config.stt_model, "format": "json"}
+    # Speech transcribes regardless; the language code only enables number/unit
+    # formatting, and not every language is in that list (e.g. Chinese) — omit
+    # it there and let the model auto-detect.
+    if language:
+        data["language"] = language
     resp = await _client.post(config.stt_url, headers=headers, data=data, files=files)
     if resp.status_code != 200:
         log.error("STT error %s: %s", resp.status_code, resp.text[:500])
