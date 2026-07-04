@@ -24,6 +24,11 @@ jobs:
             XAI_API_KEY="${{ secrets.XAI_API_KEY }}" \
             SUPABASE_DB_URL="${{ secrets.SUPABASE_DB_URL }}" \
             ADMIN_CHAT_ID="${{ secrets.ADMIN_CHAT_ID }}"
+          # Optional Google Sign-In — staged only when present
+          if [ -n "${{ secrets.GOOGLE_CLIENT_ID }}" ]; then
+            flyctl secrets set --stage -a talking-gym-mn \
+              GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
+          fi
           # Optional Messenger channel secrets — staged only when present
           if [ -n "${{ secrets.MESSENGER_PAGE_TOKEN }}" ]; then
             flyctl secrets set --stage -a talking-gym-mn \
