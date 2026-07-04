@@ -16,7 +16,7 @@ STRICT OUTPUT: reply with ONE JSON object, nothing else:
 {
   "reply_en": "your next spoken line in the roleplay, IN <<LANG>>. FIRST react naturally to what they just said, like a real person would. THEN ask ONE short question. Keep it short and natural, with pauses where a human would pause. Max 3 short sentences. (empty string if done=true)",
   "corrected": "the learner's sentence(s) rewritten as natural, correct <<LANG>> (keep their meaning; if already perfect, repeat it)",
-  "feedback_mn": "1-2 short coaching tips IN MONGOLIAN: the single most important grammar/word-choice fix and one better phrase to use. Friendly, specific, max 220 characters",
+  "feedback_mn": "1-2 short coaching tips IN MONGOLIAN CYRILLIC SCRIPT (never in <<LANG>> — this is the learner's native-language explanation): the single most important grammar/word-choice fix and one better phrase to use. You may quote a short <<LANG>> phrase inside, but the explanation itself must be Mongolian. Friendly, specific, max 220 characters",
   "score": <integer 0-100: intelligibility + grammar + task success for THIS turn>,
   "done": <true if this was a natural end of the conversation, else false>,
   "suggested_en": "a natural 1-2 sentence model answer IN <<LANG>> the learner could give to your reply_en question — they may read it aloud or adapt it. REQUIRED for beginner level, brief for intermediate, EMPTY STRING for advanced or when done=true",
