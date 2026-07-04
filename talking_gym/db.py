@@ -31,6 +31,7 @@ _SQLITE_SCHEMA = [
         reminder_hour INTEGER,
         xp            INTEGER DEFAULT 0,
         channel       TEXT DEFAULT 'telegram',
+        track         TEXT DEFAULT 'business',
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -69,6 +70,7 @@ _PG_SCHEMA = [
         reminder_hour INTEGER,
         xp            INTEGER DEFAULT 0,
         channel       TEXT DEFAULT 'telegram',
+        track         TEXT DEFAULT 'business',
         created_at    TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
@@ -174,6 +176,7 @@ def _migrate() -> None:
     statements = [
         "ALTER TABLE users ADD COLUMN {} xp INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN {} channel TEXT DEFAULT 'telegram'",
+        "ALTER TABLE users ADD COLUMN {} track TEXT DEFAULT 'business'",
     ]
     for template in statements:
         if IS_POSTGRES:
@@ -217,6 +220,11 @@ def get_user(user_id: int):
 def set_level(user_id: int, level: str) -> None:
     with _conn() as con:
         con.execute("UPDATE users SET level=? WHERE user_id=?", (level, user_id))
+
+
+def set_track(user_id: int, track: str) -> None:
+    with _conn() as con:
+        con.execute("UPDATE users SET track=? WHERE user_id=?", (track, user_id))
 
 
 def set_reminder_hour(user_id: int, hour: int | None) -> None:

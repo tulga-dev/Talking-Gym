@@ -352,7 +352,10 @@ def _file_route(filename: str, content_type: str | None = None):
 
 
 async def start_web_server() -> web.AppRunner:
-    app = web.Application()
+    from ..web_api import add_api_routes
+
+    app = web.Application(client_max_size=8 * 1024 * 1024)
+    add_api_routes(app)                                    # PWA JSON API (/api/*)
     app.router.add_get("/", _file_route("landing.html"))   # public landing page
     app.router.add_get("/health", _health)
     app.router.add_get("/webhooks/messenger", _webhook_get)
