@@ -856,7 +856,7 @@
         if (j.resumed) toast(d().resumed);
         // The teacher speaks first — voice plays as the bubble appears.
         addTeacher(j.scenario.opener_en, j.scenario.opener_mn, j.tts_b64, true);
-        if (j.scenario.example_en && j.turn === 1) addExample(j.scenario.example_en, j.scenario.example_mn);
+        if (j.scenario.example_en) addExample(j.scenario.example_en, j.scenario.example_mn);
         micState('idle');
       })
       .catch(function(){ toast(d().tstErr); })
