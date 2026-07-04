@@ -202,7 +202,8 @@ async def api_turn(request: web.Request) -> web.Response:
         if len(audio) > MAX_AUDIO_BYTES:
             return _err(413, "audio_too_large")
         est_seconds = max(1, len(audio) // 4000)
-        if db.voice_seconds_today(uid) + est_seconds > config.daily_voice_seconds_cap:
+        if (uid not in config.founder_ids
+                and db.voice_seconds_today(uid) + est_seconds > config.daily_voice_seconds_cap):
             return _err(429, "voice_cap")
         filename = field.filename or "voice.webm"
         mime = field.headers.get("Content-Type", "audio/webm")

@@ -29,6 +29,11 @@ jobs:
             flyctl secrets set --stage -a talking-gym-mn \
               GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
           fi
+          # Optional founder/test accounts exempt from the voice cap
+          if [ -n "${{ secrets.FOUNDER_IDS }}" ]; then
+            flyctl secrets set --stage -a talking-gym-mn \
+              FOUNDER_IDS="${{ secrets.FOUNDER_IDS }}"
+          fi
           # Optional Messenger channel secrets — staged only when present
           if [ -n "${{ secrets.MESSENGER_PAGE_TOKEN }}" ]; then
             flyctl secrets set --stage -a talking-gym-mn \
