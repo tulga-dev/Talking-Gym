@@ -15,7 +15,8 @@ from dataclasses import dataclass
 
 from . import db
 from .config import config
-from .langs import lang_meta, native_of, native_prompt, roman_for, target_of
+from .langs import (lang_meta, native_of, native_prompt, pipeline_for,
+                    roman_for, target_of)
 from .prompts import (FINISH_HINT, LOCALIZE_SYSTEM, LOCALIZE_TEMPLATE,
                       TURN_TEMPLATE, system_prompt)
 from .providers import ProviderError
@@ -156,7 +157,7 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     key = (scenario.id, target_lang, native)
     if key in _loc_cache:
         return _loc_cache[key]
-    dbkey = f"loc:{scenario.id}:{target_lang}:{native}"
+    dbkey = f"loc:v2:{scenario.id}:{target_lang}:{native}"   # v2: zh-pivot for mnt
     try:
         stored = db.cache_get(dbkey)
         if stored:
@@ -170,8 +171,9 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     meta = lang_meta(target_lang)
     prompt = LOCALIZE_TEMPLATE.format(
         lang=meta["name_en"],
-        roman=roman_for(target_lang, native) or "Latin letters",
+        roman=roman_for(target_lang, native) or "an empty string",
         native=native_prompt(native),
+        pipeline=pipeline_for(target_lang, native),
         setup_mn=scenario.setup_mn,
         coach=config.coach_name_en,
         opener_en=scenario.opener_en,
@@ -235,7 +237,8 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
     )
 
     raw = await llm.chat(system_prompt(lang_name, roman_for(target_lang, native),
-                                       native_prompt(native)), prompt)
+                                       native_prompt(native),
+                                       pipeline_for(target_lang, native)), prompt)
     try:
         data = llm.parse_json_block(raw)
     except ProviderError:

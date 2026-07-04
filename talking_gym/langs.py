@@ -60,18 +60,34 @@ def native_prompt(code: str) -> str:
 
 
 def roman_for(target_lang: str, native: str) -> str | None:
-    """Pronunciation-aid scheme. Cyrillic-Mongolia users get Latin romanization
-    (pinyin/romaja/romaji, none for English). Inner Mongolian users read Chinese,
-    not Latin — they get Chinese-character phonetic transcription instead
-    (except Chinese itself, where pinyin IS the Chinese standard)."""
+    """What goes in the helper line under target-language text (the *_latin
+    wire fields). Cyrillic-Mongolia users get Latin romanization (pinyin /
+    romaja / romaji; none for English). Inner Mongolian users get a CHINESE
+    TRANSLATION instead — they read Chinese fluently, and the Chinese text
+    also serves as the pivot for the Mongolian-script translation (except
+    Chinese study itself, where pinyin is the standard reading aid)."""
     meta = lang_meta(target_lang)
     if native == "mnt":
         if target_lang == "zh":
-            return meta["roman"]
-        return ("Chinese-character phonetic approximation of the pronunciation, "
-                "the way Chinese textbooks transcribe foreign sounds "
-                "(e.g. 'Nice to meet you' -> 奈斯·图·米特·尤; 감사합니다 -> 卡姆萨哈姆尼达)")
-    return meta["roman"]
+            return f"a Latin transliteration using {meta['roman']}"
+        return ("a natural Chinese (Simplified) translation of the whole sentence "
+                "— a translation of the MEANING, not phonetics")
+    if meta["roman"] is None:
+        return None
+    return f"a Latin transliteration using {meta['roman']}"
+
+
+def pipeline_for(target_lang: str, native: str) -> str:
+    """Extra instruction enforcing the zh-pivot for Inner Mongolian users:
+    direct <target>->traditional-Mongolian translation is error-prone, so the
+    Mongolian is derived from the Chinese translation instead."""
+    if native == "mnt" and target_lang != "zh":
+        return ("TRANSLATION PIPELINE (follow strictly): first write the Chinese "
+                "translation (the *_latin fields). Then write every Mongolian "
+                "traditional-script field by translating FROM that Chinese text — "
+                "not directly from the other language. Chinese-to-Mongolian is far "
+                "more reliable; never skip the Chinese step.")
+    return ""
 
 
 def target_of(user) -> str:

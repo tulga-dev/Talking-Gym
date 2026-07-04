@@ -16,15 +16,16 @@ STRICT OUTPUT: reply with ONE JSON object, nothing else:
 {
   "reply_en": "your next spoken line in the roleplay, IN <<LANG>>. FIRST react naturally to what they just said, like a real person would. THEN ask ONE short question. Keep it short and natural, with pauses where a human would pause. Max 3 short sentences. (empty string if done=true)",
   "corrected": "the learner's sentence(s) rewritten as natural, correct <<LANG>> (keep their meaning; if already perfect, repeat it)",
-  "feedback_mn": "1-2 short coaching tips written in <<NATIVE>> (never in <<LANG>> — this is the learner's native-language explanation): the single most important grammar/word-choice fix and one better phrase to use. You may quote a short <<LANG>> phrase inside, but the explanation itself must be in <<NATIVE>>. Friendly, specific, max 220 characters",
-  "score": <integer 0-100: intelligibility + grammar + task success for THIS turn>,
-  "done": <true if this was a natural end of the conversation, else false>,
-  "suggested_en": "a natural 1-2 sentence model answer IN <<LANG>> the learner could give to your reply_en question — they may read it aloud or adapt it. REQUIRED for beginner level, brief for intermediate, EMPTY STRING for advanced or when done=true",
-  "suggested_mn": "translation of suggested_en into <<NATIVE>> (empty when suggested_en is empty)",
   "reply_latin": <<ROMAN_SPEC_REPLY>>,
   "corrected_latin": <<ROMAN_SPEC_CORRECTED>>,
-  "suggested_latin": <<ROMAN_SPEC_SUGGESTED>>
+  "suggested_en": "a natural 1-2 sentence model answer IN <<LANG>> the learner could give to your reply_en question — they may read it aloud or adapt it. REQUIRED for beginner level, brief for intermediate, EMPTY STRING for advanced or when done=true",
+  "suggested_latin": <<ROMAN_SPEC_SUGGESTED>>,
+  "feedback_mn": "1-2 short coaching tips written in <<NATIVE>> (never in <<LANG>> — this is the learner's native-language explanation): the single most important grammar/word-choice fix and one better phrase to use. You may quote a short <<LANG>> phrase inside, but the explanation itself must be in <<NATIVE>>. Friendly, specific, max 220 characters",
+  "suggested_mn": "translation of suggested_en into <<NATIVE>> (empty when suggested_en is empty)",
+  "score": <integer 0-100: intelligibility + grammar + task success for THIS turn>,
+  "done": <true if this was a natural end of the conversation, else false>
 }
+<<PIPELINE>>
 
 Coaching rules:
 - Correct at most 1-2 things per turn; never overwhelm.
@@ -45,13 +46,14 @@ Level rules (follow STRICTLY):
 
 
 def system_prompt(lang_name: str, roman: str | None = None,
-                  native: str = "Mongolian in CYRILLIC script") -> str:
-    """Build the coach system prompt. `roman` is the romanization scheme for
-    non-Latin target scripts; `native` describes the learner's own language
-    (Cyrillic Mongolian, or traditional-script Mongolian for Inner Mongolia)."""
+                  native: str = "Mongolian in CYRILLIC script",
+                  pipeline: str = "") -> str:
+    """Build the coach system prompt. `roman` describes what the helper line
+    under target-language text contains (Latin transliteration, or a Chinese
+    translation for Inner Mongolian users); `native` describes the learner's
+    own language; `pipeline` optionally enforces the zh-pivot translation."""
     if roman:
-        spec = lambda what: (f'"{what} transliterated into Latin letters using {roman} '
-                             f'(empty when {what} is empty)"')
+        spec = lambda what: f'"{what} rendered as {roman} (empty when {what} is empty)"'
     else:
         spec = lambda what: '"" (always an empty string for this language)'
     return (SYSTEM_TEMPLATE
@@ -61,6 +63,7 @@ def system_prompt(lang_name: str, roman: str | None = None,
             .replace("<<ROMAN_SPEC_CORRECTED>>", spec("corrected"))
             .replace("<<ROMAN_SPEC_SUGGESTED>>", spec("suggested_en"))
             .replace("<<NATIVE>>", native)
+            .replace("<<PIPELINE>>", pipeline)
             .replace("<<LANG>>", lang_name))
 
 
@@ -98,14 +101,16 @@ Rewrite BOTH the opener and the model answer in natural, simple {lang}, suitable
 for a {level} learner. Keep the tutor's name {coach}. The opener greets the learner
 and asks one question.
 
+{pipeline}
+
 Return JSON:
 {{
-  "title": "a short scenario title in {native}",
-  "setup": "the situation description in {native} (one sentence, addressed to the learner)",
   "opener": "the tutor's opening line in {lang}",
+  "opener_latin": "the opener rendered as {roman}",
   "opener_mn": "translation of the opener into {native}",
-  "opener_latin": "the opener transliterated into Latin letters using {roman}",
   "example": "the model learner answer in {lang}",
+  "example_latin": "the model answer rendered as {roman}",
   "example_mn": "translation of the model answer into {native}",
-  "example_latin": "the model answer transliterated into Latin letters using {roman}"
+  "title": "a short scenario title in {native}",
+  "setup": "the situation description in {native} (one sentence, addressed to the learner)"
 }}"""
