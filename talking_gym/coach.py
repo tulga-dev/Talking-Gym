@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 from . import db
 from .config import config
-from .langs import lang_meta, native_of, native_prompt, target_of
+from .langs import lang_meta, native_of, native_prompt, roman_for, target_of
 from .prompts import (FINISH_HINT, LOCALIZE_SYSTEM, LOCALIZE_TEMPLATE,
                       TURN_TEMPLATE, system_prompt)
 from .providers import ProviderError
@@ -140,6 +140,7 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     Mongolian). English-target/Cyrillic-native uses the authored text; other
     combinations are LLM-generated once and cached, English fallback on failure."""
     authored = {
+        "title": scenario.title_mn, "setup": scenario.setup_mn,
         "opener": scenario.opener_en, "opener_mn": scenario.opener_mn,
         "opener_latin": "",
         "example": scenario.example_en, "example_mn": scenario.example_mn,
@@ -153,7 +154,7 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     meta = lang_meta(target_lang)
     prompt = LOCALIZE_TEMPLATE.format(
         lang=meta["name_en"],
-        roman=meta["roman"] or "Latin letters",
+        roman=roman_for(target_lang, native) or "Latin letters",
         native=native_prompt(native),
         setup_mn=scenario.setup_mn,
         coach=config.coach_name_en,
@@ -166,6 +167,8 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
         # here for natural phrasing; latency doesn't matter on this path.
         data = llm.parse_json_block(await llm.chat(LOCALIZE_SYSTEM, prompt, effort="low"))
         loc = {
+            "title": str(data.get("title", "")).strip() or authored["title"],
+            "setup": str(data.get("setup", "")).strip() or authored["setup"],
             "opener": str(data.get("opener", "")).strip() or authored["opener"],
             "opener_mn": str(data.get("opener_mn", "")).strip() or authored["opener_mn"],
             "opener_latin": str(data.get("opener_latin", "")).strip(),
@@ -211,7 +214,8 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         transcript=transcript,
     )
 
-    raw = await llm.chat(system_prompt(lang_name, lmeta["roman"], native_prompt(native)), prompt)
+    raw = await llm.chat(system_prompt(lang_name, roman_for(target_lang, native),
+                                       native_prompt(native)), prompt)
     try:
         data = llm.parse_json_block(raw)
     except ProviderError:

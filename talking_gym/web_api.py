@@ -120,8 +120,8 @@ async def _scenario_payload(sc, user) -> dict:
     loc = await coach.localize_scenario(sc, target_of(user), native_of(user))
     return {
         "id": sc.id,
-        "title_mn": sc.title_mn,
-        "setup_mn": sc.setup_mn,
+        "title_mn": loc.get("title", sc.title_mn),
+        "setup_mn": loc.get("setup", sc.setup_mn),
         "opener_en": loc["opener"],
         "opener_mn": loc["opener_mn"],
         "opener_latin": loc.get("opener_latin", ""),
@@ -242,7 +242,8 @@ async def api_session_state(request: web.Request) -> web.Response:
             "turn": session["turns"] + 1,
         }
     nxt = pick_scenario(user["level"], user["sessions_done"])
-    payload["next_title_mn"] = nxt.title_mn
+    nloc = await coach.localize_scenario(nxt, target_of(user), native_of(user))
+    payload["next_title_mn"] = nloc.get("title", nxt.title_mn)
     return web.json_response(payload)
 
 

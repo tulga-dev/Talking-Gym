@@ -59,6 +59,21 @@ def native_prompt(code: str) -> str:
     return NATIVE_LANGS.get(code, NATIVE_LANGS[DEFAULT_NATIVE])["prompt"]
 
 
+def roman_for(target_lang: str, native: str) -> str | None:
+    """Pronunciation-aid scheme. Cyrillic-Mongolia users get Latin romanization
+    (pinyin/romaja/romaji, none for English). Inner Mongolian users read Chinese,
+    not Latin — they get Chinese-character phonetic transcription instead
+    (except Chinese itself, where pinyin IS the Chinese standard)."""
+    meta = lang_meta(target_lang)
+    if native == "mnt":
+        if target_lang == "zh":
+            return meta["roman"]
+        return ("Chinese-character phonetic approximation of the pronunciation, "
+                "the way Chinese textbooks transcribe foreign sounds "
+                "(e.g. 'Nice to meet you' -> 奈斯·图·米特·尤; 감사합니다 -> 卡姆萨哈姆尼达)")
+    return meta["roman"]
+
+
 def target_of(user) -> str:
     """The user's chosen study language, defaulting to English (and tolerating
     rows created before the column existed)."""

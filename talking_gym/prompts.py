@@ -100,6 +100,8 @@ and asks one question.
 
 Return JSON:
 {{
+  "title": "a short scenario title in {native}",
+  "setup": "the situation description in {native} (one sentence, addressed to the learner)",
   "opener": "the tutor's opening line in {lang}",
   "opener_mn": "translation of the opener into {native}",
   "opener_latin": "the opener transliterated into Latin letters using {roman}",

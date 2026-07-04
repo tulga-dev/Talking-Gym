@@ -729,29 +729,76 @@
   var lang = new URLSearchParams(location.search).get('lang') ||
              (function(){ try { return localStorage.getItem('tg-lang'); } catch(e){ return null; } })() || 'mn';
   if (lang !== 'en' && lang !== 'mnt') lang = 'mn';
-  // Inner Mongolian (traditional script) UI: partial translation over the
-  // Cyrillic base — untranslated keys fall back to Cyrillic Mongolian.
+  // Inner Mongolian (traditional script) UI — full translation over the
+  // Cyrillic base. Written by AI; needs native-speaker review.
   STR.mnt = Object.assign({}, STR.mn, {
-    langBtn:"ᠮᠣ", langRowVal:"ᠮᠣᠩᠭᠣᠯ ᠪᠢᠴᠢᠭ",
-    obTabReg:"ᠪᠦᠷᠢᠳᠬᠡᠭᠦᠯᠬᠦ", obTabLog:"ᠨᠡᠪᠲᠡᠷᠡᠬᠦ",
+    obT:"Talking Gym ᠳᠤ ᠲᠠᠪᠠᠲᠠᠢ ᠮᠣᠷᠢᠯ", obS:"ᠡᠳᠦᠷ ᠲᠦ 5 ᠮᠢᠨᠦᠲ — ᠶᠠᠷᠢᠵᠤ ᠰᠤᠷ",
+    obTabReg:"ᠪᠦᠷᠢᠳᠬᠡᠭᠦᠯᠬᠦ", obTabLog:"ᠨᠡᠪᠲᠡᠷᠡᠬᠦ", obOr:"ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠢᠮᠧᠯ ᠢᠶᠡᠷ",
     obEmail:"ᠢᠮᠧᠯ", obPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ (6+)", obName:"ᠲᠠᠨ ᠤ ᠨᠡᠷ᠎ᠡ",
     obLevel:"ᠲᠦᠪᠰᠢᠨ", obLang:"ᠶᠠᠮᠠᠷ ᠬᠡᠯᠡ ᠰᠤᠷᠬᠤ ᠪᠤᠢ?",
-    lvB:"ᠠᠩᠬᠠᠨ", lvI:"ᠳᠤᠮᠳᠠ", lvA:"ᠠᠬᠢᠭᠰᠠᠨ",
+    lvB:"ᠠᠩᠬ᠎ᠠ ᠱᠠᠲᠤ", lvI:"ᠳᠤᠮᠳᠠ", lvA:"ᠠᠬᠢᠭᠰᠠᠨ",
+    errEmail:"ᠢᠮᠧᠯ ᠢᠶᠡᠨ ᠵᠥᠪ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ", errPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ 6 ᠡᠴᠡ ᠳᠡᠭᠡᠭᠰᠢ ᠲᠡᠮᠳᠡᠭᠲᠦ",
+    errName:"ᠨᠡᠷ᠎ᠡ ᠪᠡᠨ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ",
+    errTaken:"ᠡᠨᠡ ᠢᠮᠧᠯ ᠪᠦᠷᠢᠳᠬᠡᠯ ᠲᠡᠢ ᠪᠠᠶᠢᠨ᠎ᠠ — ᠨᠡᠪᠲᠡᠷᠡᠬᠦ ᠶᠢ ᠳᠠᠷᠤᠭᠠᠷᠠᠢ",
+    errLogin:"ᠢᠮᠧᠯ ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ ᠪᠤᠷᠤᠭᠤ", errNet:"ᠰᠦᠯᠵᠢᠶᠡᠨ ᠦ ᠠᠯᠳᠠᠭ᠎ᠠ — ᠳᠠᠬᠢᠨ ᠣᠷᠣᠯᠳᠤᠭᠠᠷᠠᠢ",
     greetM:"ᠥᠷᠯᠥᠭᠡ ᠶᠢᠨ ᠮᠡᠨᠳᠦ", greetD:"ᠡᠳᠦᠷ ᠦᠨ ᠮᠡᠨᠳᠦ", greetE:"ᠦᠳᠡᠰᠢ ᠶᠢᠨ ᠮᠡᠨᠳᠦ",
-    goalLbl:"ᠡᠳᠦᠷ ᠦᠨ ᠵᠣᠷᠢᠯᠭ᠎ᠠ", start:"ᠡᠬᠢᠯᠡᠬᠦ",
-    progT2:"ᠲᠠᠨ ᠤ ᠠᠬᠢᠴᠠ", curLvl:"ᠣᠳᠣ ᠶᠢᠨ ᠲᠦᠪᠰᠢᠨ",
-    recT:"ᠲᠠᠨ ᠳᠤ ᠰᠠᠨᠠᠯ ᠪᠣᠯᠭᠠᠬᠤ",
-    lbStreak:"ᠰᠲ᠋ᠷᠢᠺ", lbVoice:"ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ",
-    holdIdle:"ᠳᠠᠷᠤᠵᠤ ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", holdRec:"ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", tapIdle:"ᠳᠠᠷᠤᠵᠤ ᠡᠬᠢᠯᠡᠭᠦᠯᠬᠦ",
-    typeLink:"…ᠡᠰᠡᠪᠡᠯ ᠪᠢᠴᠢᠬᠦ",
+    todayLbl:"ᠥᠨᠥᠳᠥᠷ ᠦᠨ ᠳᠠᠰᠬᠠᠯ", start:"ᠡᠬᠢᠯᠡᠬᠦ", doneToday:"ᠥᠨᠥᠳᠥᠷ ᠬᠢᠭᠰᠡᠨ ✓ — ᠨᠡᠮᠡᠯᠲᠡ ᠳᠠᠰᠬᠠᠯ ᠤᠤ?",
+    turnsMeta:"{n} ᠰᠣᠯᠢᠯᠴᠠᠭ᠎ᠠ · ᠳᠠᠭᠤᠲᠤ ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠪᠢᠴᠢᠭ ᠢᠶᠡᠷ",
+    capT:"ᠥᠨᠥᠳᠥᠷ ᠦᠨ ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ",
+    refT:"ᠨᠠᠶᠢᠵᠠ ᠪᠠᠨ ᠤᠷᠢ", refS:"ᠬᠠᠮᠲᠤ ᠰᠤᠷᠤᠯᠴᠠᠪᠠᠯ ᠪᠦᠷ ᠤᠷᠮᠠᠲᠠᠢ", refB:"ᠤᠷᠢᠬᠤ",
     exLbl:"ᠵᠢᠱᠢᠶ᠎ᠡ ᠬᠠᠷᠢᠭᠤᠯᠲᠠ — ᠤᠩᠰᠢᠭᠠᠳ ᠬᠡᠯᠡᠭᠡᠷᠡᠢ",
-    doneT:"ᠥᠨᠥᠳᠥᠷ ᠦᠨ ᠳᠠᠰᠬᠠᠯ ᠳᠠᠭᠤᠰᠤᠯ᠎ᠠ!", doneBtn:"ᠨᠢᠭᠤᠷ ᠲᠤ",
-    tbHome:"ᠨᠢᠭᠤᠷ", tbPath:"ᠵᠠᠮ", tbTrain:"ᠳᠠᠰᠬᠠᠯ", tbProg:"ᠠᠬᠢᠴᠠ", tbMe:"ᠪᠢ",
+    holdIdle:"ᠳᠠᠷᠤᠵᠤ ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", holdRec:"ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", tapIdle:"ᠳᠠᠷᠤᠵᠤ ᠡᠬᠢᠯᠡᠭᠦᠯᠬᠦ",
+    micHintIdle:"ᠲᠣᠪᠴᠢ ᠶᠢ ᠳᠠᠷᠤᠵᠤ ᠪᠠᠶᠢᠭᠠᠳ ᠶᠠᠷᠢ — ᠲᠠᠯᠪᠢᠬᠤ ᠳᠤ ᠢᠯᠡᠭᠡᠭᠳᠡᠨ᠎ᠡ",
+    micHintRec:"ᠭᠠᠷ ᠢᠶᠠᠨ ᠲᠠᠯᠪᠢᠬᠤ ᠳᠤ ᠢᠯᠡᠭᠡᠭᠳᠡᠨ᠎ᠡ",
+    tapHintIdle:"ᠳᠠᠷᠤᠵᠤ ᠡᠬᠢᠯᠡᠭᠦᠯᠦᠭᠡᠳ᠂ ᠳᠠᠭᠤᠰᠬᠤ ᠳᠤ ᠳᠠᠬᠢᠨ ᠳᠠᠷᠤ",
+    tapHintRec:"ᠳᠠᠭᠤᠰᠬᠠᠬᠤ ᠳᠤ ᠳᠠᠬᠢᠨ ᠳᠠᠷᠤ — ᠢᠯᠡᠭᠡᠭᠳᠡᠨ᠎ᠡ",
+    micHintBusy:"ᠰᠠᠷᠠ ᠰᠣᠨᠣᠰᠴᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
+    micHintDenied:"ᠮᠢᠺᠷᠣᠹᠣᠨ ᠤ ᠵᠥᠪᠰᠢᠶᠡᠷᠡᠯ ᠬᠡᠷᠡᠭᠲᠡᠢ — ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠪᠢᠴᠢᠭᠡᠷᠡᠢ",
+    typeLink:"…ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠪᠢᠴᠢᠬᠦ",
+    doneT:"ᠥᠨᠥᠳᠥᠷ ᠦᠨ ᠳᠠᠰᠬᠠᠯ ᠳᠠᠭᠤᠰᠤᠯ᠎ᠠ!", doneStreak:"ᠰᠲ᠋ᠷᠢᠺ", doneScore:"ᠣᠨᠣᠭ᠎ᠠ", doneBtn:"ᠨᠢᠭᠤᠷ ᠲᠤ",
+    resumed:"ᠡᠮᠦᠨᠡᠬᠢ ᠶᠠᠷᠢᠶ᠎ᠠ ᠦᠷᠭᠦᠯᠵᠢᠯᠡᠵᠦ ᠪᠠᠶᠢᠨ᠎ᠠ",
+    pathT:"ᠮᠢᠨᠦ ᠵᠠᠮ", pathS:"ᠮᠡᠷᠭᠡᠵᠢᠯ ᠳᠦ ᠪᠡᠨ ᠲᠣᠬᠢᠷᠠᠭᠤᠯᠵᠤ ᠰᠤᠷ",
+    trMovies:"ᠺᠢᠨᠣ᠋", trDaily:"ᠡᠳᠦᠷ ᠲᠤᠲᠤᠮ", trDating:"ᠪᠣᠯᠵᠣᠭ᠎ᠠ",
+    lvlLbl:"ᠲᠦᠪᠰᠢᠨ", nextT:"ᠳᠠᠷᠠᠭ᠎ᠠ ᠶᠢᠨ ᠳᠠᠰᠬᠠᠯ",
+    soonTracks:"ᠮᠡᠷᠭᠡᠵᠢᠯ ᠦᠨ ᠵᠠᠮ ᠪᠦᠷᠢ ᠶᠢᠨ ᠬᠢᠴᠢᠶᠡᠯ ᠤᠳᠠᠬᠤ ᠦᠭᠡᠢ ᠨᠡᠮᠡᠭᠳᠡᠨ᠎ᠡ",
+    prgT:"ᠮᠢᠨᠦ ᠠᠬᠢᠴᠠ", statsT:"ᠮᠢᠨᠦ ᠲᠣᠭ᠎ᠠ ᠪᠠᠷᠢᠮᠲᠠ",
+    mStreak:"ᠣᠳᠣ ᠶᠢᠨ ᠰᠲ᠋ᠷᠢᠺ", mBest:"ᠳᠡᠭᠡᠳᠦ ᠰᠲ᠋ᠷᠢᠺ", mSessions:"ᠨᠡᠶᠢᠲᠡ ᠳᠠᠰᠬᠠᠯ", mVoice:"ᠥᠨᠥᠳᠥᠷ ᠶᠠᠷᠢᠭᠰᠠᠨ",
+    shareB:"ᠠᠮᠵᠢᠯᠲᠠ ᠪᠠᠨ ᠬᠤᠪᠢᠶᠠᠯᠴᠠᠬᠤ",
+    soonProg:"ᠤᠳᠠᠬᠤ ᠦᠭᠡᠢ᠄ ᠠᠯᠳᠠᠭᠠᠨ ᠤ ᠰᠠᠩ᠂ ᠳᠣᠯᠣᠭᠠᠨ ᠬᠣᠨᠣᠭ ᠤᠨ ᠯᠢᠭ",
     sRem:"ᠰᠠᠨᠠᠭᠤᠯᠭ᠎ᠠ", sStudy:"ᠰᠤᠳᠤᠯᠬᠤ ᠬᠡᠯᠡ", sLang:"ᠠᠫᠫ ᠤᠨ ᠬᠡᠯᠡ", sOut:"ᠭᠠᠷᠬᠤ",
-    callT:"ᠰᠠᠷᠠ ᠲᠠᠢ ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ", callNew:"ᠰᠢᠨ᠎ᠡ",
-    callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
-    planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ"
+    goalLbl:"ᠡᠳᠦᠷ ᠦᠨ ᠵᠣᠷᠢᠯᠭ᠎ᠠ", progT2:"ᠲᠠᠨ ᠤ ᠠᠬᠢᠴᠠ", curLvl:"ᠣᠳᠣ ᠶᠢᠨ ᠲᠦᠪᠰᠢᠨ",
+    recT:"ᠲᠠᠨ ᠳᠤ ᠰᠠᠨᠠᠯ ᠪᠣᠯᠭᠠᠬᠤ", recSub:"ᠳᠠᠷᠠᠭ᠎ᠠ ᠶᠢᠨ ᠬᠢᠴᠢᠶᠡᠯ — ᠰᠠᠷᠠ ᠲᠠᠢ ᠶᠠᠷᠢᠯᠴᠠᠶ᠎ᠠ",
+    lbStreak:"ᠰᠲ᠋ᠷᠢᠺ", lbVoice:"ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ",
+    callT:"ᠰᠠᠷᠠ ᠲᠠᠢ ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ", callS:"ᠭᠠᠷ ᠴᠢᠯᠦᠭᠡᠲᠡᠢ᠂ ᠵᠢᠩᠬᠢᠨᠢ ᠶᠠᠷᠢᠶ᠎ᠠ ᠰᠢᠭ", callNew:"ᠰᠢᠨ᠎ᠡ",
+    callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"ᠰᠠᠷᠠ ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
+    callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"ᠰᠠᠷᠠ ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
+    planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ",
+    tstPlanOn:"ᠪᠠᠭᠴᠠ ᠢᠳᠡᠪᠬᠢᠵᠢᠯ᠎ᠡ᠄", tstBadCode:"ᠺᠣᠳ᠋ ᠪᠤᠷᠤᠭᠤ ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠳᠠᠭᠤᠰᠤᠭᠰᠠᠨ",
+    pBadge:"ᠤᠳᠠᠬᠤ ᠦᠭᠡᠢ", perMo:"/ᠰᠠᠷ᠎ᠠ",
+    pGym1:"ᠡᠳᠦᠷ ᠪᠦᠷᠢ ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ + ᠳᠠᠪᠲᠠᠯᠭ᠎ᠠ", pGym2:"ᠪᠦᠬᠦ ᠮᠡᠷᠭᠡᠵᠢᠯ ᠦᠨ ᠵᠠᠮ",
+    pPr1:"AI ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ + ᠶᠠᠷᠢᠯᠴᠠᠯᠭ᠎ᠠ ᠶᠢᠨ ᠰᠢᠮᠦᠯᠢᠶᠠᠼ", pPr2:"IELTS Speaking ᠣᠨᠣᠭ᠎ᠠ",
+    proto:"Beta — ᠰᠠᠨᠠᠯ ᠬᠦᠰᠡᠯᠲᠡ᠄",
+    tbHome:"ᠨᠢᠭᠤᠷ", tbPath:"ᠵᠠᠮ", tbTrain:"ᠳᠠᠰᠬᠠᠯ", tbProg:"ᠠᠬᠢᠴᠠ", tbMe:"ᠪᠢ",
+    langBtn:"ᠮᠣ", langRowVal:"ᠮᠣᠩᠭᠣᠯ ᠪᠢᠴᠢᠭ",
+    tstPlan:"ᠲᠥᠯᠥᠪᠦᠷᠢ ᠤᠳᠠᠬᠤ ᠦᠭᠡᠢ — QPay ᠬᠣᠯᠪᠣᠯᠲᠠ ᠬᠢᠭᠳᠡᠵᠦ ᠪᠠᠶᠢᠨ᠎ᠠ",
+    tstTrack:"ᠵᠠᠮ ᠬᠠᠳᠠᠭᠠᠯᠠᠭᠳᠠᠯ᠎ᠠ᠄", tstLvl:"ᠲᠦᠪᠰᠢᠨ ᠰᠣᠯᠢᠭᠳᠠᠯ᠎ᠠ", tstRem:"ᠰᠠᠨᠠᠭᠤᠯᠭ᠎ᠠ᠄", tstStudy:"ᠰᠤᠳᠤᠯᠬᠤ ᠬᠡᠯᠡ᠄",
+    tstCopied:"ᠬᠣᠯᠪᠣᠭᠠᠰᠤ ᠬᠠᠭᠤᠯᠤᠭᠳᠠᠯ᠎ᠠ ✓", tstShared:"ᠬᠤᠪᠢᠶᠠᠯᠴᠠᠯ᠎ᠠ ✓",
+    tstCap:"ᠥᠨᠥᠳᠥᠷ ᠦᠨ ᠳᠠᠭᠤᠲᠤ ᠬᠢᠵᠠᠭᠠᠷ ᠲᠤ ᠬᠦᠷᠦᠯ᠎ᠡ — ᠪᠢᠴᠢᠭ ᠢᠶᠡᠷ ᠦᠷᠭᠦᠯᠵᠢᠯᠡᠭᠦᠯᠦᠭᠡᠷᠡᠢ",
+    tstEmpty:"ᠳᠠᠭᠤ ᠰᠣᠨᠣᠰᠤᠭᠳᠠᠭᠰᠠᠨ ᠦᠭᠡᠢ — ᠲᠣᠳᠣ᠂ ᠣᠶᠢᠷᠠᠬᠠᠨ ᠶᠠᠷᠢᠭᠠᠷᠠᠢ",
+    tstErr:"ᠲᠦᠷ ᠵᠠᠭᠤᠷ᠎ᠠ ᠶᠢᠨ ᠠᠯᠳᠠᠭ᠎ᠠ — ᠳᠠᠬᠢᠨ ᠣᠷᠣᠯᠳᠤᠭᠠᠷᠠᠢ",
+    shareTxt:"ᠪᠢ Talking Gym ᠳᠡᠭᠡᠷ᠎ᠡ ᠶᠠᠷᠢᠵᠤ ᠰᠤᠷᠴᠤ ᠪᠠᠶᠢᠨ᠎ᠠ!",
+    inviteTxt:"ᠨᠠᠳᠠ ᠲᠠᠢ ᠬᠠᠮᠲᠤ Talking Gym ᠳᠡᠭᠡᠷ᠎ᠡ ᠰᠤᠷᠤᠯᠴᠠᠶ᠎ᠠ᠄",
+    remOff:"ᠤᠨᠲᠠᠷᠠᠭᠠᠯᠲᠠ ᠲᠠᠢ"
   });
+  // Server-sent Cyrillic that the client re-renders in traditional script.
+  var RANK_MNT = {
+    "Шинэхэн":"ᠰᠢᠨᠡᠬᠡᠨ", "Хичээнгүй":"ᠬᠢᠴᠢᠶᠡᠩᠭᠦᠢ", "Тууштай":"ᠲᠤᠭᠤᠰᠢᠲᠠᠢ",
+    "Дадлагатай":"ᠳᠠᠳᠤᠯᠭ᠎ᠠ ᠲᠠᠢ", "Аварга":"ᠠᠪᠤᠷᠭᠤ", "Мастер":"ᠮᠠᠰᠲ᠋ᠧᠷ"
+  };
+  function rankLabel(r){
+    if (lang !== 'mnt') return r;
+    return r.replace(/[А-Яа-яЁёӨөҮү]+/g, function(w){ return RANK_MNT[w] || w; });
+  }
   var token = null;
   try { token = localStorage.getItem('tg-token'); } catch(e){}
   var me = null, session = null, sessionXp = 0;
@@ -949,21 +996,22 @@
     return h < 12 ? d().greetM : (h < 18 ? d().greetD : d().greetE);
   }
   var TRACK_LABEL = {business:"Business", sales:"Sales", logistics:"Logistics", travel:"Travel",
-                     movies:{mn:"Кино",en:"Movies"}, daily:{mn:"Өдөр тутам",en:"Daily life"}, dating:{mn:"Болзоо",en:"Dating"}};
+                     movies:{mn:"Кино",en:"Movies",mnt:"ᠺᠢᠨᠣ᠋"}, daily:{mn:"Өдөр тутам",en:"Daily life",mnt:"ᠡᠳᠦᠷ ᠲᠤᠲᠤᠮ"}, dating:{mn:"Болзоо",en:"Dating",mnt:"ᠪᠣᠯᠵᠣᠭ᠎ᠠ"}};
   function trackLabel(t){
     var v = TRACK_LABEL[t] || t;
-    return (typeof v === 'string') ? v : v[lang];
+    return (typeof v === 'string') ? v : (v[lang] || v.mn);
   }
-  var LVL_LABEL = {beginner:{mn:"Анхан",en:"Beginner"}, intermediate:{mn:"Дунд",en:"Intermediate"}, advanced:{mn:"Ахисан",en:"Advanced"}};
+  var LVL_LABEL = {beginner:{mn:"Анхан",en:"Beginner",mnt:"ᠠᠩᠬ᠎ᠠ ᠱᠠᠲᠤ"}, intermediate:{mn:"Дунд",en:"Intermediate",mnt:"ᠳᠤᠮᠳᠠ"}, advanced:{mn:"Ахисан",en:"Advanced",mnt:"ᠠᠬᠢᠭᠰᠠᠨ"}};
+  function lvlLabel(l){ var v = LVL_LABEL[l] || {}; return v[lang] || v.mn || l; }
 
   function renderMe(){
     $('greet').textContent = greetWord() + ',';
     $('home-name').textContent = me.name;
     $('home-avatar').textContent = (me.name || 'T').trim().charAt(0).toUpperCase();
     var tl0 = TLANGS[me.target_lang] || TLANGS.en;
-    $('home-tlang').textContent = tl0.f + ' ' + tl0.n + ' · ' + LVL_LABEL[me.level][lang];
-    $('home-lvl').textContent = LVL_LABEL[me.level][lang];
-    $('home-rank').textContent = me.rank;
+    $('home-tlang').textContent = tl0.f + ' ' + tl0.n + ' · ' + lvlLabel(me.level);
+    $('home-lvl').textContent = lvlLabel(me.level);
+    $('home-rank').textContent = rankLabel(me.rank);
     // Level ring: progress toward the next rank (same math as the rank bar).
     var rspan = (me.rank_next_xp || (me.xp + 1)) - me.rank_cur_xp;
     var rgot = Math.max(0, me.xp - me.rank_cur_xp);
@@ -985,9 +1033,9 @@
     document.querySelectorAll('#lvl-pick [data-lvl]').forEach(function(b){
       b.classList.toggle('on', b.getAttribute('data-lvl') === me.level);
     });
-    $('lvl-cur').textContent = LVL_LABEL[me.level][lang];
-    $('rank-name').textContent = me.rank.replace(/^[^\s]+\s/, '');
-    $('rank-name2').textContent = me.rank;
+    $('lvl-cur').textContent = lvlLabel(me.level);
+    $('rank-name').textContent = rankLabel(me.rank).replace(/^[^\s]+\s/, '');
+    $('rank-name2').textContent = rankLabel(me.rank);
     $('st-streak').textContent = me.streak;
     $('st-best').textContent = me.best_streak;
     $('st-sessions').textContent = me.sessions_done;
@@ -997,7 +1045,7 @@
     $('rank-fill').style.width = me.rank_next_xp ? Math.min(100, got * 100 / span) + '%' : '100%';
     $('rank-progress').textContent = me.rank_next_xp ? (me.xp + ' / ' + me.rank_next_xp + ' XP') : (me.xp + ' XP');
     $('prof-name').textContent = me.name;
-    $('prof-sub').textContent = trackLabel(me.track) + ' · ' + LVL_LABEL[me.level][lang] + ' · ' + me.xp + ' XP';
+    $('prof-sub').textContent = trackLabel(me.track) + ' · ' + lvlLabel(me.level) + ' · ' + me.xp + ' XP';
     $('rem-val').textContent = (me.reminder_hour === null || me.reminder_hour === undefined)
       ? d().remOff : (('0' + me.reminder_hour).slice(-2) + ':00');
     var tl = TLANGS[me.target_lang] || TLANGS.en;
@@ -1146,7 +1194,7 @@
         sessionXp = 0;
         chat.innerHTML = '';
         $('les-title').textContent = j.scenario.title_mn;
-        $('les-sub').textContent = LVL_LABEL[me.level][lang];
+        $('les-sub').textContent = lvlLabel(me.level);
         $('les-setup').textContent = j.scenario.setup_mn;
         $('done-card').hidden = true;
         $('mic-zone').hidden = false;
