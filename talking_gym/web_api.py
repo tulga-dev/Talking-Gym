@@ -157,7 +157,7 @@ async def api_turn(request: web.Request) -> web.Response:
             field = await reader.next()
         if field is None:
             return _err(400, "audio_missing")
-        audio = await field.read(decode=False)
+        audio = bytes(await field.read(decode=False))  # aiohttp yields bytearray; httpx needs bytes
         if len(audio) > MAX_AUDIO_BYTES:
             return _err(413, "audio_too_large")
         est_seconds = max(1, len(audio) // 4000)
@@ -168,6 +168,9 @@ async def api_turn(request: web.Request) -> web.Response:
         try:
             transcript = await stt.transcribe(audio, filename=filename, mime=mime)
         except ProviderError:
+            return _err(502, "stt_failed")
+        except Exception:
+            log.exception("STT unexpected failure")
             return _err(502, "stt_failed")
         db.add_voice_seconds(uid, est_seconds)
         spoken = True
