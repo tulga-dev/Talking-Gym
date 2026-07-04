@@ -105,13 +105,13 @@
   .example .en{font-size:15px;font-weight:800}
   .example .mn{font-size:12.5px;color:var(--mut);font-style:italic;margin-top:2px}
   .mic-zone{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0 8px}
-  .mic-big{width:88px;height:88px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 10px 24px rgba(0,99,255,.4),0 0 0 14px var(--sky);animation:breath 3.4s var(--ease) infinite;transition:transform .35s var(--ease)}
-  .mic-big .i{width:34px;height:34px}
-  .mic-big:active{transform:scale(.94)}
-  @keyframes breath{50%{transform:scale(1.04)}}
-  .mic-big.rec{animation:pulse 1s infinite;background:var(--red)}
-  @keyframes pulse{50%{box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 10px 24px rgba(237,92,59,.4),0 0 0 26px rgba(237,92,59,.12)}}
-  .mic-big.busy{animation:none;background:#93A1B3;pointer-events:none}
+  .holdbar{width:100%;height:58px;border-radius:16px;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;gap:9px;font-family:inherit;font-size:15.5px;font-weight:800;color:var(--ink);box-shadow:0 2px 0 var(--line);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;transition:transform .15s var(--ease),background .15s,color .15s}
+  .holdbar .i{width:20px;height:20px;pointer-events:none}
+  .holdbar span{pointer-events:none}
+  .holdbar:active{transform:scale(.985)}
+  .holdbar.rec{background:var(--blue);border-color:#0047b8;color:#fff;box-shadow:0 2px 0 #0047b8,0 0 0 6px rgba(0,99,255,.14);animation:pulse 1.1s infinite}
+  @keyframes pulse{50%{box-shadow:0 2px 0 #0047b8,0 0 0 15px rgba(0,99,255,.06)}}
+  .holdbar.busy{animation:none;background:#EEF3F9;color:#93A1B3;pointer-events:none}
   .spin{width:26px;height:26px;border:3.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
   .mic-hint{font-size:12.5px;color:var(--mut);font-weight:600;text-align:center}
@@ -306,7 +306,7 @@
     </div>
 
     <div class="mic-zone" id="mic-zone">
-      <button class="mic-big" id="mic-btn" aria-label="Speak"><svg class="i" id="mic-ico"><use href="#i-mic"/></svg></button>
+      <button class="holdbar" id="mic-btn" aria-label="Hold to talk"><svg class="i"><use href="#i-mic"/></svg><span id="mic-lbl"></span></button>
       <div class="mic-hint" id="mic-hint"></div>
       <button class="type-link" id="type-toggle" data-i18n="typeLink">…эсвэл бичих</button>
       <div class="type-row" id="type-row" hidden>
@@ -414,8 +414,10 @@
       capT:"Өнөөдрийн дуут дасгал",
       refT:"Найзаа урь", refS:"Хамтдаа суралцвал бүр урамтай", refB:"Урих",
       exLbl:"Жишээ хариулт — уншаад хэлээрэй",
-      micHintIdle:"Дараад ярь — дуусаад дахин дар",
-      micHintRec:"Ярьж байна... дуусгахдаа дар",
+      holdIdle:"Дарж яриарай",
+      holdRec:"Ярьж байна...",
+      micHintIdle:"Товчийг дарж байгаад ярь — суллахад илгээгдэнэ",
+      micHintRec:"Гараа суллахад илгээгдэнэ",
       micHintBusy:"Сараа сонсож байна...",
       micHintDenied:"Микрофоны зөвшөөрөл хэрэгтэй — эсвэл бичээрэй",
       typeLink:"…эсвэл бичих",
@@ -460,8 +462,10 @@
       capT:"Today's voice practice",
       refT:"Invite a friend", refS:"Learning together keeps you going", refB:"Invite",
       exLbl:"Example answer — read it aloud",
-      micHintIdle:"Tap and speak — tap again to finish",
-      micHintRec:"Recording... tap to finish",
+      holdIdle:"Hold to talk",
+      holdRec:"Recording...",
+      micHintIdle:"Press and hold to speak — release to send",
+      micHintRec:"Release to send",
       micHintBusy:"Sarah is listening...",
       micHintDenied:"Microphone permission needed — or type instead",
       typeLink:"…or type",
@@ -515,7 +519,7 @@
     $('lang-row-val').textContent = d().langRowVal;
     $('ob-go-lbl').textContent = authMode === 'reg' ? d().obTabReg : d().obTabLog;
     if (me) renderMe();
-    if (micMode === 'idle') $('mic-hint').textContent = d().micHintIdle;
+    if (micMode === 'idle') micState('idle');   // refresh hold-bar label + hint
   }
   function toggleLang(){
     lang = (lang === 'mn') ? 'en' : 'mn';
@@ -559,13 +563,29 @@
   }
 
   /* ---------- audio playback ---------- */
-  var currentAudio = null;
+  /* One reusable <audio> element: unlocked by the user's first tap so that
+     replies arriving later (after fetch + typing delay) can still auto-play
+     on iOS/Android, where play() outside a gesture is otherwise blocked. */
+  var voiceEl = new Audio();
+  voiceEl.setAttribute('playsinline', '');
+  var voiceUnlocked = false;
+  var SILENT_WAV = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  function unlockVoice(){
+    if (voiceUnlocked) return;
+    try {
+      voiceEl.src = SILENT_WAV;
+      var p = voiceEl.play();
+      if (p && p.then) p.then(function(){ voiceUnlocked = true; }).catch(function(){});
+    } catch(e){}
+  }
+  document.addEventListener('pointerdown', unlockVoice, true);
   function playB64(b64){
     if (!b64) return;
     try {
-      if (currentAudio) { currentAudio.pause(); }
-      currentAudio = new Audio('data:audio/mpeg;base64,' + b64);
-      currentAudio.play().catch(function(){});
+      voiceEl.pause();
+      voiceEl.src = 'data:audio/mpeg;base64,' + b64;
+      voiceEl.currentTime = 0;
+      voiceEl.play().catch(function(){});
     } catch(e){}
   }
 
@@ -832,16 +852,27 @@
     $('les-dots').textContent = s + ' ' + Math.min(turn, max) + '/' + max;
   }
 
-  /* ---------- mic ---------- */
+  /* ---------- mic: WeChat-style hold-to-talk ---------- */
   var mediaRecorder = null, chunks = [], micMode = 'idle';
-  function micIcon(name){ return '<svg class="i"><use href="#i-' + name + '"/></svg>'; }
+  var holdActive = false, holdStart = 0;
   function micState(st){
     micMode = st;
     var btn = $('mic-btn');
     btn.classList.remove('rec','busy');
-    if (st === 'idle') { btn.innerHTML = micIcon('mic'); $('mic-hint').textContent = d().micHintIdle; }
-    if (st === 'rec')  { btn.classList.add('rec'); btn.innerHTML = micIcon('stop'); $('mic-hint').textContent = d().micHintRec; }
-    if (st === 'busy') { btn.classList.add('busy'); btn.innerHTML = '<span class="spin"></span>'; $('mic-hint').textContent = d().micHintBusy; }
+    if (st === 'idle') {
+      btn.innerHTML = '<svg class="i"><use href="#i-mic"/></svg><span>' + d().holdIdle + '</span>';
+      $('mic-hint').textContent = d().micHintIdle;
+    }
+    if (st === 'rec') {
+      btn.classList.add('rec');
+      btn.innerHTML = '<svg class="i"><use href="#i-sound"/></svg><span>' + d().holdRec + '</span>';
+      $('mic-hint').textContent = d().micHintRec;
+    }
+    if (st === 'busy') {
+      btn.classList.add('busy');
+      btn.innerHTML = '<span class="spin"></span><span>' + d().micHintBusy + '</span>';
+      $('mic-hint').textContent = d().micHintBusy;
+    }
   }
   function pickMime(){
     var cands = ['audio/webm;codecs=opus','audio/webm','audio/mp4'];
@@ -850,15 +881,20 @@
     }
     return '';
   }
-  $('mic-btn').addEventListener('click', function(){
-    if (micMode === 'busy') return;
-    if (micMode === 'rec') { try { mediaRecorder.stop(); } catch(e){} return; }
-    if (currentAudio) currentAudio.pause();   // don't record over the teacher's voice
+  function beginHold(e){
+    if (micMode !== 'idle') return;
+    e.preventDefault();
+    try { $('mic-btn').setPointerCapture(e.pointerId); } catch(err){}
+    unlockVoice();
+    voiceEl.pause();   // don't record over Sarah's voice
     if (!navigator.mediaDevices || !window.MediaRecorder) {
       $('mic-hint').textContent = d().micHintDenied; $('type-row').hidden = false; return;
     }
+    holdActive = true;
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      if (!holdActive) { stream.getTracks().forEach(function(t){ t.stop(); }); return; }
       chunks = [];
+      holdStart = Date.now();
       var mime = pickMime();
       mediaRecorder = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream);
       mediaRecorder.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
@@ -866,16 +902,31 @@
         stream.getTracks().forEach(function(t){ t.stop(); });
         var type = (mediaRecorder.mimeType || 'audio/webm').split(';')[0];
         var blob = new Blob(chunks, {type:type});
-        if (blob.size < 1000) { micState('idle'); return; }
+        // Too short = accidental tap; don't send half-words to the coach.
+        if (blob.size < 1000 || Date.now() - holdStart < 400) { micState('idle'); return; }
         sendAudio(blob, type);
       };
       mediaRecorder.start();
       micState('rec');
     }).catch(function(){
+      holdActive = false;
       $('mic-hint').textContent = d().micHintDenied;
       $('type-row').hidden = false;
     });
-  });
+  }
+  function endHold(){
+    if (!holdActive) return;
+    holdActive = false;
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try { mediaRecorder.stop(); } catch(e){ micState('idle'); }
+    } else if (micMode === 'rec') {
+      micState('idle');
+    }
+  }
+  $('mic-btn').addEventListener('pointerdown', beginHold);
+  $('mic-btn').addEventListener('pointerup', endHold);
+  $('mic-btn').addEventListener('pointercancel', endHold);
+  $('mic-btn').addEventListener('contextmenu', function(e){ e.preventDefault(); });
   function sendAudio(blob, type){
     micState('busy');
     var ext = type.indexOf('mp4') >= 0 ? 'm4a' : 'webm';
