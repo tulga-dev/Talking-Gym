@@ -1187,28 +1187,38 @@
 
   /* ---------- session flow (conversation) ---------- */
   function startSession(){
+    if (window.__starting) return;   // ignore double-taps while loading
+    window.__starting = true;
     $('btn-start').disabled = true;
+    // Navigate instantly — Sarah "types" while the lesson loads, so the tap
+    // always responds immediately even when generation is slow.
+    chat.innerHTML = '';
+    $('les-title').textContent = '…';
+    $('les-sub').textContent = me ? lvlLabel(me.level) : '';
+    $('les-setup').textContent = '';
+    $('les-dots').textContent = '';
+    $('done-card').hidden = true;
+    $('mic-zone').hidden = true;
+    show('lesson');
+    showTyping();
     req('/api/session/start', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
       .then(function(j){
+        clearTyping();
         session = j;
         sessionXp = 0;
-        chat.innerHTML = '';
         $('les-title').textContent = j.scenario.title_mn;
-        $('les-sub').textContent = lvlLabel(me.level);
         $('les-setup').textContent = j.scenario.setup_mn;
-        $('done-card').hidden = true;
         $('mic-zone').hidden = false;
         $('type-row').hidden = true;
         setDots(j.turn, j.scenario.max_turns);
-        show('lesson');
         if (j.resumed) toast(d().resumed);
         // The teacher speaks first — voice plays as the bubble appears.
         addTeacher(j.scenario.opener_en, j.scenario.opener_mn, j.tts_b64, true, j.scenario.opener_latin);
         if (j.scenario.example_en) addExample(j.scenario.example_en, j.scenario.example_mn, j.scenario.example_latin);
         micState('idle');
       })
-      .catch(function(){ toast(d().tstErr); })
-      .then(function(){ $('btn-start').disabled = false; });
+      .catch(function(){ clearTyping(); toast(d().tstErr); show('home'); })
+      .then(function(){ $('btn-start').disabled = false; window.__starting = false; });
   }
   $('btn-start').addEventListener('click', startSession);
   $('btn-start2').addEventListener('click', startSession);

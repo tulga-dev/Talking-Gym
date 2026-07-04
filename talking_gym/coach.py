@@ -9,6 +9,7 @@ bold for the load-bearing items, italics for translations, and
 <blockquote> to make example answers unmissable.
 """
 import html
+import json
 import logging
 from dataclasses import dataclass
 
@@ -129,16 +130,20 @@ def start_daily_session(user_id: int) -> SessionIntro:
     return SessionIntro(scenario=scenario, text_mn="\n".join(parts))
 
 
-# Generated opener/example per (scenario, target language) — static, so cache
-# them for the process lifetime instead of regenerating every session.
+# Generated opener/example per (scenario, target, native) — static content.
+# Two cache layers: process memory (fast path) and the database (survives
+# deploys, shared by all future processes).
 _loc_cache: dict[tuple, dict] = {}
 
 
-async def localize_scenario(scenario: Scenario, target_lang: str, native: str = "mn") -> dict:
+async def localize_scenario(scenario: Scenario, target_lang: str, native: str = "mn",
+                            cached_only: bool = False) -> dict:
     """The scenario's opener + model answer in the target language, with
     translations in the learner's native script (Cyrillic or traditional
     Mongolian). English-target/Cyrillic-native uses the authored text; other
-    combinations are LLM-generated once and cached, English fallback on failure."""
+    combinations are LLM-generated once and cached, English fallback on failure.
+    cached_only=True never calls the LLM — it returns the authored text when
+    nothing is cached (for latency-critical paths like the home screen)."""
     authored = {
         "title": scenario.title_mn, "setup": scenario.setup_mn,
         "opener": scenario.opener_en, "opener_mn": scenario.opener_mn,
@@ -151,6 +156,17 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     key = (scenario.id, target_lang, native)
     if key in _loc_cache:
         return _loc_cache[key]
+    dbkey = f"loc:{scenario.id}:{target_lang}:{native}"
+    try:
+        stored = db.cache_get(dbkey)
+        if stored:
+            loc = json.loads(stored)
+            _loc_cache[key] = loc
+            return loc
+    except Exception:
+        log.exception("cache_get failed for %s", dbkey)
+    if cached_only:
+        return authored
     meta = lang_meta(target_lang)
     prompt = LOCALIZE_TEMPLATE.format(
         lang=meta["name_en"],
@@ -178,8 +194,12 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
         }
     except Exception:
         log.warning("Scenario localization failed for %s/%s; using English", scenario.id, target_lang)
-        loc = authored
+        return authored   # don't cache failures — retry next time
     _loc_cache[key] = loc
+    try:
+        db.cache_set(dbkey, json.dumps(loc, ensure_ascii=False))
+    except Exception:
+        log.exception("cache_set failed for %s", dbkey)
     return loc
 
 

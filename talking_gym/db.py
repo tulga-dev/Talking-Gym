@@ -72,6 +72,11 @@ _SQLITE_SCHEMA = [
         user_id    INTEGER,
         created_at TEXT
     )""",
+    """CREATE TABLE IF NOT EXISTS cache_kv (
+        k          TEXT PRIMARY KEY,
+        v          TEXT,
+        created_at TEXT
+    )""",
 ]
 
 # Telegram user/chat ids exceed 32-bit — BIGINT is required on Postgres.
@@ -127,6 +132,11 @@ _PG_SCHEMA = [
     """CREATE TABLE IF NOT EXISTS auth_tokens (
         token      TEXT PRIMARY KEY,
         user_id    BIGINT,
+        created_at TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS cache_kv (
+        k          TEXT PRIMARY KEY,
+        v          TEXT,
         created_at TEXT
     )""",
 ]
@@ -279,6 +289,23 @@ def set_target_lang(user_id: int, target_lang: str) -> None:
 def set_native_lang(user_id: int, native_lang: str) -> None:
     with _conn() as con:
         con.execute("UPDATE users SET native_lang=? WHERE user_id=?", (native_lang, user_id))
+
+
+# ---------- generated-content cache (survives deploys) ----------
+
+def cache_get(key: str) -> str | None:
+    with _conn() as con:
+        row = con.execute("SELECT v FROM cache_kv WHERE k=?", (key,)).fetchone()
+        return row["v"] if row else None
+
+
+def cache_set(key: str, value: str) -> None:
+    with _conn() as con:
+        con.execute(
+            "INSERT INTO cache_kv (k, v, created_at) VALUES (?,?,?) "
+            "ON CONFLICT (k) DO UPDATE SET v=excluded.v, created_at=excluded.created_at",
+            (key, value, datetime.utcnow().isoformat()),
+        )
 
 
 # ---------- plans / promo codes ----------

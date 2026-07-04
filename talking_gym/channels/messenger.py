@@ -351,10 +351,24 @@ def _file_route(filename: str, content_type: str | None = None):
     return handler
 
 
+@web.middleware
+async def _error_middleware(request: web.Request, handler):
+    """Unhandled exceptions become logged JSON 500s instead of HTML stack
+    pages, so the PWA's fetch handlers always get parseable responses."""
+    try:
+        return await handler(request)
+    except web.HTTPException:
+        raise
+    except Exception:
+        log.exception("Unhandled error on %s %s", request.method, request.path)
+        return web.json_response({"error": "internal"}, status=500)
+
+
 async def start_web_server() -> web.AppRunner:
     from ..web_api import add_api_routes
 
-    app = web.Application(client_max_size=8 * 1024 * 1024)
+    app = web.Application(client_max_size=8 * 1024 * 1024,
+                          middlewares=[_error_middleware])
     add_api_routes(app)                                    # PWA JSON API (/api/*)
     app.router.add_get("/", _file_route("landing.html"))   # public landing page
     app.router.add_get("/health", _health)

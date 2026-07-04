@@ -31,11 +31,21 @@ async def chat(system: str, user: str, effort: str | None = None) -> str:
         "reasoning_effort": effort or config.llm_reasoning_effort,
     }
     headers = {"Authorization": f"Bearer {config.xai_api_key}"}
-    resp = await _client.post(
-        f"{config.llm_base_url.rstrip('/')}/chat/completions",
-        json=payload,
-        headers=headers,
-    )
+    url = f"{config.llm_base_url.rstrip('/')}/chat/completions"
+    resp = None
+    for attempt in (1, 2):
+        try:
+            resp = await _client.post(url, json=payload, headers=headers)
+        except httpx.TransportError as e:
+            # One retry on connection resets/timeouts — common transient blips.
+            if attempt == 2:
+                raise ProviderError(f"LLM transport error: {e}")
+            log.warning("LLM transport error, retrying: %s", e)
+            continue
+        if resp.status_code in (429, 500, 502, 503, 504) and attempt == 1:
+            log.warning("LLM HTTP %s, retrying once", resp.status_code)
+            continue
+        break
     if resp.status_code != 200:
         log.error("LLM error %s: %s", resp.status_code, resp.text[:500])
         raise ProviderError(f"LLM HTTP {resp.status_code}")

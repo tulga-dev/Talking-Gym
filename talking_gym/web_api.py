@@ -4,6 +4,7 @@ Auth model (beta): /api/register issues a random 63-bit user id which the
 client stores in localStorage and sends as the X-User header. Good enough
 for focus testing; replace with phone/OTP auth before public launch.
 """
+import asyncio
 import base64
 import difflib
 import logging
@@ -191,12 +192,25 @@ async def _opener_tts(sc_id: str, opener_text: str, target_lang: str, level: str
     key = (sc_id, target_lang, speed)
     if key in _opener_cache:
         return _opener_cache[key]
+    # Second layer: DB cache — opener audio survives deploys.
+    dbkey = f"tts:{sc_id}:{target_lang}:{speed}"
+    try:
+        stored = db.cache_get(dbkey)
+        if stored:
+            _opener_cache[key] = stored
+            return stored
+    except Exception:
+        log.exception("cache_get failed for %s", dbkey)
     try:
         audio = await tts.speak(opener_text[:400], language=target_lang, speed=speed)
     except ProviderError:
         return None
     b64 = base64.b64encode(audio).decode()
     _opener_cache[key] = b64
+    try:
+        db.cache_set(dbkey, b64)
+    except Exception:
+        log.exception("cache_set failed for %s", dbkey)
     return b64
 
 
@@ -242,8 +256,11 @@ async def api_session_state(request: web.Request) -> web.Response:
             "turn": session["turns"] + 1,
         }
     nxt = pick_scenario(user["level"], user["sessions_done"])
-    nloc = await coach.localize_scenario(nxt, target_of(user), native_of(user))
+    # Home screen must never wait on generation: cached title or the authored
+    # one, and warm the cache in the background for next time.
+    nloc = await coach.localize_scenario(nxt, target_of(user), native_of(user), cached_only=True)
     payload["next_title_mn"] = nloc.get("title", nxt.title_mn)
+    asyncio.create_task(coach.localize_scenario(nxt, target_of(user), native_of(user)))
     return web.json_response(payload)
 
 
