@@ -55,6 +55,7 @@
   .nav-links{display:flex;gap:28px;align-items:center}
   .nav-links a{color:var(--ink);text-decoration:none;font-size:15px;font-weight:600}
   .nav-links a:hover{color:var(--blue)}
+  .nav-lang{font-size:13px;font-weight:800;letter-spacing:.5px;color:var(--mut);background:#fff;border:2px solid var(--line);padding:8px 16px;border-radius:60px;margin-right:2px}
   .nav-cta{background:var(--blue);color:#fff!important;padding:11px 24px;border-radius:60px;font-weight:700!important}
   @media(max-width:860px){.nav-links a:not(.nav-cta){display:none}}
 
@@ -397,11 +398,11 @@
 <nav><div class="wrap nav-in">
   <a class="logo" href="#top"><span class="mark"><svg class="i"><use href="#i-dumbbell"/></svg></span>Talking<b>Gym</b></a>
   <div class="nav-links">
-    <a href="#action">Боломжууд</a>
+    <a href="#action" data-i18n="lNav1">Боломжууд</a>
     <a href="#premium">Premium</a>
-    <a href="#pricing">Үнэ</a>
-    <a href="#faq">Асуулт</a>
-    <a href="/app" class="nav-cta">Сурч эхлэх</a>
+    <a href="#pricing" data-i18n="lNav3">Үнэ</a>
+    <a href="#faq" data-i18n="lNav4">Асуулт</a>
+    <button class="nav-lang" id="lang-nav">EN</button><a href="/app" class="nav-cta" data-i18n="lNavCta">Сурч эхлэх</a>
   </div>
 </div></nav>
 
@@ -412,27 +413,27 @@
   <svg class="cloud c3" viewBox="0 0 100 40" aria-hidden="true"><ellipse cx="30" cy="28" rx="26" ry="12"/><ellipse cx="60" cy="22" rx="30" ry="15"/><ellipse cx="80" cy="30" rx="18" ry="9"/></svg>
   <div class="wrap hero-in">
     <div>
-      <div class="pwa-chip"><svg class="i"><use href="#i-bolt"/></svg>PWA — Play Store хэрэггүй, 30 секундэд суудаг</div>
-      <h1>«Юунаас эхлэхээ мэдэхгүй» гэдгээс <em>жинхэнэ яриа</em> хүртэл</h1>
-      <p class="lead">Өдөрт ердөө 5 минут: таны мэргэжилд тохирсон бодит нөхцөлд дуут дасгал хийж, AI багшаас монголоор зөвлөгөө авна. Анхан шатны хүн ч эхний өдрөөс ярьж эхэлнэ — учир нь жишээ хариулт үргэлж бэлэн.</p>
+      <div class="pwa-chip"><svg class="i"><use href="#i-bolt"/></svg><span data-i18n="lChip">PWA — Play Store хэрэггүй, 30 секундэд суудаг</span></div>
+      <h1 id="hero-h1">«Юунаас эхлэхээ мэдэхгүй» гэдгээс <em>жинхэнэ яриа</em> хүртэл</h1>
+      <p class="lead" data-i18n="lLead">Өдөрт ердөө 5 минут: таны мэргэжилд тохирсон бодит нөхцөлд дуут дасгал хийж, AI багшаас монголоор зөвлөгөө авна. Анхан шатны хүн ч эхний өдрөөс ярьж эхэлнэ — учир нь жишээ хариулт үргэлж бэлэн.</p>
       <div class="hero-ctas">
-        <a class="btn blue" href="/app">Сурч эхлэх — үнэгүй <span class="chip-ico"><svg class="i"><use href="#i-arrow"/></svg></span></a>
-        <a class="btn line" href="#action">Апп-ыг үзэх</a>
+        <a class="btn blue" href="/app"><span data-i18n="lCta1">Сурч эхлэх — үнэгүй</span> <span class="chip-ico"><svg class="i"><use href="#i-arrow"/></svg></span></a>
+        <a class="btn line" href="#action" data-i18n="lCta2">Апп-ыг үзэх</a>
       </div>
       <div class="trust">
-        <div><b>400+</b>бета хэрэглэгч</div>
-        <div><b>5 мин</b>өдрийн дасгал</div>
-        <div><b>7</b>мэргэжлийн зам</div>
-        <div><b>МН·EN</b>хоёр хэлтэй апп</div>
+        <div><b>400+</b><span data-i18n="lT1">бета хэрэглэгч</span></div>
+        <div><b data-i18n="lT2b">5 мин</b><span data-i18n="lT2">өдрийн дасгал</span></div>
+        <div><b>7</b><span data-i18n="lT3">мэргэжлийн зам</span></div>
+        <div><b>МН·EN</b><span data-i18n="lT4">хоёр хэлтэй апп</span></div>
       </div>
     </div>
     <div class="phone-zone">
       <div class="screen-picker" role="tablist" aria-label="App screens">
-        <button aria-pressed="true"  data-scr="home">Нүүр</button>
-        <button aria-pressed="false" data-scr="lesson">Дасгал</button>
-        <button aria-pressed="false" data-scr="path">Зам</button>
-        <button aria-pressed="false" data-scr="prog">Ахиц</button>
-        <button aria-pressed="false" data-scr="prof">Профайл</button>
+        <button aria-pressed="true"  data-scr="home" data-i18n="tbHome">Нүүр</button>
+        <button aria-pressed="false" data-scr="lesson" data-i18n="tbTrain">Дасгал</button>
+        <button aria-pressed="false" data-scr="path" data-i18n="tbPath">Зам</button>
+        <button aria-pressed="false" data-scr="prog" data-i18n="tbProg">Ахиц</button>
+        <button aria-pressed="false" data-scr="prof" data-i18n="lPkProf">Профайл</button>
       </div>
 
       <!-- ============ THE APP (mirrors the live PWA) ============ -->
@@ -618,7 +619,7 @@
           <button data-scr="prof" aria-pressed="false"><svg class="i"><use href="#i-user"/></svg><span data-i18n="tbMe">Би</span></button>
         </div>
       </div></div>
-      <div style="font-size:13px;color:var(--mut);font-weight:600">Дарж үзээрэй — EN товчоор хэлээ солино</div>
+      <div style="font-size:13px;color:var(--mut);font-weight:600" data-i18n="lHint">Дарж үзээрэй — EN товчоор хэлээ солино</div>
     </div>
   </div>
 </header>
@@ -626,29 +627,29 @@
 <!-- ================= TESTIMONIALS ================= -->
 <section style="background:var(--sky-2)"><div class="wrap">
   <div class="sec-head">
-    <div class="eyebrow">Суралцагчдын үг</div>
-    <h2>Жинхэнэ хүмүүс. Жинхэнэ яриа.</h2>
-    <p>Анхны 400 бета хэрэглэгчийн туршилтаас.</p>
+    <div class="eyebrow" data-i18n="lQe">Суралцагчдын үг</div>
+    <h2 data-i18n="lQh">Жинхэнэ хүмүүс. Жинхэнэ яриа.</h2>
+    <p data-i18n="lQp">Анхны 400 бета хэрэглэгчийн туршилтаас.</p>
   </div>
   <div class="quotes">
-    <div class="q"><div class="stars">★★★★★</div><p>Мэргэжилдээ тааруулж сурч байгаа юм шиг санагддаг боллоо. Logistics-ийн яриаг өдөр бүр 5 минут дадлага хийхэд л ажил дээрээ хэрэглэж эхэлсэн.</p><div class="who"><span class="av" style="background:var(--sky);color:var(--blue)">Т</span><span>Т., 34<span>Тээвэр логистикийн менежер, УБ</span></span></div></div>
-    <div class="q"><div class="stars">★★★★★</div><p>Хамгийн гол нь буруу хэлэхээс айхаа больсон. Багш шүүмжлэхгүй, зөв хувилбарыг нь хэлээд яагаад гэдгийг монголоор тайлбарладаг.</p><div class="who"><span class="av" style="background:#FFF1D6;color:var(--orange)">Б</span><span>Б., 29<span>Банкны ажилтан, УБ</span></span></div></div>
-    <div class="q"><div class="stars">★★★★★</div><p>Хөдөө ажилладаг болохоор курст явах боломжгүй. Утсан дээрээ, интернет муутай ч ажилладаг нь надад яг тохирсон.</p><div class="who"><span class="av" style="background:#E4F5EA;color:var(--green)">Г</span><span>Г., 38<span>Уурхайн инженер, Өмнөговь</span></span></div></div>
+    <div class="q"><div class="stars">★★★★★</div><p data-i18n="lQ1">Мэргэжилдээ тааруулж сурч байгаа юм шиг санагддаг боллоо.</p><div class="who"><span class="av" style="background:var(--sky);color:var(--blue)">Т</span><span>Т., 34<span data-i18n="lQ1r">Тээвэр логистикийн менежер, УБ</span></span></div></div>
+    <div class="q"><div class="stars">★★★★★</div><p data-i18n="lQ2">Хамгийн гол нь буруу хэлэхээс айхаа больсон.</p><div class="who"><span class="av" style="background:#FFF1D6;color:var(--orange)">Б</span><span>Б., 29<span data-i18n="lQ2r">Банкны ажилтан, УБ</span></span></div></div>
+    <div class="q"><div class="stars">★★★★★</div><p data-i18n="lQ3">Хөдөө ажилладаг болохоор курст явах боломжгүй.</p><div class="who"><span class="av" style="background:#E4F5EA;color:var(--green)">Г</span><span>Г., 38<span data-i18n="lQ3r">Уурхайн инженер, Өмнөговь</span></span></div></div>
   </div>
 </div></section>
 
 <!-- ================= SEE IT IN ACTION ================= -->
 <section id="action"><div class="wrap">
   <div class="sec-head">
-    <div class="eyebrow">Апп дотор</div>
-    <h2>Talking Gym-ийг ажиллуулж үз</h2>
-    <p>Сурах нь тоглоом шиг санагдана — гэхдээ ажил дээр чинь үр дүн нь гарна.</p>
+    <div class="eyebrow" data-i18n="lAe">Апп дотор</div>
+    <h2 data-i18n="lAh">Talking Gym-ийг ажиллуулж үз</h2>
+    <p data-i18n="lAp">Сурах нь тоглоом шиг санагдана — гэхдээ ажил дээр чинь үр дүн нь гарна.</p>
   </div>
   <div class="callout-grid">
-    <div class="co"><div class="ic"><svg class="i"><use href="#i-mic"/></svg></div><h4>Дуут дасгал өдөр бүр</h4><p>Бодит нөхцөлд ярьж, оноо + засвар + монгол зөвлөгөө авна. Алдвал дахин, дуурайвал баталгаажуулна.</p></div>
-    <div class="co"><div class="ic"><svg class="i"><use href="#i-case"/></svg></div><h4>7 мэргэжлийн зам</h4><p>Business, Sales, Logistics, Travel... 60 секундын шалгалтаар түвшнээ тогтоогоод өөрийн замаар явна.</p></div>
-    <div class="co"><div class="ic"><svg class="i"><use href="#i-flame"/></svg></div><h4>Стрик, лиг, XP</h4><p>Өдөр бүр ирэхээр урамтай: стрик хамгаалагч, найзын стрик, долоо хоногийн лиг.</p></div>
-    <div class="co"><div class="ic"><svg class="i"><use href="#i-book"/></svg></div><h4>Алдааны сан</h4><p>Таны алдаа өөрийн чинь давталтын хөтөлбөр болно — мартахаас нь өмнө эргэж ирнэ.</p></div>
+    <div class="co"><div class="ic"><svg class="i"><use href="#i-mic"/></svg></div><h4 data-i18n="lCo1h">Дуут дасгал өдөр бүр</h4><p data-i18n="lCo1p">Бодит нөхцөлд ярьж, оноо + засвар + монгол зөвлөгөө авна.</p></div>
+    <div class="co"><div class="ic"><svg class="i"><use href="#i-case"/></svg></div><h4 data-i18n="lCo2h">7 мэргэжлийн зам</h4><p data-i18n="lCo2p">Business, Sales, Logistics, Travel... өөрийн замаар явна.</p></div>
+    <div class="co"><div class="ic"><svg class="i"><use href="#i-flame"/></svg></div><h4 data-i18n="lCo3h">Стрик, лиг, XP</h4><p data-i18n="lCo3p">Өдөр бүр ирэхээр урамтай: стрик хамгаалагч, найзын стрик, лиг.</p></div>
+    <div class="co"><div class="ic"><svg class="i"><use href="#i-book"/></svg></div><h4 data-i18n="lCo4h">Алдааны сан</h4><p data-i18n="lCo4p">Таны алдаа өөрийн чинь давталтын хөтөлбөр болно.</p></div>
   </div>
 </div></section>
 
@@ -656,10 +657,10 @@
 <section style="background:var(--sky-2);padding-top:64px" id="features"><div class="wrap">
   <div class="frow">
     <div>
-      <div class="eyebrow"><svg class="i"><use href="#i-mic"/></svg>Ярианы дасгал</div>
-      <h3>Алдвал дахин. Зөв бол баталгаажуулна.</h3>
-      <p>Дуут хариулт бүрд оноо, зөв хувилбар, монголоор нэг л гол зөвлөгөө. Алдсан бол <b>«Дахин оролдох»</b>, дуурайж хэлбэл систем шинэ даалгавар өгөхийн оронд <b>давталтыг тань баталгаажуулж</b> дуудлагын оноо өгнө. Багш цаг өөрчилж зассан бол — ямар цаг, яагаад гэдгийг тайлбарлана.</p>
-      <span class="src">Бета саналаас: retry flow · tense тайлбар · давталт баталгаажуулах</span>
+      <div class="eyebrow"><svg class="i"><use href="#i-mic"/></svg><span data-i18n="lF1e">Ярианы дасгал</span></div>
+      <h3 data-i18n="lF1h">Алдвал дахин. Зөв бол баталгаажуулна.</h3>
+      <p id="lF1p">Дуут хариулт бүрд оноо, зөв хувилбар, монголоор нэг л гол зөвлөгөө. Багш цаг өөрчилж зассан бол — ямар цаг, яагаад гэдгийг тайлбарлана.</p>
+      <span class="src" data-i18n="lF1s">Бета саналаас: retry flow · tense тайлбар · давталт баталгаажуулах</span>
     </div>
     <div class="fviz">
       <div class="fb-card">
@@ -679,10 +680,10 @@
 
   <div class="frow">
     <div>
-      <div class="eyebrow"><svg class="i"><use href="#i-case"/></svg>Мэргэжлийн зам</div>
-      <h3>Таны ажилд хэрэгтэй англи хэл</h3>
-      <p>Logistics, Sales, Business, Travel, кино яриа, өдөр тутам — 60 секундын ярианы шалгалтаар түвшнээ тогтоогоод, өөрийн салбарын бодит нөхцөлөөр сурна. Багш таны нэр, ажил, сонирхлыг санаж, дараагийн хичээлдээ ашиглана.</p>
-      <span class="src">Бета саналаас: personalization · Судалгаанаас: learner memory (+24% D1)</span>
+      <div class="eyebrow"><svg class="i"><use href="#i-case"/></svg><span data-i18n="lF2e">Мэргэжлийн зам</span></div>
+      <h3 data-i18n="lF2h">Таны ажилд хэрэгтэй англи хэл</h3>
+      <p data-i18n="lF2p">Logistics, Sales, Business, Travel, кино яриа, өдөр тутам — өөрийн салбарын бодит нөхцөлөөр сурна. Багш таны нэр, ажил, сонирхлыг санаж, дараагийн хичээлдээ ашиглана.</p>
+      <span class="src" data-i18n="lF2s">Бета саналаас: personalization · Судалгаанаас: learner memory (+24% D1)</span>
     </div>
     <div class="fviz">
       <div class="tracks" style="margin-bottom:14px">
@@ -696,10 +697,10 @@
 
   <div class="frow">
     <div>
-      <div class="eyebrow"><svg class="i"><use href="#i-user"/></svg>Хүн шиг багш</div>
-      <h3>Царайгүй бот биш — таны Багш</h3>
-      <p>Нэртэй, дүртэй, хоолойгоо сонгодог AI багш. Тайлбар нь үгчилсэн орчуулга биш — байгалийн, найрсаг монгол хэл. Premium дээр өдөр бүр 20:00 цагт <b>жинхэнэ багштай</b> live хичээл, түвшин тус бүрээр.</p>
-      <span class="src">Бета саналаас: humanization · natural орчуулга · live багш</span>
+      <div class="eyebrow"><svg class="i"><use href="#i-user"/></svg><span data-i18n="lF3e">Хүн шиг багш</span></div>
+      <h3 data-i18n="lF3h">Царайгүй бот биш — таны Багш</h3>
+      <p id="lF3p">Нэртэй, дүртэй, хоолойгоо сонгодог AI багш. Premium дээр өдөр бүр 20:00 цагт <b>жинхэнэ багштай</b> live хичээл.</p>
+      <span class="src" data-i18n="lF3s">Бета саналаас: humanization · natural орчуулга · live багш</span>
     </div>
     <div class="fviz">
       <div class="bubble"><div class="avatar">С</div><div class="msg"><b>Багш Сараа:</b> Let's practice for your meeting tomorrow!<span class="mn">Маргаашийн хурлдаа бэлдэцгээе!</span></div></div>
@@ -711,102 +712,102 @@
 <!-- ================= WHY DIFFERENT ================= -->
 <section><div class="wrap">
   <div class="sec-head">
-    <div class="eyebrow">Юугаараа онцлог вэ</div>
-    <h2>Курс биш. Дасгалын заал.</h2>
+    <div class="eyebrow" data-i18n="lPe">Юугаараа онцлог вэ</div>
+    <h2 data-i18n="lPh">Курс биш. Дасгалын заал.</h2>
   </div>
   <div class="pillars">
-    <div class="pillar"><div class="big"><svg class="i"><use href="#i-mic"/></svg></div><h4>Ярианд 100% төвлөрсөн</h4><p>Дүрэм цээжлэхгүй — эхний минутаас ярина. Жишээ хариулт үргэлж бэлэн тул «юу хэлэхээ мэдэхгүй» гэж хэзээ ч гацахгүй.</p></div>
-    <div class="pillar"><div class="big"><svg class="i"><use href="#i-globe"/></svg></div><h4>Монгол хүнд зориулав</h4><p>Зөвлөгөө, дүрмийн тайлбар байгалийн монгол хэлээр. Апп МН/EN хоёр хэлтэй. Таны мэргэжил, зорилгод тохирсон зам — УБ ч бай, орон нутаг ч бай.</p></div>
-    <div class="pillar"><div class="big"><svg class="i"><use href="#i-bolt"/></svg></div><h4>Завгүй хүний хэмнэлээр</h4><p>Өдөрт 5 минут — өглөөний кофе, обед, автобусан дээр. PWA тул ямар ч утсанд суудаг, давталт offline ажиллана.</p></div>
+    <div class="pillar"><div class="big"><svg class="i"><use href="#i-mic"/></svg></div><h4 data-i18n="lP1h">Ярианд 100% төвлөрсөн</h4><p data-i18n="lP1p">Дүрэм цээжлэхгүй — эхний минутаас ярина. Жишээ хариулт үргэлж бэлэн тул «юу хэлэхээ мэдэхгүй» гэж хэзээ ч гацахгүй.</p></div>
+    <div class="pillar"><div class="big"><svg class="i"><use href="#i-globe"/></svg></div><h4 data-i18n="lP2h">Монгол хүнд зориулав</h4><p data-i18n="lP2p">Зөвлөгөө, дүрмийн тайлбар байгалийн монгол хэлээр. Апп МН/EN хоёр хэлтэй.</p></div>
+    <div class="pillar"><div class="big"><svg class="i"><use href="#i-bolt"/></svg></div><h4 data-i18n="lP3h">Завгүй хүний хэмнэлээр</h4><p data-i18n="lP3p">Өдөрт 5 минут — өглөөний кофе, обед, автобусан дээр. PWA тул ямар ч утсанд суудаг.</p></div>
   </div>
 </div></section>
 
 <!-- ================= PREMIUM ================= -->
 <section id="premium" style="padding-top:0"><div class="wrap"><div class="prem-band">
   <div class="eyebrow"><svg class="i"><use href="#i-star"/></svg>Premium</div>
-  <h2>Карьераа ахиулах хүнд</h2>
-  <p>Ажил горилогч, албан тушаал ахих гэж буй хүмүүст зориулсан гурван хүчирхэг хэрэгсэл.</p>
+  <h2 data-i18n="lPrh">Карьераа ахиулах хүнд</h2>
+  <p data-i18n="lPrp">Ажил горилогч, албан тушаал ахих гэж буй хүмүүст зориулсан гурван хүчирхэг хэрэгсэл.</p>
   <div class="prem-grid">
-    <div class="prem-card"><div class="ic"><svg class="i"><use href="#i-video"/></svg></div><h4>AI видео дуудлага</h4><p>Багштайгаа нүүр тулан video call хийж ярилцана — айдасгүй орчинд, хүссэн цагтаа, хэдэн ч удаа.</p></div>
-    <div class="prem-card"><div class="ic"><svg class="i"><use href="#i-case"/></svg></div><h4>Ярилцлагын симуляци</h4><p>Уул уурхай, банк, олон улсын компанийн жинхэнэ ярилцлагын загвараар бэлдэнэ — HR асуултууд, дараа нь дэлгэрэнгүй үнэлгээ.</p></div>
-    <div class="prem-card"><div class="ic"><svg class="i"><use href="#i-clip"/></svg></div><h4>IELTS Speaking оноо</h4><p>Албан ёсны рубрик: fluency, lexical resource, grammar, pronunciation — mock speaking test бүрд.</p></div>
+    <div class="prem-card"><div class="ic"><svg class="i"><use href="#i-video"/></svg></div><h4 data-i18n="lPr1h">AI видео дуудлага</h4><p data-i18n="lPr1p">Багштайгаа нүүр тулан video call хийж ярилцана — айдасгүй орчинд, хүссэн цагтаа.</p></div>
+    <div class="prem-card"><div class="ic"><svg class="i"><use href="#i-case"/></svg></div><h4 data-i18n="lPr2h">Ярилцлагын симуляци</h4><p data-i18n="lPr2p">Уул уурхай, банк, олон улсын компанийн ярилцлагын загвараар бэлдэнэ.</p></div>
+    <div class="prem-card"><div class="ic"><svg class="i"><use href="#i-clip"/></svg></div><h4 data-i18n="lPr3h">IELTS Speaking оноо</h4><p data-i18n="lPr3p">Албан ёсны рубрик: fluency, lexical resource, grammar, pronunciation.</p></div>
   </div>
 </div></div></section>
 
 <!-- ================= PRICING ================= -->
 <section id="pricing" style="background:var(--sky-2)"><div class="wrap">
   <div class="sec-head">
-    <div class="eyebrow">Үнэ</div>
-    <h2>Нэг кофены үнээр — сар турш</h2>
-    <p>Эхний 5 хоног Premium бүрэн үнэгүй. Дараа нь өөрөө сонгоно — 0₮-өөр ч үргэлжлүүлж болно.</p>
+    <div class="eyebrow" data-i18n="lPce">Үнэ</div>
+    <h2 data-i18n="lPch">Нэг кофены үнээр — сар турш</h2>
+    <p data-i18n="lPcp">Эхний 5 хоног Premium бүрэн үнэгүй. Дараа нь өөрөө сонгоно — 0₮-өөр ч үргэлжлүүлж болно.</p>
   </div>
   <div class="price-grid">
     <div class="pcard">
-      <h4>Үнэгүй</h4>
+      <h4 data-i18n="lPc1n">Үнэгүй</h4>
       <div class="price">₮0</div>
-      <div class="pkg">үргэлж үнэгүй</div>
+      <div class="pkg" data-i18n="lPc1k">үргэлж үнэгүй</div>
       <ul>
-        <li><svg class="i"><use href="#i-check"/></svg>Өдөрт 1 дасгал</li>
-        <li><svg class="i"><use href="#i-check"/></svg>Стрик, XP, лиг</li>
-        <li><svg class="i"><use href="#i-check"/></svg>1 мэргэжлийн зам</li>
-        <li class="no"><svg class="i"><use href="#i-lock"/></svg>Дуут дасгал хязгаартай</li>
-        <li class="no"><svg class="i"><use href="#i-lock"/></svg>Давталтын сан</li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL1">Өдөрт 1 дасгал</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL2">Стрик, XP, лиг</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL3">1 мэргэжлийн зам</span></li>
+        <li class="no"><svg class="i"><use href="#i-lock"/></svg><span data-i18n="lL4">Дуут дасгал хязгаартай</span></li>
+        <li class="no"><svg class="i"><use href="#i-lock"/></svg><span data-i18n="lL5">Давталтын сан</span></li>
       </ul>
-      <a class="btn line" href="/app">Эхлэх</a>
+      <a class="btn line" href="/app" data-i18n="lPc1c">Эхлэх</a>
     </div>
     <div class="pcard hot">
-      <span class="badge">5 хоног үнэгүй турш</span>
+      <span class="badge" data-i18n="lPc2b">5 хоног үнэгүй турш</span>
       <h4>Gym</h4>
       <div class="price">₮14,900<span>/сар</span></div>
-      <div class="pkg">3 сар ₮37,900 (−15%) · 6 сар ₮66,900 (−25%)</div>
+      <div class="pkg" data-i18n="lPc2k">3 сар ₮37,900 (−15%) · 6 сар ₮66,900 (−25%)</div>
       <ul>
-        <li><svg class="i"><use href="#i-check"/></svg>Өдөр бүр дуут дасгал, хязгааргүй давталт</li>
-        <li><svg class="i"><use href="#i-check"/></svg>Бүх 7 мэргэжлийн зам</li>
-        <li><svg class="i"><use href="#i-check"/></svg>Алдааны сан + долоо хоногийн тайлан</li>
-        <li><svg class="i"><use href="#i-check"/></svg>Стрик хамгаалагч</li>
-        <li><svg class="i"><use href="#i-check"/></svg>QPay-ээр төлнө</li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL6">Өдөр бүр дуут дасгал, хязгааргүй давталт</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL7">Бүх 7 мэргэжлийн зам</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL8">Алдааны сан + долоо хоногийн тайлан</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL9">Стрик хамгаалагч</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL10">QPay-ээр төлнө</span></li>
       </ul>
-      <a class="btn blue" href="/app">0₮-өөр туршаад үз</a>
+      <a class="btn blue" href="/app" data-i18n="lPc2c">0₮-өөр туршаад үз</a>
     </div>
     <div class="pcard">
       <h4>Premium</h4>
       <div class="price">₮39,900<span>/сар</span></div>
-      <div class="pkg">IELTS болон ярилцлагад бэлдэж буй хүнд</div>
+      <div class="pkg" data-i18n="lPc3k">IELTS болон ярилцлагад бэлдэж буй хүнд</div>
       <ul>
-        <li><svg class="i"><use href="#i-check"/></svg>Gym-ийн бүх боломж</li>
-        <li><svg class="i"><use href="#i-check"/></svg>AI видео дуудлага</li>
-        <li><svg class="i"><use href="#i-check"/></svg>Ярилцлагын симуляци</li>
-        <li><svg class="i"><use href="#i-check"/></svg>IELTS Speaking оноо</li>
-        <li><svg class="i"><use href="#i-check"/></svg>Өдөр бүр 20:00 live багштай хичээл</li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL11">Gym-ийн бүх боломж</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL12">AI видео дуудлага</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL13">Ярилцлагын симуляци</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL14">IELTS Speaking оноо</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="lL15">Өдөр бүр 20:00 live багштай хичээл</span></li>
       </ul>
-      <a class="btn line" href="/app">Premium авах</a>
+      <a class="btn line" href="/app" data-i18n="lPc3c">Premium авах</a>
     </div>
   </div>
   <div class="corp">
     <div class="t">
-      <h4><svg class="i"><use href="#i-building"/></svg>Байгууллагад — багаараа сурцгаа</h4>
-      <p>Ажилтнуудынхаа ахицыг HR самбараас хянана. Багш, HR мэргэжилтнүүдэд хэрэглэгч урьсны commission хөтөлбөр бий.</p>
+      <h4><svg class="i"><use href="#i-building"/></svg><span data-i18n="lCoh">Байгууллагад — багаараа сурцгаа</span></h4>
+      <p data-i18n="lCop">Ажилтнуудынхаа ахицыг HR самбараас хянана. Багш, HR мэргэжилтнүүдэд commission хөтөлбөр бий.</p>
     </div>
     <div class="tiers">
       <div><b>10+</b>−20%</div>
       <div><b>50+</b>−30%</div>
-      <div><b>100+</b>тусгай үнэ</div>
+      <div><b>100+</b><span data-i18n="lCot">тусгай үнэ</span></div>
     </div>
-    <a class="btn line" href="/app" style="background:#fff">Холбогдох</a>
+    <a class="btn line" href="/app" style="background:#fff" data-i18n="lCob">Холбогдох</a>
   </div>
 </div></section>
 
 <!-- ================= PWA STEPS ================= -->
 <section id="pwa"><div class="wrap">
   <div class="sec-head">
-    <div class="eyebrow"><svg class="i"><use href="#i-bolt"/></svg>PWA технологи</div>
-    <h2>Апп татахгүй. 30 секундэд суулгана.</h2>
-    <p>Play Store, App Store хэрэггүй — ямар ч утасны browser-оос шууд. 5MB-аас бага, хуучин утсанд ч хөнгөн. Хөдөө орон нутгийн 3G сүлжээнд зориулж бүтээв.</p>
+    <div class="eyebrow"><svg class="i"><use href="#i-bolt"/></svg><span data-i18n="lWe">PWA технологи</span></div>
+    <h2 data-i18n="lWh">Апп татахгүй. 30 секундэд суулгана.</h2>
+    <p data-i18n="lWp">Play Store, App Store хэрэггүй — ямар ч утасны browser-оос шууд. Хөдөө орон нутгийн 3G сүлжээнд зориулж бүтээв.</p>
   </div>
   <div class="pwa-steps">
-    <div class="step"><div class="n">1</div><h4>Линк нээнэ</h4><p>talking-gym-mn.fly.dev/app — линкийг browser дээр нээгээд л болно (удахгүй talkinggym.mn).</p></div>
-    <div class="step"><div class="n">2</div><h4>«Нүүр дэлгэцэд нэмэх»</h4><p>Browser цэснээс нэг товч — апп шиг icon үүснэ. Бүртгэл: утасны дугаараар, 20 секунд.</p></div>
-    <div class="step"><div class="n">3</div><h4>Өдөр бүр 5 минут</h4><p>Сануулга ирнэ, стрик өснө. Дуут дасгал 3G дээр ажиллана, давталт offline хийгдэнэ.</p></div>
+    <div class="step"><div class="n">1</div><h4 data-i18n="lW1h">Линк нээнэ</h4><p data-i18n="lW1p">talking-gym-mn.fly.dev/app линкийг browser дээр нээнэ.</p></div>
+    <div class="step"><div class="n">2</div><h4 data-i18n="lW2h">«Нүүр дэлгэцэд нэмэх»</h4><p data-i18n="lW2p">Browser цэснээс нэг товч — апп шиг icon үүснэ. Бүртгэл: нэрээ бичээд л, 20 секунд.</p></div>
+    <div class="step"><div class="n">3</div><h4 data-i18n="lW3h">Өдөр бүр 5 минут</h4><p data-i18n="lW3p">Стрик өснө, XP цуглана. Дуут дасгал 3G дээр ч ажиллана.</p></div>
   </div>
 </div></section>
 
@@ -814,26 +815,26 @@
 <section style="padding-top:0"><div class="wrap"><div class="cta-band">
   <svg class="cloud c1" viewBox="0 0 100 40" aria-hidden="true" style="top:20px;left:30px;width:140px"><ellipse cx="30" cy="28" rx="26" ry="12"/><ellipse cx="60" cy="22" rx="30" ry="15"/></svg>
   <svg class="cloud c2" viewBox="0 0 100 40" aria-hidden="true" style="bottom:20px;right:40px;top:auto;width:170px"><ellipse cx="30" cy="28" rx="26" ry="12"/><ellipse cx="60" cy="22" rx="30" ry="15"/></svg>
-  <h2>Маргааш биш. Өнөөдөр 5 минут.</h2>
-  <p>Эхний дасгалаа яг одоо хийгээд үзээрэй — бүртгэл 20 секунд.</p>
-  <a class="btn yellow" href="#top"><svg class="i"><use href="#i-dumbbell"/></svg>Сурч эхлэх — үнэгүй</a>
+  <h2 data-i18n="lBh">Маргааш биш. Өнөөдөр 5 минут.</h2>
+  <p data-i18n="lBp">Эхний дасгалаа яг одоо хийгээд үзээрэй — бүртгэл 20 секунд.</p>
+  <a class="btn yellow" href="/app"><svg class="i"><use href="#i-dumbbell"/></svg><span data-i18n="lBc">Сурч эхлэх — үнэгүй</span></a>
 </div></div></section>
 
 <!-- ================= FAQ ================= -->
 <section id="faq" style="padding-top:0"><div class="wrap" style="max-width:780px">
-  <div class="sec-head"><div class="eyebrow">Асуулт</div><h2>Түгээмэл асуултууд</h2></div>
-  <details><summary>Огт англиар ярьж чадахгүй бол?</summary><p>Яг танд зориулсан. Асуулт бүрд бэлэн жишээ хариулт (монгол орчуулгатай) өгнө — эхэндээ шууд уншаад л хэлнэ. Чанга унших нь өөрөө дасгал: 2-3 долоо хоногт өөрийн үгээр ярьж эхэлдэг.</p></details>
-  <details><summary>Апп ямар хэлтэй вэ?</summary><p>Интерфэйс МН/EN хоёр хэлтэй — нэг товчоор солино. Хичээлийн агуулга нь англи яриа + монгол орчуулга, зөвлөгөө үргэлж монголоор.</p></details>
-  <details><summary>Бүртгүүлэхэд юу хэрэгтэй вэ?</summary><p>Зөвхөн нэр, түвшнээ сонгоод л эхэлнэ — имэйл, утасны дугаар, карт шаардлагагүй. 20 секундэд бэлэн.</p></details>
-  <details><summary>Төлбөрөө яаж төлөх вэ?</summary><p>QPay-ээр — ямар ч банкны апп-аас QR уншуулаад л болно. Сар, 3 сар, 6 сарын багц бий. Эхний 5 хоног Premium үнэгүй, картын мэдээлэл шаардахгүй.</p></details>
-  <details><summary>Интернет муу газар ажиллах уу?</summary><p>Дуут дасгалд энгийн 3G хангалттай (дуут мессеж илгээхтэй адил). Алдааны сангийн давталт бүрэн offline ажиллана — сүлжээгүй үедээ давтаад, дараа нь sync хийнэ.</p></details>
-  <details><summary>Байгууллагаараа хэрхэн авах вэ?</summary><p>10+ ажилтантай бол корпорацийн хөнгөлөлт (−20%-иас эхэлнэ), HR-д зориулсан ахицын самбартай. «Холбогдох» товчоор хүсэлтээ үлдээгээрэй.</p></details>
+  <div class="sec-head"><div class="eyebrow" data-i18n="lFqe">Асуулт</div><h2 data-i18n="lFqh">Түгээмэл асуултууд</h2></div>
+  <details><summary data-i18n="lFq1s">Огт англиар ярьж чадахгүй бол?</summary><p data-i18n="lFq1p">Яг танд зориулсан. Асуулт бүрд бэлэн жишээ хариулт (монгол орчуулгатай) өгнө — эхэндээ шууд уншаад л хэлнэ.</p></details>
+  <details><summary data-i18n="lFq2s">Апп ямар хэлтэй вэ?</summary><p data-i18n="lFq2p">Интерфэйс МН/EN хоёр хэлтэй — нэг товчоор солино. Хичээлийн агуулга нь англи яриа + монгол орчуулга.</p></details>
+  <details><summary data-i18n="lFq3s">Бүртгүүлэхэд юу хэрэгтэй вэ?</summary><p data-i18n="lFq3p">Зөвхөн нэр, түвшнээ сонгоод л эхэлнэ — имэйл, утасны дугаар, карт шаардлагагүй.</p></details>
+  <details><summary data-i18n="lFq4s">Төлбөрөө яаж төлөх вэ?</summary><p data-i18n="lFq4p">QPay-ээр — ямар ч банкны апп-аас QR уншуулаад л болно. Одоогоор бүрэн үнэгүй (beta).</p></details>
+  <details><summary data-i18n="lFq5s">Интернет муу газар ажиллах уу?</summary><p data-i18n="lFq5p">Дуут дасгалд энгийн 3G хангалттай — дуут мессеж илгээхтэй адил.</p></details>
+  <details><summary data-i18n="lFq6s">Байгууллагаараа хэрхэн авах вэ?</summary><p data-i18n="lFq6p">10+ ажилтантай бол корпорацийн хөнгөлөлт (−20%-иас эхэлнэ). «Холбогдох» товчоор хүсэлтээ үлдээгээрэй.</p></details>
 </div></section>
 
 <!-- ================= FOOTER ================= -->
 <footer><div class="wrap foot-in">
-  <div><a class="logo" href="#top"><span class="mark"><svg class="i"><use href="#i-dumbbell"/></svg></span>Talking<b style="color:var(--yellow)">Gym</b></a><div style="margin-top:8px">Өдөрт 5 минут — англиар ярьж сур.</div></div>
-  <div>Улаанбаатар, Монгол · hello@talkinggym.mn · © 2026</div>
+  <div><a class="logo" href="#top"><span class="mark"><svg class="i"><use href="#i-dumbbell"/></svg></span>Talking<b style="color:var(--yellow)">Gym</b></a><div style="margin-top:8px" data-i18n="lFt">Өдөрт 5 минут — англиар ярьж сур.</div></div>
+  <div><span data-i18n="lFr">Улаанбаатар, Монгол</span> · hello@talkinggym.mn · © 2026</div>
 </div></footer>
 
 <script>
@@ -875,7 +876,59 @@
       sCorp:"Байгууллагын багц", sCorpV:"Холбогдох →",
       proto:"Prototype — дата жишээ. Жинхэнэ апп:",
       tbHome:"Нүүр", tbPath:"Зам", tbTrain:"Дасгал", tbProg:"Ахиц", tbMe:"Би",
-      langBtn:"EN", langRow:"Монгол → English"
+      langBtn:"EN", langRow:"Монгол → English",
+      lNav1:"Боломжууд", lNav3:"Үнэ", lNav4:"Асуулт", lNavCta:"Сурч эхлэх",
+      lChip:"PWA — Play Store хэрэггүй, 30 секундэд суудаг",
+      lLead:"Өдөрт ердөө 5 минут: таны мэргэжилд тохирсон бодит нөхцөлд дуут дасгал хийж, AI багшаас монголоор зөвлөгөө авна. Анхан шатны хүн ч эхний өдрөөс ярьж эхэлнэ — учир нь жишээ хариулт үргэлж бэлэн.",
+      lCta1:"Сурч эхлэх — үнэгүй", lCta2:"Апп-ыг үзэх",
+      lT1:"бета хэрэглэгч", lT2:"өдрийн дасгал", lT2b:"5 мин", lT3:"мэргэжлийн зам", lT4:"хоёр хэлтэй апп",
+      lPkProf:"Профайл", lHint:"Дарж үзээрэй — EN товчоор хэлээ солино",
+      lQe:"Суралцагчдын үг", lQh:"Жинхэнэ хүмүүс. Жинхэнэ яриа.", lQp:"Анхны 400 бета хэрэглэгчийн туршилтаас.",
+      lQ1:"Мэргэжилдээ тааруулж сурч байгаа юм шиг санагддаг боллоо.",
+      lQ2:"Хамгийн гол нь буруу хэлэхээс айхаа больсон.",
+      lQ3:"Хөдөө ажилладаг болохоор курст явах боломжгүй.",
+      lQ1r:"Тээвэр логистикийн менежер, УБ", lQ2r:"Банкны ажилтан, УБ", lQ3r:"Уурхайн инженер, Өмнөговь",
+      lAe:"Апп дотор", lAh:"Talking Gym-ийг ажиллуулж үз", lAp:"Сурах нь тоглоом шиг санагдана — гэхдээ ажил дээр чинь үр дүн нь гарна.",
+      lCo1h:"Дуут дасгал өдөр бүр", lCo1p:"Бодит нөхцөлд ярьж, оноо + засвар + монгол зөвлөгөө авна.",
+      lCo2h:"7 мэргэжлийн зам", lCo2p:"Business, Sales, Logistics, Travel... өөрийн замаар явна.",
+      lCo3h:"Стрик, лиг, XP", lCo3p:"Өдөр бүр ирэхээр урамтай: стрик хамгаалагч, найзын стрик, лиг.",
+      lCo4h:"Алдааны сан", lCo4p:"Таны алдаа өөрийн чинь давталтын хөтөлбөр болно.",
+      lF1e:"Ярианы дасгал", lF1h:"Алдвал дахин. Зөв бол баталгаажуулна.",
+      lF1s:"Бета саналаас: retry flow · tense тайлбар · давталт баталгаажуулах",
+      lF2e:"Мэргэжлийн зам", lF2h:"Таны ажилд хэрэгтэй англи хэл",
+      lF2p:"Logistics, Sales, Business, Travel, кино яриа, өдөр тутам — өөрийн салбарын бодит нөхцөлөөр сурна. Багш таны нэр, ажил, сонирхлыг санаж, дараагийн хичээлдээ ашиглана.",
+      lF2s:"Бета саналаас: personalization · Судалгаанаас: learner memory (+24% D1)",
+      lF3e:"Хүн шиг багш", lF3h:"Царайгүй бот биш — таны Багш",
+      lF3s:"Бета саналаас: humanization · natural орчуулга · live багш",
+      lPe:"Юугаараа онцлог вэ", lPh:"Курс биш. Дасгалын заал.",
+      lP1h:"Ярианд 100% төвлөрсөн", lP1p:"Дүрэм цээжлэхгүй — эхний минутаас ярина. Жишээ хариулт үргэлж бэлэн тул «юу хэлэхээ мэдэхгүй» гэж хэзээ ч гацахгүй.",
+      lP2h:"Монгол хүнд зориулав", lP2p:"Зөвлөгөө, дүрмийн тайлбар байгалийн монгол хэлээр. Апп МН/EN хоёр хэлтэй.",
+      lP3h:"Завгүй хүний хэмнэлээр", lP3p:"Өдөрт 5 минут — өглөөний кофе, обед, автобусан дээр. PWA тул ямар ч утсанд суудаг.",
+      lPrh:"Карьераа ахиулах хүнд", lPrp:"Ажил горилогч, албан тушаал ахих гэж буй хүмүүст зориулсан гурван хүчирхэг хэрэгсэл.",
+      lPr1h:"AI видео дуудлага", lPr1p:"Багштайгаа нүүр тулан video call хийж ярилцана — айдасгүй орчинд, хүссэн цагтаа.",
+      lPr2h:"Ярилцлагын симуляци", lPr2p:"Уул уурхай, банк, олон улсын компанийн ярилцлагын загвараар бэлдэнэ.",
+      lPr3h:"IELTS Speaking оноо", lPr3p:"Албан ёсны рубрик: fluency, lexical resource, grammar, pronunciation.",
+      lPce:"Үнэ", lPch:"Нэг кофены үнээр — сар турш", lPcp:"Эхний 5 хоног Premium бүрэн үнэгүй. Дараа нь өөрөө сонгоно — 0₮-өөр ч үргэлжлүүлж болно.",
+      lPc1n:"Үнэгүй", lPc1k:"үргэлж үнэгүй", lPc1c:"Эхлэх",
+      lL1:"Өдөрт 1 дасгал", lL2:"Стрик, XP, лиг", lL3:"1 мэргэжлийн зам", lL4:"Дуут дасгал хязгаартай", lL5:"Давталтын сан",
+      lPc2b:"5 хоног үнэгүй турш", lPc2k:"3 сар ₮37,900 (−15%) · 6 сар ₮66,900 (−25%)", lPc2c:"0₮-өөр туршаад үз",
+      lL6:"Өдөр бүр дуут дасгал, хязгааргүй давталт", lL7:"Бүх 7 мэргэжлийн зам", lL8:"Алдааны сан + долоо хоногийн тайлан", lL9:"Стрик хамгаалагч", lL10:"QPay-ээр төлнө",
+      lPc3k:"IELTS болон ярилцлагад бэлдэж буй хүнд", lPc3c:"Premium авах",
+      lL11:"Gym-ийн бүх боломж", lL12:"AI видео дуудлага", lL13:"Ярилцлагын симуляци", lL14:"IELTS Speaking оноо", lL15:"Өдөр бүр 20:00 live багштай хичээл",
+      lCoh:"Байгууллагад — багаараа сурцгаа", lCop:"Ажилтнуудынхаа ахицыг HR самбараас хянана. Багш, HR мэргэжилтнүүдэд commission хөтөлбөр бий.", lCot:"тусгай үнэ", lCob:"Холбогдох",
+      lWe:"PWA технологи", lWh:"Апп татахгүй. 30 секундэд суулгана.", lWp:"Play Store, App Store хэрэггүй — ямар ч утасны browser-оос шууд. Хөдөө орон нутгийн 3G сүлжээнд зориулж бүтээв.",
+      lW1h:"Линк нээнэ", lW1p:"talking-gym-mn.fly.dev/app линкийг browser дээр нээнэ.",
+      lW2h:"«Нүүр дэлгэцэд нэмэх»", lW2p:"Browser цэснээс нэг товч — апп шиг icon үүснэ. Бүртгэл: нэрээ бичээд л, 20 секунд.",
+      lW3h:"Өдөр бүр 5 минут", lW3p:"Стрик өснө, XP цуглана. Дуут дасгал 3G дээр ч ажиллана.",
+      lBh:"Маргааш биш. Өнөөдөр 5 минут.", lBp:"Эхний дасгалаа яг одоо хийгээд үзээрэй — бүртгэл 20 секунд.", lBc:"Сурч эхлэх — үнэгүй",
+      lFqe:"Асуулт", lFqh:"Түгээмэл асуултууд",
+      lFq1s:"Огт англиар ярьж чадахгүй бол?", lFq1p:"Яг танд зориулсан. Асуулт бүрд бэлэн жишээ хариулт (монгол орчуулгатай) өгнө — эхэндээ шууд уншаад л хэлнэ.",
+      lFq2s:"Апп ямар хэлтэй вэ?", lFq2p:"Интерфэйс МН/EN хоёр хэлтэй — нэг товчоор солино. Хичээлийн агуулга нь англи яриа + монгол орчуулга.",
+      lFq3s:"Бүртгүүлэхэд юу хэрэгтэй вэ?", lFq3p:"Зөвхөн нэр, түвшнээ сонгоод л эхэлнэ — имэйл, утасны дугаар, карт шаардлагагүй.",
+      lFq4s:"Төлбөрөө яаж төлөх вэ?", lFq4p:"QPay-ээр — ямар ч банкны апп-аас QR уншуулаад л болно. Одоогоор бүрэн үнэгүй (beta).",
+      lFq5s:"Интернет муу газар ажиллах уу?", lFq5p:"Дуут дасгалд энгийн 3G хангалттай — дуут мессеж илгээхтэй адил.",
+      lFq6s:"Байгууллагаараа хэрхэн авах вэ?", lFq6p:"10+ ажилтантай бол корпорацийн хөнгөлөлт (−20%-иас эхэлнэ). «Холбогдох» товчоор хүсэлтээ үлдээгээрэй.",
+      lFt:"Өдөрт 5 минут — англиар ярьж сур.", lFr:"Улаанбаатар, Монгол"
     },
     en: {
       greet:"Good morning, Bold", d1:"Mo",d2:"Tu",d3:"We",d4:"Th",d5:"Fr",d6:"Sa",d7:"Su",
@@ -912,24 +965,97 @@
       sCorp:"For teams", sCorpV:"Contact us →",
       proto:"Prototype — sample data. Live app:",
       tbHome:"Home", tbPath:"Path", tbTrain:"Train", tbProg:"Progress", tbMe:"Me",
-      langBtn:"МН", langRow:"English → Монгол"
+      langBtn:"МН", langRow:"English → Монгол",
+      lNav1:"Features", lNav3:"Pricing", lNav4:"FAQ", lNavCta:"Start learning",
+      lChip:"PWA — no Play Store, installs in 30 seconds",
+      lLead:"Just 5 minutes a day: practice speaking in real situations tailored to your profession, with AI coaching in Mongolian. Even complete beginners speak from day one — an example answer is always there.",
+      lCta1:"Start learning — free", lCta2:"See the app",
+      lT1:"beta users", lT2:"daily workout", lT2b:"5 min", lT3:"career paths", lT4:"bilingual app",
+      lPkProf:"Profile", lHint:"Try it — the EN button switches language",
+      lQe:"From our learners", lQh:"Real people. Real conversations.", lQp:"From our first 400 beta users.",
+      lQ1:"It feels like the lessons were made for my job.",
+      lQ2:"The biggest change: I stopped being afraid of speaking.",
+      lQ3:"I work in the countryside and can't attend courses.",
+      lQ1r:"Logistics manager, Ulaanbaatar", lQ2r:"Bank officer, Ulaanbaatar", lQ3r:"Mining engineer, Umnugovi",
+      lAe:"Inside the app", lAh:"See Talking Gym in action", lAp:"Learning feels like play — but the results show up at work.",
+      lCo1h:"Daily voice workouts", lCo1p:"Speak in real situations, get a score + corrections + tips in Mongolian.",
+      lCo2h:"7 career paths", lCo2p:"Business, Sales, Logistics, Travel... learn on your own path.",
+      lCo3h:"Streaks, league, XP", lCo3p:"Reasons to come back daily: streak freezes, friend streaks, leagues.",
+      lCo4h:"Mistake bank", lCo4p:"Your own mistakes become your personal review plan.",
+      lF1e:"Speaking practice", lF1h:"Miss it? Retry. Nail it? Confirmed.",
+      lF1s:"From beta feedback: retry flow · grammar notes · repeat confirmation",
+      lF2e:"Career paths", lF2h:"English that your job actually needs",
+      lF2p:"Logistics, Sales, Business, Travel, movie talk, daily life — learn through real situations from your field. The coach remembers your name, job and interests and uses them in the next lesson.",
+      lF2s:"From beta feedback: personalization · From research: learner memory (+24% D1)",
+      lF3e:"A human-like coach", lF3h:"Not a faceless bot — your own coach",
+      lF3s:"From beta feedback: humanization · natural translations · live teachers",
+      lPe:"Why it's different", lPh:"Not a course. A gym.",
+      lP1h:"100% focused on speaking", lP1p:"No grammar memorizing — you speak from the first minute. An example answer is always ready, so you never freeze.",
+      lP2h:"Built for Mongolians", lP2p:"Tips and grammar notes in natural Mongolian. The app is fully bilingual MN/EN.",
+      lP3h:"Fits a busy life", lP3p:"5 minutes a day — over coffee, lunch, or on the bus. A PWA that installs on any phone.",
+      lPrh:"For career climbers", lPrp:"Three powerful tools for job seekers and professionals aiming higher.",
+      lPr1h:"AI video calls", lPr1p:"Face-to-face practice with your coach — judgment-free, any time you want.",
+      lPr2h:"Interview simulation", lPr2p:"Prepare with realistic interview formats from mining, banking and international companies.",
+      lPr3h:"IELTS Speaking scores", lPr3p:"Official rubric: fluency, lexical resource, grammar, pronunciation.",
+      lPce:"Pricing", lPch:"A month for the price of one coffee", lPcp:"First 5 days of Premium completely free. Then you choose — staying on the free plan is fine too.",
+      lPc1n:"Free", lPc1k:"free forever", lPc1c:"Start",
+      lL1:"1 workout per day", lL2:"Streaks, XP, league", lL3:"1 career path", lL4:"Limited voice practice", lL5:"Review bank",
+      lPc2b:"5-day free trial", lPc2k:"3 mo ₮37,900 (−15%) · 6 mo ₮66,900 (−25%)", lPc2c:"Try for ₮0",
+      lL6:"Daily voice workouts, unlimited review", lL7:"All 7 career paths", lL8:"Mistake bank + weekly report", lL9:"Streak freeze", lL10:"Pay with QPay",
+      lPc3k:"For IELTS and interview preparation", lPc3c:"Get Premium",
+      lL11:"Everything in Gym", lL12:"AI video calls", lL13:"Interview simulation", lL14:"IELTS Speaking scores", lL15:"Daily 20:00 live teacher class",
+      lCoh:"For teams — learn together", lCop:"Track your employees' progress from an HR dashboard. Commission program for teachers and HR professionals.", lCot:"custom", lCob:"Contact us",
+      lWe:"PWA technology", lWh:"No app store. Installs in 30 seconds.", lWp:"No Play Store or App Store — straight from any phone's browser. Built for rural 3G networks.",
+      lW1h:"Open the link", lW1p:"Open talking-gym-mn.fly.dev/app in your browser.",
+      lW2h:"“Add to Home Screen”", lW2p:"One tap in the browser menu — an app icon appears. Sign-up: just your name, 20 seconds.",
+      lW3h:"5 minutes a day", lW3p:"Streaks grow, XP adds up. Voice workouts run even on 3G.",
+      lBh:"Not tomorrow. 5 minutes today.", lBp:"Do your first workout right now — sign-up takes 20 seconds.", lBc:"Start learning — free",
+      lFqe:"FAQ", lFqh:"Frequently asked questions",
+      lFq1s:"What if I can't speak English at all?", lFq1p:"That's exactly who this is for. Every question comes with a ready example answer (with Mongolian translation) — at first you can simply read it aloud.",
+      lFq2s:"What languages does the app support?", lFq2p:"The interface is fully bilingual MN/EN — switch with one tap. Lesson content is English speech + Mongolian translations.",
+      lFq3s:"What do I need to sign up?", lFq3p:"Just your name and level — no email, phone number or card required.",
+      lFq4s:"How do I pay?", lFq4p:"With QPay — scan a QR from any banking app. Currently completely free (beta).",
+      lFq5s:"Does it work with poor internet?", lFq5p:"Basic 3G is enough for voice workouts — same as sending a voice message.",
+      lFq6s:"How does my company sign up?", lFq6p:"Teams of 10+ get corporate discounts (from −20%). Leave a request via the Contact button.",
+      lFt:"5 minutes a day — learn to speak English.", lFr:"Ulaanbaatar, Mongolia"
     }
   };
-  var lang = 'mn';
+  var lang = new URLSearchParams(location.search).get('lang') ||
+             (function(){ try { return localStorage.getItem('tg-lang'); } catch(e){ return null; } })() || 'mn';
+  if (lang !== 'en') lang = 'mn';
   function applyLang(){
     var d = STR[lang];
     document.querySelectorAll('[data-i18n]').forEach(function(el){
       var k = el.getAttribute('data-i18n');
       if (d[k] !== undefined) el.textContent = d[k];
     });
-    var b1 = document.getElementById('lang-btn'), b2 = document.getElementById('lang-btn2');
+    var b1 = document.getElementById('lang-btn'), b2 = document.getElementById('lang-btn2'),
+        b3 = document.getElementById('lang-nav');
     if (b1) b1.textContent = d.langBtn;
     if (b2) b2.textContent = d.langRow;
+    if (b3) b3.textContent = d.langBtn;
+    var H = {
+      'hero-h1': {mn:'\u00ab\u042e\u0443\u043d\u0430\u0430\u0441 \u044d\u0445\u043b\u044d\u0445\u044d\u044d \u043c\u044d\u0434\u044d\u0445\u0433\u04af\u0439\u00bb \u0433\u044d\u0434\u0433\u044d\u044d\u0441 <em>\u0436\u0438\u043d\u0445\u044d\u043d\u044d \u044f\u0440\u0438\u0430</em> \u0445\u04af\u0440\u0442\u044d\u043b',
+                  en:'From \u201cI don\u2019t know where to start\u201d to <em>real conversations</em>'},
+      'lF1p': {mn:'\u0414\u0443\u0443\u0442 \u0445\u0430\u0440\u0438\u0443\u043b\u0442 \u0431\u04af\u0440\u0434 \u043e\u043d\u043e\u043e, \u0437\u04e9\u0432 \u0445\u0443\u0432\u0438\u043b\u0431\u0430\u0440, \u043c\u043e\u043d\u0433\u043e\u043b\u043e\u043e\u0440 \u043d\u044d\u0433 \u043b \u0433\u043e\u043b \u0437\u04e9\u0432\u043b\u04e9\u0433\u04e9\u04e9. \u0411\u0430\u0433\u0448 \u0446\u0430\u0433 \u04e9\u04e9\u0440\u0447\u0438\u043b\u0436 \u0437\u0430\u0441\u0441\u0430\u043d \u0431\u043e\u043b \u2014 \u044f\u043c\u0430\u0440 \u0446\u0430\u0433, \u044f\u0430\u0433\u0430\u0430\u0434 \u0433\u044d\u0434\u0433\u0438\u0439\u0433 \u0442\u0430\u0439\u043b\u0431\u0430\u0440\u043b\u0430\u043d\u0430.',
+               en:'Every spoken answer gets a score, a corrected version, and one key tip in Mongolian. Miss it \u2014 <b>retry</b>; repeat after the coach and the app <b>confirms your repeat</b> with a pronunciation score.'},
+      'lF3p': {mn:'\u041d\u044d\u0440\u0442\u044d\u0439, \u0434\u04af\u0440\u0442\u044d\u0439, \u0445\u043e\u043e\u043b\u043e\u0439\u0433\u043e\u043e \u0441\u043e\u043d\u0433\u043e\u0434\u043e\u0433 AI \u0431\u0430\u0433\u0448. Premium \u0434\u044d\u044d\u0440 \u04e9\u0434\u04e9\u0440 \u0431\u04af\u0440 20:00 \u0446\u0430\u0433\u0442 <b>\u0436\u0438\u043d\u0445\u044d\u043d\u044d \u0431\u0430\u0433\u0448\u0442\u0430\u0439</b> live \u0445\u0438\u0447\u044d\u044d\u043b.',
+               en:'A coach with a name, a face and a selectable voice. On Premium: daily 20:00 <b>live classes with a real teacher</b>.'}
+    };
+    Object.keys(H).forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = H[id][lang];
+    });
   }
-  function toggleLang(){ lang = (lang === 'mn') ? 'en' : 'mn'; applyLang(); }
+  function toggleLang(){ lang = (lang === 'mn') ? 'en' : 'mn';
+    try { localStorage.setItem('tg-lang', lang); } catch(e){}
+    applyLang(); }
   var lb1 = document.getElementById('lang-btn'), lb2 = document.getElementById('lang-btn2');
   if (lb1) lb1.addEventListener('click', toggleLang);
   if (lb2) lb2.addEventListener('click', toggleLang);
+  var lb3 = document.getElementById('lang-nav');
+  if (lb3) lb3.addEventListener('click', toggleLang);
+  applyLang();
 
   /* ---------- phone navigation ---------- */
   var screens = ['home','lesson','path','prog','prof'];
