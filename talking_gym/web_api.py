@@ -406,6 +406,61 @@ async def api_plan_grant(request: web.Request) -> web.Response:
     return web.json_response({"code": code, "plan": plan, "days": days, "uses": uses})
 
 
+_warm_state = {"running": False, "done": 0, "total": 0, "errors": 0}
+
+
+async def _warm_all():
+    """Pre-generate every scenario localization and opener audio into the
+    durable cache, so no learner ever hits the one-time generation delay.
+    A scenario is only ever spoken at its own level's speed, so one TTS per
+    (scenario, target language) suffices."""
+    from .langs import NATIVE_LANGS, TARGET_LANGS
+    from .scenarios import SCENARIOS
+    combos = [(t, n) for t in TARGET_LANGS for n in NATIVE_LANGS
+              if not (t == "en" and n == "mn")]
+    loc_jobs = [(sc, t, n) for sc in SCENARIOS for (t, n) in combos]
+    tts_jobs = [(sc, t) for sc in SCENARIOS for t in TARGET_LANGS]
+    _warm_state.update(running=True, done=0, errors=0,
+                       total=len(loc_jobs) + len(tts_jobs))
+    sem = asyncio.Semaphore(5)
+
+    async def warm_loc(sc, t, n):
+        async with sem:
+            try:
+                await coach.localize_scenario(sc, t, n)
+            except Exception:
+                _warm_state["errors"] += 1
+                log.exception("warm localize failed %s/%s/%s", sc.id, t, n)
+            _warm_state["done"] += 1
+
+    async def warm_tts(sc, t):
+        async with sem:
+            try:
+                loc = await coach.localize_scenario(sc, t, "mn")
+                await _opener_tts(sc.id, loc["opener"], t, sc.level)
+            except Exception:
+                _warm_state["errors"] += 1
+                log.exception("warm tts failed %s/%s", sc.id, t)
+            _warm_state["done"] += 1
+
+    await asyncio.gather(*[warm_loc(*j) for j in loc_jobs])
+    await asyncio.gather(*[warm_tts(*j) for j in tts_jobs])
+    _warm_state["running"] = False
+    log.info("Cache warm-up complete: %s jobs, %s errors",
+             _warm_state["total"], _warm_state["errors"])
+
+
+async def api_admin_warm(request: web.Request) -> web.Response:
+    """Founder-only. POST starts a warm-up (no-op if already running);
+    GET reports progress."""
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    if request.method == "POST" and not _warm_state["running"]:
+        asyncio.create_task(_warm_all())
+    return web.json_response(_warm_state)
+
+
 def add_api_routes(app: web.Application) -> None:
     from .web_auth import add_auth_routes
     add_auth_routes(app)
@@ -417,3 +472,5 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_post("/api/turn", api_turn)
     app.router.add_post("/api/plan/redeem", api_plan_redeem)
     app.router.add_post("/api/plan/grant", api_plan_grant)
+    app.router.add_post("/api/admin/warm", api_admin_warm)
+    app.router.add_get("/api/admin/warm", api_admin_warm)
