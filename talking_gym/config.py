@@ -54,7 +54,7 @@ class Config:
     founder_ids: frozenset = field(default_factory=lambda: frozenset(
         int(x) for x in os.getenv("FOUNDER_IDS", "").split(",") if x.strip().isdigit()
     ))
-    turns_per_session: int = int(os.getenv("TURNS_PER_SESSION", "3"))
+    turns_per_session: int = int(os.getenv("TURNS_PER_SESSION", "5"))
     default_reminder_hour: int = int(os.getenv("DEFAULT_REMINDER_HOUR", "19"))
     tz_name: str = os.getenv("TIMEZONE", "Asia/Ulaanbaatar")
 
