@@ -1,7 +1,7 @@
 /* Talking Gym PWA — app shell cache.
    HTML is network-first (UI updates propagate on next online load);
    static assets are cache-first. Offline falls back to the cached shell. */
-const CACHE = "tg-app-v2";
+const CACHE = "tg-app-v3";
 const ASSETS = ["/app", "/app/manifest.webmanifest", "/app/icon-192.png", "/app/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -21,6 +21,9 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (url.pathname !== "/app" && !url.pathname.startsWith("/app/")) return;
+  // Never proxy media: <video> uses Range requests, which stall when routed
+  // through a service worker. The server sets long-lived cache headers instead.
+  if (e.request.headers.get("range") || url.pathname.endsWith(".mp4")) return;
 
   if (url.pathname === "/app") {
     // network-first: always try to get the freshest UI, cache it, fall back offline
