@@ -67,6 +67,25 @@ def _err(status: int, code: str) -> web.Response:
     return web.json_response({"error": code}, status=status)
 
 
+def _effective_plan(user) -> str:
+    """The plan a user actually has right now: founders are always premium;
+    otherwise the stored plan, downgraded to free once it has expired."""
+    if user["user_id"] in config.founder_ids:
+        return "premium"
+    plan = user["plan"] if "plan" in user.keys() else "free"
+    if not plan or plan == "free":
+        return "free"
+    exp = user["plan_expires"] if "plan_expires" in user.keys() else None
+    if exp:
+        try:
+            from datetime import date
+            if date.fromisoformat(exp) < db._today():
+                return "free"
+        except (ValueError, TypeError):
+            pass
+    return plan
+
+
 def _me_payload(user) -> dict:
     rank, cur, nxt = coach.rank_for(user["xp"] or 0)
     return {
@@ -84,6 +103,8 @@ def _me_payload(user) -> dict:
         "reminder_hour": user["reminder_hour"],
         "turns_per_session": config.turns_per_session,
         "target_lang": target_of(user),
+        "plan": _effective_plan(user),
+        "plan_expires": user["plan_expires"] if "plan_expires" in user.keys() else None,
         "trained_today": db.did_session_today(user["user_id"]),
         "voice_seconds_today": db.voice_seconds_today(user["user_id"]),
         "voice_seconds_cap": config.daily_voice_seconds_cap,
@@ -327,6 +348,43 @@ async def api_turn(request: web.Request) -> web.Response:
     return web.json_response(out)
 
 
+async def api_plan_redeem(request: web.Request) -> web.Response:
+    user = _user_from(request)
+    if user is None:
+        return _err(401, "unauthorized")
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "bad_json")
+    code = str(body.get("code", "")).strip().upper()
+    if not code:
+        return _err(400, "code_required")
+    result = db.redeem_promo_code(user["user_id"], code)
+    if result is None:
+        return _err(404, "invalid_code")
+    return web.json_response({"ok": True, "plan": result["plan"],
+                              "me": _me_payload(db.get_user(user["user_id"]))})
+
+
+async def api_plan_grant(request: web.Request) -> web.Response:
+    """Founder-only: mint a promo code (or grant a plan to self)."""
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "bad_json")
+    plan = body.get("plan", "gym")
+    if plan not in ("gym", "premium"):
+        plan = "gym"
+    days = int(body.get("days", 30) or 0)
+    uses = int(body.get("uses", 1) or 1)
+    code = "GYM-" + secrets.token_hex(3).upper()
+    db.create_promo_code(code, plan, days, uses)
+    return web.json_response({"code": code, "plan": plan, "days": days, "uses": uses})
+
+
 def add_api_routes(app: web.Application) -> None:
     from .web_auth import add_auth_routes
     add_auth_routes(app)
@@ -336,3 +394,5 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_post("/api/session/start", api_session_start)
     app.router.add_get("/api/session", api_session_state)
     app.router.add_post("/api/turn", api_turn)
+    app.router.add_post("/api/plan/redeem", api_plan_redeem)
+    app.router.add_post("/api/plan/grant", api_plan_grant)

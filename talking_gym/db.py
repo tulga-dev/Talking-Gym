@@ -33,7 +33,17 @@ _SQLITE_SCHEMA = [
         channel       TEXT DEFAULT 'telegram',
         track         TEXT DEFAULT 'business',
         target_lang   TEXT DEFAULT 'en',
+        plan          TEXT DEFAULT 'free',
+        plan_expires  TEXT,
         created_at    TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS promo_codes (
+        code        TEXT PRIMARY KEY,
+        plan        TEXT DEFAULT 'gym',
+        days        INTEGER DEFAULT 30,
+        max_uses    INTEGER DEFAULT 1,
+        used_count  INTEGER DEFAULT 0,
+        created_at  TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
         user_id      INTEGER PRIMARY KEY,
@@ -79,7 +89,17 @@ _PG_SCHEMA = [
         channel       TEXT DEFAULT 'telegram',
         track         TEXT DEFAULT 'business',
         target_lang   TEXT DEFAULT 'en',
+        plan          TEXT DEFAULT 'free',
+        plan_expires  TEXT,
         created_at    TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS promo_codes (
+        code        TEXT PRIMARY KEY,
+        plan        TEXT DEFAULT 'gym',
+        days        INTEGER DEFAULT 30,
+        max_uses    INTEGER DEFAULT 1,
+        used_count  INTEGER DEFAULT 0,
+        created_at  TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS active_sessions (
         user_id      BIGINT PRIMARY KEY,
@@ -192,6 +212,8 @@ def _migrate() -> None:
         "ALTER TABLE users ADD COLUMN {} channel TEXT DEFAULT 'telegram'",
         "ALTER TABLE users ADD COLUMN {} track TEXT DEFAULT 'business'",
         "ALTER TABLE users ADD COLUMN {} target_lang TEXT DEFAULT 'en'",
+        "ALTER TABLE users ADD COLUMN {} plan TEXT DEFAULT 'free'",
+        "ALTER TABLE users ADD COLUMN {} plan_expires TEXT",
         "ALTER TABLE active_sessions ADD COLUMN {} last_example TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN {} email TEXT",
         "ALTER TABLE users ADD COLUMN {} password_hash TEXT",
@@ -249,6 +271,42 @@ def set_track(user_id: int, track: str) -> None:
 def set_target_lang(user_id: int, target_lang: str) -> None:
     with _conn() as con:
         con.execute("UPDATE users SET target_lang=? WHERE user_id=?", (target_lang, user_id))
+
+
+# ---------- plans / promo codes ----------
+
+def set_plan(user_id: int, plan: str, days: int | None = 30) -> str | None:
+    """Set a user's plan. days=None (or 0) = never expires. Returns the
+    expiry ISO date (or None for lifetime)."""
+    expires = None
+    if days:
+        expires = (_today() + timedelta(days=days)).isoformat()
+    with _conn() as con:
+        con.execute("UPDATE users SET plan=?, plan_expires=? WHERE user_id=?",
+                    (plan, expires, user_id))
+    return expires
+
+
+def create_promo_code(code: str, plan: str, days: int, max_uses: int) -> None:
+    with _conn() as con:
+        con.execute(
+            "INSERT INTO promo_codes (code, plan, days, max_uses, used_count, created_at) "
+            "VALUES (?,?,?,?,0,?)",
+            (code, plan, days, max_uses, datetime.utcnow().isoformat()),
+        )
+
+
+def redeem_promo_code(user_id: int, code: str) -> dict | None:
+    """Redeem a code for the user. Returns {plan, days} on success, else None."""
+    with _conn() as con:
+        row = con.execute("SELECT * FROM promo_codes WHERE code=?", (code,)).fetchone()
+        if row is None:
+            return None
+        if row["max_uses"] > 0 and row["used_count"] >= row["max_uses"]:
+            return None
+        con.execute("UPDATE promo_codes SET used_count = used_count + 1 WHERE code=?", (code,))
+    set_plan(user_id, row["plan"], row["days"] or None)
+    return {"plan": row["plan"], "days": row["days"]}
 
 
 def set_auth(user_id: int, email: str | None = None, password_hash: str | None = None,
