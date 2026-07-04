@@ -1569,8 +1569,8 @@
     vt.addEventListener('canplay', ok, {once:true});
     vi.addEventListener('error', fail, {once:true});
     vt.addEventListener('error', fail, {once:true});
-    vi.src = '/app/sarah-idle.mp4';
-    vt.src = '/app/sarah-talk.mp4';
+    vi.src = '/app/sarah-idle.mp4?v=2';
+    vt.src = '/app/sarah-talk.mp4?v=2';
     vi.play().catch(function(){});
     vt.play().catch(function(){});
   }
