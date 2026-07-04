@@ -40,6 +40,9 @@ class Config:
     stt_model: str = os.getenv("STT_MODEL", "grok-stt")
     stt_language: str = os.getenv("STT_LANGUAGE", "en")
 
+    # "none" skips grok-4.3's thinking phase — coaching JSON doesn't need it.
+    llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "none")
+
     tts_enabled: bool = field(default_factory=lambda: _bool("TTS_ENABLED", True))
     tts_url: str = os.getenv("TTS_URL", "https://api.x.ai/v1/tts")
     tts_voice: str = os.getenv("TTS_VOICE", "ara")

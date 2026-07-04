@@ -14,6 +14,7 @@ from . import ProviderError
 log = logging.getLogger(__name__)
 
 _TIMEOUT = httpx.Timeout(60.0, connect=10.0)
+_client = httpx.AsyncClient(timeout=_TIMEOUT)
 
 
 async def speak(text: str, language: str = "en", speed: float | None = None) -> bytes:
@@ -25,8 +26,7 @@ async def speak(text: str, language: str = "en", speed: float | None = None) -> 
         # xAI accepts 0.7-1.5; slower speech is easier for learners to follow.
         "speed": max(0.7, min(1.5, speed if speed is not None else config.tts_speed)),
     }
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        resp = await client.post(config.tts_url, headers=headers, json=payload)
+    resp = await _client.post(config.tts_url, headers=headers, json=payload)
     if resp.status_code != 200:
         log.error("TTS error %s: %s", resp.status_code, resp.text[:500])
         raise ProviderError(f"TTS HTTP {resp.status_code}")

@@ -119,14 +119,23 @@ async def api_profile(request: web.Request) -> web.Response:
     return web.json_response(_me_payload(db.get_user(user["user_id"])))
 
 
+_opener_cache: dict[tuple, str] = {}  # (scenario id, speed) -> b64; openers are static
+
+
 async def _opener_tts(sc, level: str) -> str | None:
     if not config.tts_enabled:
         return None
+    speed = LEVEL_SPEED.get(level, 1.0)
+    key = (sc.id, speed)
+    if key in _opener_cache:
+        return _opener_cache[key]
     try:
-        audio = await tts.speak(sc.opener_en[:400], speed=LEVEL_SPEED.get(level, 1.0))
-        return base64.b64encode(audio).decode()
+        audio = await tts.speak(sc.opener_en[:400], speed=speed)
     except ProviderError:
         return None
+    b64 = base64.b64encode(audio).decode()
+    _opener_cache[key] = b64
+    return b64
 
 
 async def api_session_start(request: web.Request) -> web.Response:

@@ -627,10 +627,14 @@
     scrollBottom();
     return b;
   }
-  // Human pacing: Sarah "thinks" for a moment before her bubble appears.
-  function addTeacherSoon(en, mn, ttsB64, delayMs, after){
-    var t = addTyping();
-    setTimeout(function(){ t.remove(); addTeacher(en, mn, ttsB64, true); if (after) after(); }, delayMs || 1000);
+  // Sarah "types" while the reply is on the wire — shown during the real
+  // network wait, removed the moment the response lands.
+  var pendingTyping = null;
+  function showTyping(){
+    if (!pendingTyping) pendingTyping = addTyping();
+  }
+  function clearTyping(){
+    if (pendingTyping) { pendingTyping.remove(); pendingTyping = null; }
   }
   function addUser(text){
     var b = document.createElement('div'); b.className = 'bubble user';
@@ -946,13 +950,14 @@
   $('mic-btn').addEventListener('contextmenu', function(e){ e.preventDefault(); });
   function sendAudio(blob, type){
     micState('busy');
+    showTyping();
     var ext = type.indexOf('mp4') >= 0 ? 'm4a' : 'webm';
     var fd = new FormData();
     fd.append('audio', blob, 'voice.' + ext);
     fetch(API + '/api/turn', {method:'POST', headers: authHeaders({}), body: fd})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(handleTurnResult)
-      .catch(function(){ toast(d().tstErr); micState('idle'); });
+      .catch(function(){ clearTyping(); toast(d().tstErr); micState('idle'); });
   }
 
   $('type-toggle').addEventListener('click', function(){
@@ -964,16 +969,18 @@
     if (!t || micMode === 'busy') return;
     $('type-input').value = '';
     micState('busy');
+    showTyping();
     fetch(API + '/api/turn', {method:'POST', headers: authHeaders({'Content-Type':'application/json'}), body: JSON.stringify({text:t})})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(handleTurnResult)
-      .catch(function(){ toast(d().tstErr); micState('idle'); });
+      .catch(function(){ clearTyping(); toast(d().tstErr); micState('idle'); });
   }
   $('type-send').addEventListener('click', sendText);
   $('type-input').addEventListener('keydown', function(e){ if (e.key === 'Enter') sendText(); });
 
   /* ---------- turn result: extend the conversation ---------- */
   function handleTurnResult(res){
+    clearTyping();
     if (!res.ok) {
       var code = res.j && res.j.error;
       if (code === 'voice_cap') { toast(d().tstCap); $('type-row').hidden = false; }
@@ -989,7 +996,7 @@
     addFeedback(j);
     if (j.done) {
       session = null;
-      if (j.reply_en) addTeacherSoon(j.reply_en, '', j.tts_b64, 900);
+      if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true);
       else if (j.tts_b64) playB64(j.tts_b64);
       $('mic-zone').hidden = true;
       $('done-card').hidden = false;
@@ -1000,9 +1007,8 @@
       refreshMe(); refreshNext();
     } else {
       setDots(j.turn_no + 1, j.max_turns);
-      addTeacherSoon(j.reply_en, '', j.tts_b64, 1100, function(){
-        if (j.suggested_en) addExample(j.suggested_en, j.suggested_mn || '');
-      });
+      addTeacher(j.reply_en, '', j.tts_b64, true);
+      if (j.suggested_en) addExample(j.suggested_en, j.suggested_mn || '');
       micState('idle');
       refreshMe();
     }

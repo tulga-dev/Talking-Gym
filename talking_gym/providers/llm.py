@@ -11,6 +11,8 @@ from . import ProviderError
 log = logging.getLogger(__name__)
 
 _TIMEOUT = httpx.Timeout(60.0, connect=10.0)
+# Shared client: reuses the TLS connection to api.x.ai across turns.
+_client = httpx.AsyncClient(timeout=_TIMEOUT)
 
 
 async def chat(system: str, user: str) -> str:
@@ -22,14 +24,16 @@ async def chat(system: str, user: str) -> str:
             {"role": "user", "content": user},
         ],
         "temperature": 0.4,
+        # Coaching turns are simple structured output; skipping the model's
+        # thinking phase cuts several seconds off every reply.
+        "reasoning_effort": config.llm_reasoning_effort,
     }
     headers = {"Authorization": f"Bearer {config.xai_api_key}"}
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        resp = await client.post(
-            f"{config.llm_base_url.rstrip('/')}/chat/completions",
-            json=payload,
-            headers=headers,
-        )
+    resp = await _client.post(
+        f"{config.llm_base_url.rstrip('/')}/chat/completions",
+        json=payload,
+        headers=headers,
+    )
     if resp.status_code != 200:
         log.error("LLM error %s: %s", resp.status_code, resp.text[:500])
         raise ProviderError(f"LLM HTTP {resp.status_code}")

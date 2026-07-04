@@ -14,6 +14,7 @@ from . import ProviderError
 log = logging.getLogger(__name__)
 
 _TIMEOUT = httpx.Timeout(120.0, connect=10.0)
+_client = httpx.AsyncClient(timeout=_TIMEOUT)
 
 
 async def transcribe(audio: bytes, filename: str = "voice.ogg", mime: str = "audio/ogg") -> str:
@@ -24,8 +25,7 @@ async def transcribe(audio: bytes, filename: str = "voice.ogg", mime: str = "aud
         "format": "json",
         "language": config.stt_language,
     }
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        resp = await client.post(config.stt_url, headers=headers, data=data, files=files)
+    resp = await _client.post(config.stt_url, headers=headers, data=data, files=files)
     if resp.status_code != 200:
         log.error("STT error %s: %s", resp.status_code, resp.text[:500])
         raise ProviderError(f"STT HTTP {resp.status_code}")
