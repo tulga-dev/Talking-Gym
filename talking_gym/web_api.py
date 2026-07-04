@@ -229,6 +229,8 @@ async def api_turn(request: web.Request) -> web.Response:
         "feedback_mn": reply.feedback_mn,
         "score": reply.score,
         "done": reply.done,
+        "suggested_en": reply.suggested_en,
+        "suggested_mn": reply.suggested_mn,
         "turn_no": reply.turn_no,
         "max_turns": reply.max_turns,
         "xp_earned": reply.xp_earned,

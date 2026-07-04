@@ -622,9 +622,9 @@
     return b;
   }
   // Human pacing: Sarah "thinks" for a moment before her bubble appears.
-  function addTeacherSoon(en, mn, ttsB64, delayMs){
+  function addTeacherSoon(en, mn, ttsB64, delayMs, after){
     var t = addTyping();
-    setTimeout(function(){ t.remove(); addTeacher(en, mn, ttsB64, true); }, delayMs || 1000);
+    setTimeout(function(){ t.remove(); addTeacher(en, mn, ttsB64, true); if (after) after(); }, delayMs || 1000);
   }
   function addUser(text){
     var b = document.createElement('div'); b.className = 'bubble user';
@@ -983,7 +983,9 @@
       refreshMe(); refreshNext();
     } else {
       setDots(j.turn_no + 1, j.max_turns);
-      addTeacherSoon(j.reply_en, '', j.tts_b64, 1100);
+      addTeacherSoon(j.reply_en, '', j.tts_b64, 1100, function(){
+        if (j.suggested_en) addExample(j.suggested_en, j.suggested_mn || '');
+      });
       micState('idle');
       refreshMe();
     }
