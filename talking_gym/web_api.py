@@ -22,10 +22,8 @@ MAX_AUDIO_BYTES = 4 * 1024 * 1024  # ~4MB ≈ well over a minute of opus
 
 
 def _user_from(request: web.Request):
-    raw = request.headers.get("X-User", "")
-    if not raw.isdigit():
-        return None
-    return db.get_user(int(raw))
+    from .web_auth import user_from_request
+    return user_from_request(request)
 
 
 def _err(status: int, code: str) -> web.Response:
@@ -112,13 +110,38 @@ async def api_profile(request: web.Request) -> web.Response:
     return web.json_response(_me_payload(db.get_user(user["user_id"])))
 
 
+async def _opener_tts(sc) -> str | None:
+    if not config.tts_enabled:
+        return None
+    try:
+        audio = await tts.speak(sc.opener_en[:400])
+        return base64.b64encode(audio).decode()
+    except ProviderError:
+        return None
+
+
 async def api_session_start(request: web.Request) -> web.Response:
     user = _user_from(request)
     if user is None:
         return _err(401, "unauthorized")
+    active = db.get_active_session(user["user_id"])
+    if active and active["turns"] > 0:
+        # resume mid-session instead of silently restarting the conversation
+        sc = by_id(active["scenario_id"])
+        return web.json_response({
+            "scenario": _scenario_payload(sc, user["level"]),
+            "turn": active["turns"] + 1,
+            "resumed": True,
+            "tts_b64": await _opener_tts(sc),
+        })
     sc = pick_scenario(user["level"], user["sessions_done"])
     db.start_session(user["user_id"], sc.id)
-    return web.json_response({"scenario": _scenario_payload(sc, user["level"]), "turn": 1})
+    return web.json_response({
+        "scenario": _scenario_payload(sc, user["level"]),
+        "turn": 1,
+        "resumed": False,
+        "tts_b64": await _opener_tts(sc),
+    })
 
 
 async def api_session_state(request: web.Request) -> web.Response:
@@ -220,6 +243,8 @@ async def api_turn(request: web.Request) -> web.Response:
 
 
 def add_api_routes(app: web.Application) -> None:
+    from .web_auth import add_auth_routes
+    add_auth_routes(app)
     app.router.add_post("/api/register", api_register)
     app.router.add_get("/api/me", api_me)
     app.router.add_post("/api/profile", api_profile)

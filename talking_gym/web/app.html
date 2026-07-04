@@ -10,6 +10,7 @@
 <link rel="apple-touch-icon" href="/app/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --blue:#0063FF; --blue-2:#4094ED; --sky:#EBF6FD; --sky-2:#F5FAFF;
@@ -171,6 +172,24 @@
   .onb .err{color:var(--red);font-size:12px;font-weight:700;margin-top:10px;text-align:center;min-height:18px}
   .onb .lang-sw{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px}
 
+  .bubble.user{flex-direction:row-reverse}
+  .bubble.user .msg{background:var(--blue);color:#fff;border-radius:18px 4px 18px 18px}
+  .bubble .play{width:32px;height:32px;border-radius:50%;background:var(--sky);color:var(--blue);display:inline-flex;align-items:center;justify-content:center;margin-top:7px;transition:transform .35s var(--ease)}
+  .bubble .play:active{transform:scale(.88)}
+  .bubble .play .i{width:15px;height:15px}
+  .fb-mini{background:#fff;border-radius:16px;padding:11px 13px;margin:-2px 0 12px 52px;box-shadow:var(--shadow-card);font-size:12.5px}
+  .fb-mini .row1{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .fb-mini .scorechip{font-weight:800;font-size:12px;padding:3px 11px;border-radius:60px;background:#E4F5EA;color:var(--green);font-variant-numeric:tabular-nums}
+  .fb-mini .scorechip.mid{background:#FFF1D6;color:var(--yellow-d)}
+  .fb-mini .scorechip.low{background:#FDEEEA;color:var(--red)}
+  .fb-mini .corr{font-weight:800}
+  .fb-mini .tip2{color:var(--mut);margin-top:3px}
+  .auth-tabs{display:flex;background:#E4EBF4;border-radius:14px;padding:4px;margin-bottom:4px}
+  .auth-tabs button{flex:1;padding:10px;border-radius:11px;font-weight:800;font-size:13px;color:var(--mut)}
+  .auth-tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,39,51,.12)}
+  .gbtn-wrap{display:flex;justify-content:center;margin-bottom:6px;min-height:44px}
+  .divider{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;font-weight:700;margin:8px 0 4px}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
   .toast{position:absolute;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(86px + env(safe-area-inset-bottom));background:#1B2733;color:#fff;font-size:12.5px;font-weight:700;padding:11px 18px;border-radius:60px;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease);z-index:50;max-width:88%;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -196,6 +215,7 @@
 <symbol id="i-globe" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.8 3.2 2.8 14.8 0 18-2.8-3.2-2.8-14.8 0-18z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9L4 20.5v-15z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M2.5 12h2M19.5 12h2M7.5 12h9M5.5 8.5v7M18.5 8.5v7M8.5 6v12M15.5 6v12" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5zM15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4.5H5.5v15H14M10 12h10M16.5 8.5 20 12l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 
@@ -207,15 +227,27 @@
   <div class="mark"><svg class="i"><use href="#i-dumbbell"/></svg></div>
   <h2 data-i18n="obT">Talking Gym-д тавтай морил</h2>
   <div class="sub" data-i18n="obS">Өдөрт 5 минут — англиар ярьж сур</div>
-  <label data-i18n="obName">Таны нэр</label>
-  <input id="ob-name" maxlength="40" autocomplete="name">
-  <label data-i18n="obLevel">Түвшин</label>
-  <div class="lvl-pick" id="ob-levels">
-    <button data-lvl="beginner" class="on" data-i18n="lvB">Анхан</button>
-    <button data-lvl="intermediate" data-i18n="lvI">Дунд</button>
-    <button data-lvl="advanced" data-i18n="lvA">Ахисан</button>
+  <div class="gbtn-wrap" id="gbtn" hidden></div>
+  <div class="divider" id="gdiv" hidden><span data-i18n="obOr">эсвэл имэйлээр</span></div>
+  <div class="auth-tabs">
+    <button id="tab-reg" class="on" data-i18n="obTabReg">Бүртгүүлэх</button>
+    <button id="tab-login" data-i18n="obTabLog">Нэвтрэх</button>
   </div>
-  <button class="start-btn" id="ob-go" style="margin-top:20px"><span data-i18n="obGo">Эхлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
+  <label data-i18n="obEmail">Имэйл</label>
+  <input id="ob-email" type="email" maxlength="80" autocomplete="email" inputmode="email">
+  <label data-i18n="obPass">Нууц үг (6+ тэмдэгт)</label>
+  <input id="ob-pass" type="password" maxlength="80" autocomplete="current-password">
+  <div id="reg-extra">
+    <label data-i18n="obName">Таны нэр</label>
+    <input id="ob-name" maxlength="40" autocomplete="name">
+    <label data-i18n="obLevel">Түвшин</label>
+    <div class="lvl-pick" id="ob-levels">
+      <button data-lvl="beginner" class="on" data-i18n="lvB">Анхан</button>
+      <button data-lvl="intermediate" data-i18n="lvI">Дунд</button>
+      <button data-lvl="advanced" data-i18n="lvA">Ахисан</button>
+    </div>
+  </div>
+  <button class="start-btn" id="ob-go" style="margin-top:18px"><span id="ob-go-lbl">Бүртгүүлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
   <div class="err" id="ob-err"></div>
 </div>
 
@@ -256,32 +288,7 @@
       <div class="dots" id="les-dots"></div>
     </div>
     <div class="acard" style="background:var(--sky);box-shadow:none" id="les-setup"></div>
-    <div class="bubble">
-      <div class="avatar" data-i18n="avatar">Б</div>
-      <div class="msg"><span id="coach-en"></span><span class="mn" id="coach-mn"></span></div>
-    </div>
-    <div class="example" id="example-box">
-      <div class="lbl"><svg class="i"><use href="#i-msg"/></svg><span data-i18n="exLbl">Жишээ хариулт — уншаад хэлээрэй</span></div>
-      <div class="en" id="ex-en"></div>
-      <div class="mn" id="ex-mn"></div>
-    </div>
-
-    <div class="fb-card" id="fb-card" hidden>
-      <div class="fb-top">
-        <svg class="ring" viewBox="0 0 60 60" aria-hidden="true">
-          <circle cx="30" cy="30" r="25" fill="none" stroke="#E5EDF6" stroke-width="7"/>
-          <circle id="prog-ring" cx="30" cy="30" r="25" fill="none" stroke="#36B35D" stroke-width="7"
-            stroke-linecap="round" stroke-dasharray="0 157" transform="rotate(-90 30 30)"
-            style="transition:stroke-dasharray .9s cubic-bezier(.32,.72,0,1)"/>
-          <text id="ring-num" x="30" y="35" text-anchor="middle" font-size="15" font-weight="800" fill="#1B2733">0</text>
-        </svg>
-        <div style="min-width:0">
-          <div class="yours" id="fb-yours"></div>
-          <div class="corr" id="fb-corr"></div>
-        </div>
-      </div>
-      <div class="tip" id="fb-tip" hidden></div>
-    </div>
+    <div id="chat"></div>
 
     <div class="done-card" id="done-card" hidden>
       <h4 data-i18n="doneT">Өнөөдрийн дасгал дууслаа!</h4>
@@ -390,15 +397,17 @@
   var STR = {
     mn: {
       obT:"Talking Gym-д тавтай морил", obS:"Өдөрт 5 минут — англиар ярьж сур",
-      obName:"Таны нэр", obLevel:"Түвшин", obGo:"Эхлэх",
+      obTabReg:"Бүртгүүлэх", obTabLog:"Нэвтрэх", obOr:"эсвэл имэйлээр",
+      obEmail:"Имэйл", obPass:"Нууц үг (6+ тэмдэгт)", obName:"Таны нэр", obLevel:"Түвшин",
       lvB:"Анхан", lvI:"Дунд", lvA:"Ахисан",
-      errName:"Нэрээ оруулаарай", errNet:"Сүлжээний алдаа — дахин оролдоорой",
+      errEmail:"Имэйлээ зөв оруулаарай", errPass:"Нууц үг 6-аас дээш тэмдэгт", errName:"Нэрээ оруулаарай",
+      errTaken:"Энэ имэйл бүртгэлтэй байна — Нэвтрэх дээр дараарай", errLogin:"Имэйл эсвэл нууц үг буруу",
+      errNet:"Сүлжээний алдаа — дахин оролдоорой",
       greetM:"Өглөөний мэнд", greetD:"Өдрийн мэнд", greetE:"Оройн мэнд",
       todayLbl:"Өнөөдрийн дасгал", start:"Эхлэх", doneToday:"Өнөөдөр хийсэн ✓ — нэмэлт дасгал уу?",
       turnsMeta:"3 солилцоо · дуут эсвэл бичгээр",
       capT:"Өнөөдрийн дуут дасгал",
       refT:"Найзаа урь", refS:"Хамтдаа суралцвал бүр урамтай", refB:"Урих",
-      avatar:"Б",
       exLbl:"Жишээ хариулт — уншаад хэлээрэй",
       micHintIdle:"Дараад ярь — дуусаад дахин дар",
       micHintRec:"Ярьж байна... дуусгахдаа дар",
@@ -406,6 +415,7 @@
       micHintDenied:"Микрофоны зөвшөөрөл хэрэгтэй — эсвэл бичээрэй",
       typeLink:"…эсвэл бичих",
       doneT:"Өнөөдрийн дасгал дууслаа!", doneStreak:"стрик", doneScore:"оноо", doneBtn:"Нүүр рүү",
+      resumed:"Өмнөх яриа үргэлжилж байна",
       pathT:"Миний зам", pathS:"мэргэжилдээ тохируулж сур",
       trMovies:"Кино", trDaily:"Өдөр тутам", trDating:"Болзоо",
       lvlLbl:"Түвшин", nextT:"Дараагийн дасгал",
@@ -433,15 +443,17 @@
     },
     en: {
       obT:"Welcome to Talking Gym", obS:"5 minutes a day — learn to speak English",
-      obName:"Your name", obLevel:"Level", obGo:"Start",
+      obTabReg:"Sign up", obTabLog:"Log in", obOr:"or with email",
+      obEmail:"Email", obPass:"Password (6+ characters)", obName:"Your name", obLevel:"Level",
       lvB:"Beginner", lvI:"Intermediate", lvA:"Advanced",
-      errName:"Please enter your name", errNet:"Network error — try again",
+      errEmail:"Please enter a valid email", errPass:"Password must be 6+ characters", errName:"Please enter your name",
+      errTaken:"This email is already registered — tap Log in", errLogin:"Wrong email or password",
+      errNet:"Network error — try again",
       greetM:"Good morning", greetD:"Good afternoon", greetE:"Good evening",
       todayLbl:"Today's workout", start:"Start", doneToday:"Done today ✓ — extra workout?",
       turnsMeta:"3 turns · voice or text",
       capT:"Today's voice practice",
       refT:"Invite a friend", refS:"Learning together keeps you going", refB:"Invite",
-      avatar:"B",
       exLbl:"Example answer — read it aloud",
       micHintIdle:"Tap and speak — tap again to finish",
       micHintRec:"Recording... tap to finish",
@@ -449,6 +461,7 @@
       micHintDenied:"Microphone permission needed — or type instead",
       typeLink:"…or type",
       doneT:"Workout complete!", doneStreak:"streak", doneScore:"score", doneBtn:"Home",
+      resumed:"Resuming your previous conversation",
       pathT:"My path", pathS:"learn for your profession",
       trMovies:"Movies", trDaily:"Daily life", trDating:"Dating",
       lvlLbl:"Level", nextT:"Next workout",
@@ -482,9 +495,7 @@
   if (lang !== 'en') lang = 'mn';
   var token = null;
   try { token = localStorage.getItem('tg-token'); } catch(e){}
-  var me = null;
-  var session = null;
-  var sessionXp = 0;
+  var me = null, session = null, sessionXp = 0;
 
   function $(id){ return document.getElementById(id); }
   function d(){ return STR[lang]; }
@@ -497,8 +508,9 @@
     });
     ['lang-btn','lang-btn-onb'].forEach(function(id){ var b=$(id); if(b) b.textContent = d().langBtn; });
     $('lang-row-val').textContent = d().langRowVal;
+    $('ob-go-lbl').textContent = authMode === 'reg' ? d().obTabReg : d().obTabLog;
     if (me) renderMe();
-    if (session === null && !$('mic-zone').hidden) $('mic-hint').textContent = d().micHintIdle;
+    if (micMode === 'idle') $('mic-hint').textContent = d().micHintIdle;
   }
   function toggleLang(){
     lang = (lang === 'mn') ? 'en' : 'mn';
@@ -516,21 +528,100 @@
     toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
   }
 
+  function authHeaders(extra){
+    var h = extra || {};
+    if (token) {
+      if (/^\d+$/.test(token)) h['X-User'] = token;      // legacy beta accounts
+      else h['Authorization'] = 'Bearer ' + token;
+    }
+    return h;
+  }
   function req(path, opts){
     opts = opts || {};
-    opts.headers = opts.headers || {};
-    if (token) opts.headers['X-User'] = token;
+    opts.headers = authHeaders(opts.headers || {});
     return fetch(API + path, opts).then(function(r){
-      if (r.status === 401) { logout(); throw {code:'unauthorized'}; }
+      if (r.status === 401) { doLogout(true); throw {code:'unauthorized'}; }
       return r.json().then(function(j){ if (!r.ok) throw j; return j; });
     });
   }
-  function logout(){
+  function doLogout(silent){
+    if (!silent && token && !/^\d+$/.test(token)) {
+      fetch(API + '/api/auth/logout', {method:'POST', headers: authHeaders({})}).catch(function(){});
+    }
     try { localStorage.removeItem('tg-token'); } catch(e){}
     token = null; me = null; session = null;
     $('main').hidden = true; $('tabbar').hidden = true; $('onb').hidden = false;
   }
 
+  /* ---------- audio playback ---------- */
+  var currentAudio = null;
+  function playB64(b64){
+    if (!b64) return;
+    try {
+      if (currentAudio) { currentAudio.pause(); }
+      currentAudio = new Audio('data:audio/mpeg;base64,' + b64);
+      currentAudio.play().catch(function(){});
+    } catch(e){}
+  }
+
+  /* ---------- chat rendering ---------- */
+  var chat = $('chat');
+  function scrollBottom(){
+    var m = $('main');
+    requestAnimationFrame(function(){ m.scrollTo({top: m.scrollHeight, behavior:'smooth'}); });
+  }
+  function addTeacher(en, mn, ttsB64, autoplay){
+    var b = document.createElement('div'); b.className = 'bubble';
+    var av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'Б';
+    var msg = document.createElement('div'); msg.className = 'msg';
+    var enEl = document.createElement('span'); enEl.textContent = en; msg.appendChild(enEl);
+    if (mn) { var mnEl = document.createElement('span'); mnEl.className = 'mn'; mnEl.textContent = mn; msg.appendChild(mnEl); }
+    if (ttsB64) {
+      var pb = document.createElement('button'); pb.className = 'play'; pb.setAttribute('aria-label','Listen');
+      pb.innerHTML = '<svg class="i"><use href="#i-sound"/></svg>';
+      pb.addEventListener('click', function(){ playB64(ttsB64); });
+      msg.appendChild(document.createElement('br'));
+      msg.appendChild(pb);
+      if (autoplay) playB64(ttsB64);
+    }
+    b.appendChild(av); b.appendChild(msg); chat.appendChild(b);
+    scrollBottom();
+  }
+  function addUser(text){
+    var b = document.createElement('div'); b.className = 'bubble user';
+    var msg = document.createElement('div'); msg.className = 'msg'; msg.textContent = text;
+    b.appendChild(msg); chat.appendChild(b);
+    scrollBottom();
+  }
+  function addExample(en, mn){
+    var e = document.createElement('div'); e.className = 'example';
+    e.innerHTML = '<div class="lbl"><svg class="i"><use href="#i-msg"/></svg><span>' +
+      (d().exLbl) + '</span></div><div class="en"></div><div class="mn"></div>';
+    e.querySelector('.en').textContent = en;
+    e.querySelector('.mn').textContent = mn;
+    chat.appendChild(e);
+    scrollBottom();
+  }
+  function addFeedback(j){
+    var f = document.createElement('div'); f.className = 'fb-mini';
+    var cls = j.score >= 75 ? '' : (j.score >= 55 ? ' mid' : ' low');
+    var row = document.createElement('div'); row.className = 'row1';
+    var chipEl = document.createElement('span'); chipEl.className = 'scorechip' + cls;
+    chipEl.textContent = j.score + ' · +' + j.xp_earned + ' XP';
+    row.appendChild(chipEl); f.appendChild(row);
+    if (j.corrected && j.corrected.toLowerCase() !== j.transcript.toLowerCase()) {
+      var c = document.createElement('div'); c.className = 'corr';
+      c.textContent = '✓ ' + j.corrected; f.appendChild(c);
+    }
+    if (j.feedback_mn) {
+      var t = document.createElement('div'); t.className = 'tip2';
+      t.textContent = j.feedback_mn; f.appendChild(t);
+    }
+    chat.appendChild(f);
+    scrollBottom();
+  }
+
+  /* ---------- rendering (me) ---------- */
   function greetWord(){
     var h = new Date().getHours();
     return h < 12 ? d().greetM : (h < 18 ? d().greetD : d().greetE);
@@ -586,7 +677,6 @@
   }
 
   var screens = ['home','lesson','path','prog','prof'];
-  var main = $('main');
   function show(id){
     screens.forEach(function(s){
       var el = $('scr-'+s);
@@ -596,39 +686,87 @@
       b.setAttribute('aria-pressed', String(b.getAttribute('data-scr')===id));
     });
     $('tab-train').setAttribute('aria-pressed', String(id==='lesson'));
-    main.scrollTo(0,0);
+    $('main').scrollTo(0,0);
   }
   document.querySelectorAll('[data-scr]').forEach(function(b){
     b.addEventListener('click', function(){ show(b.getAttribute('data-scr')); });
   });
 
-  /* onboarding */
+  /* ---------- onboarding / auth ---------- */
+  var authMode = 'reg';
   var obLevel = 'beginner';
+  function setAuthMode(m){
+    authMode = m;
+    $('tab-reg').classList.toggle('on', m === 'reg');
+    $('tab-login').classList.toggle('on', m === 'login');
+    $('reg-extra').hidden = (m !== 'reg');
+    $('ob-go-lbl').textContent = m === 'reg' ? d().obTabReg : d().obTabLog;
+    $('ob-err').textContent = '';
+  }
+  $('tab-reg').addEventListener('click', function(){ setAuthMode('reg'); });
+  $('tab-login').addEventListener('click', function(){ setAuthMode('login'); });
   document.querySelectorAll('#ob-levels [data-lvl]').forEach(function(b){
     b.addEventListener('click', function(){
       obLevel = b.getAttribute('data-lvl');
       document.querySelectorAll('#ob-levels [data-lvl]').forEach(function(x){ x.classList.toggle('on', x===b); });
     });
   });
+  function finishAuth(tok){
+    token = tok;
+    try { localStorage.setItem('tg-token', token); } catch(e){}
+    refreshMe().then(enterApp).catch(function(){ $('ob-err').textContent = d().errNet; });
+  }
   $('ob-go').addEventListener('click', function(){
-    var name = $('ob-name').value.trim();
-    if (!name) { $('ob-err').textContent = d().errName; return; }
-    $('ob-err').textContent = '';
+    var email = $('ob-email').value.trim().toLowerCase();
+    var pass = $('ob-pass').value;
+    var err = $('ob-err');
+    err.textContent = '';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) { err.textContent = d().errEmail; return; }
+    if (pass.length < 6) { err.textContent = d().errPass; return; }
+    var path, body;
+    if (authMode === 'reg') {
+      var name = $('ob-name').value.trim();
+      if (!name) { err.textContent = d().errName; return; }
+      path = '/api/auth/register';
+      body = {email:email, password:pass, name:name, level:obLevel};
+    } else {
+      path = '/api/auth/login';
+      body = {email:email, password:pass};
+    }
     $('ob-go').disabled = true;
-    fetch(API + '/api/register', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name:name, level:obLevel})
-    }).then(function(r){ return r.json(); }).then(function(j){
-      token = j.token;
-      try { localStorage.setItem('tg-token', token); } catch(e){}
-      me = j.me;
-      $('ob-go').disabled = false;
-      enterApp();
-    }).catch(function(){
-      $('ob-err').textContent = d().errNet;
-      $('ob-go').disabled = false;
-    });
+    fetch(API + path, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+      .then(function(res){
+        $('ob-go').disabled = false;
+        if (res.ok) { finishAuth(res.j.token); return; }
+        var c = res.j.error;
+        err.textContent = c === 'email_taken' ? d().errTaken
+                        : c === 'bad_credentials' ? d().errLogin
+                        : c === 'bad_email' ? d().errEmail
+                        : c === 'weak_password' ? d().errPass : d().errNet;
+      })
+      .catch(function(){ $('ob-go').disabled = false; err.textContent = d().errNet; });
   });
+
+  /* Google Sign-In (renders only when GOOGLE_CLIENT_ID is configured) */
+  function initGoogle(){
+    fetch(API + '/api/config').then(function(r){ return r.json(); }).then(function(cfg){
+      if (!cfg.google_client_id || !window.google || !google.accounts) return;
+      $('gbtn').hidden = false; $('gdiv').hidden = false;
+      google.accounts.id.initialize({
+        client_id: cfg.google_client_id,
+        callback: function(resp){
+          fetch(API + '/api/auth/google', {method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({id_token: resp.credential})})
+            .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+            .then(function(res){ if (res.ok) finishAuth(res.j.token); else $('ob-err').textContent = d().errNet; });
+        }
+      });
+      google.accounts.id.renderButton($('gbtn'), {theme:'outline', size:'large', shape:'pill', width:280});
+    }).catch(function(){});
+  }
+  if (document.readyState === 'complete') initGoogle();
+  else window.addEventListener('load', initGoogle);
 
   function enterApp(){
     $('onb').hidden = true;
@@ -639,14 +777,27 @@
     show('home');
   }
 
-  /* session flow */
+  /* ---------- session flow (conversation) ---------- */
   function startSession(){
     $('btn-start').disabled = true;
     req('/api/session/start', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
       .then(function(j){
         session = j;
-        renderScenario(j.scenario, j.turn);
+        sessionXp = 0;
+        chat.innerHTML = '';
+        $('les-title').textContent = j.scenario.title_mn;
+        $('les-sub').textContent = LVL_LABEL[me.level][lang];
+        $('les-setup').textContent = j.scenario.setup_mn;
+        $('done-card').hidden = true;
+        $('mic-zone').hidden = false;
+        $('type-row').hidden = true;
+        setDots(j.turn, j.scenario.max_turns);
         show('lesson');
+        if (j.resumed) toast(d().resumed);
+        // The teacher speaks first — voice plays as the bubble appears.
+        addTeacher(j.scenario.opener_en, j.scenario.opener_mn, j.tts_b64, true);
+        if (j.scenario.example_en && j.turn === 1) addExample(j.scenario.example_en, j.scenario.example_mn);
+        micState('idle');
       })
       .catch(function(){ toast(d().tstErr); })
       .then(function(){ $('btn-start').disabled = false; });
@@ -656,39 +807,15 @@
   $('tab-train').addEventListener('click', function(){
     if (session) { show('lesson'); } else { startSession(); }
   });
-
-  function renderScenario(sc, turn){
-    $('les-title').textContent = sc.title_mn;
-    $('les-sub').textContent = LVL_LABEL[me.level][lang];
-    $('les-setup').textContent = sc.setup_mn;
-    $('coach-en').textContent = sc.opener_en;
-    $('coach-mn').textContent = sc.opener_mn;
-    if (sc.example_en) {
-      $('example-box').hidden = false;
-      $('ex-en').textContent = sc.example_en;
-      $('ex-mn').textContent = sc.example_mn;
-    } else {
-      $('example-box').hidden = true;
-    }
-    $('fb-card').hidden = true;
-    $('done-card').hidden = true;
-    $('mic-zone').hidden = false;
-    $('type-row').hidden = true;
-    sessionXp = 0;
-    setDots(turn, sc.max_turns);
-    micState('idle');
-  }
   function setDots(turn, max){
     var s = '';
     for (var i = 1; i <= max; i++) s += (i < turn ? '●' : '○');
     $('les-dots').textContent = s + ' ' + Math.min(turn, max) + '/' + max;
   }
 
-  /* mic */
+  /* ---------- mic ---------- */
   var mediaRecorder = null, chunks = [], micMode = 'idle';
-  function micIcon(name){
-    return '<svg class="i" id="mic-ico"><use href="#i-' + name + '"/></svg>';
-  }
+  function micIcon(name){ return '<svg class="i"><use href="#i-' + name + '"/></svg>'; }
   function micState(st){
     micMode = st;
     var btn = $('mic-btn');
@@ -707,6 +834,7 @@
   $('mic-btn').addEventListener('click', function(){
     if (micMode === 'busy') return;
     if (micMode === 'rec') { try { mediaRecorder.stop(); } catch(e){} return; }
+    if (currentAudio) currentAudio.pause();   // don't record over the teacher's voice
     if (!navigator.mediaDevices || !window.MediaRecorder) {
       $('mic-hint').textContent = d().micHintDenied; $('type-row').hidden = false; return;
     }
@@ -729,19 +857,17 @@
       $('type-row').hidden = false;
     });
   });
-
   function sendAudio(blob, type){
     micState('busy');
     var ext = type.indexOf('mp4') >= 0 ? 'm4a' : 'webm';
     var fd = new FormData();
     fd.append('audio', blob, 'voice.' + ext);
-    fetch(API + '/api/turn', {method:'POST', headers:{'X-User': token}, body: fd})
+    fetch(API + '/api/turn', {method:'POST', headers: authHeaders({}), body: fd})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(handleTurnResult)
       .catch(function(){ toast(d().tstErr); micState('idle'); });
   }
 
-  /* typed answers */
   $('type-toggle').addEventListener('click', function(){
     $('type-row').hidden = !$('type-row').hidden;
     if (!$('type-row').hidden) $('type-input').focus();
@@ -751,7 +877,7 @@
     if (!t || micMode === 'busy') return;
     $('type-input').value = '';
     micState('busy');
-    fetch(API + '/api/turn', {method:'POST', headers:{'X-User': token, 'Content-Type':'application/json'}, body: JSON.stringify({text:t})})
+    fetch(API + '/api/turn', {method:'POST', headers: authHeaders({'Content-Type':'application/json'}), body: JSON.stringify({text:t})})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(handleTurnResult)
       .catch(function(){ toast(d().tstErr); micState('idle'); });
@@ -759,7 +885,7 @@
   $('type-send').addEventListener('click', sendText);
   $('type-input').addEventListener('keydown', function(e){ if (e.key === 'Enter') sendText(); });
 
-  /* turn result */
+  /* ---------- turn result: extend the conversation ---------- */
   function handleTurnResult(res){
     if (!res.ok) {
       var code = res.j && res.j.error;
@@ -772,43 +898,29 @@
     }
     var j = res.j;
     sessionXp += j.xp_earned;
-    $('fb-card').hidden = false;
-    $('fb-yours').textContent = j.transcript;
-    $('fb-corr').textContent = '"' + (j.corrected || j.transcript) + '"';
-    if (j.feedback_mn) { $('fb-tip').hidden = false; $('fb-tip').textContent = '💡 ' + j.feedback_mn; }
-    else { $('fb-tip').hidden = true; }
-    $('ring-num').textContent = j.score;
-    var ring = $('prog-ring');
-    ring.style.strokeDasharray = '0 157';
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){
-      ring.style.strokeDasharray = (Math.max(5, Math.min(100, j.score)) * 1.57) + ' 157';
-    });});
-    if (j.tts_b64) { try { new Audio('data:audio/mpeg;base64,' + j.tts_b64).play().catch(function(){}); } catch(e){} }
-
+    addUser(j.transcript);
+    addFeedback(j);
     if (j.done) {
       session = null;
-      $('example-box').hidden = true;
+      if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true);
+      else if (j.tts_b64) playB64(j.tts_b64);
       $('mic-zone').hidden = true;
-      $('coach-en').textContent = j.reply_en || '';
-      $('coach-mn').textContent = '';
       $('done-card').hidden = false;
       $('done-streak').textContent = (j.streak !== null && j.streak !== undefined) ? j.streak : '—';
       $('done-xp').textContent = '+' + sessionXp;
       $('done-score').textContent = j.score;
+      scrollBottom();
       refreshMe(); refreshNext();
     } else {
       setDots(j.turn_no + 1, j.max_turns);
-      $('coach-en').textContent = j.reply_en;
-      $('coach-mn').textContent = '';
-      $('example-box').hidden = true;
+      addTeacher(j.reply_en, '', j.tts_b64, true);
       micState('idle');
       refreshMe();
     }
-    $('fb-card').scrollIntoView({behavior:'smooth', block:'nearest'});
   }
   $('done-home').addEventListener('click', function(){ show('home'); });
 
-  /* path: persisted track & level */
+  /* ---------- path: persisted track & level ---------- */
   document.querySelectorAll('#tracks [data-track]').forEach(function(b){
     b.addEventListener('click', function(){
       var t = b.getAttribute('data-track');
@@ -826,7 +938,7 @@
     });
   });
 
-  /* profile actions */
+  /* ---------- profile actions ---------- */
   var remCycle = [19, 20, 21, 8, null];
   $('row-rem').addEventListener('click', function(){
     var cur = (me.reminder_hour === null || me.reminder_hour === undefined) ? null : Number(me.reminder_hour);
@@ -837,7 +949,7 @@
         toast(d().tstRem + ' ' + (next === null ? d().remOff : ('0' + next).slice(-2) + ':00')); })
       .catch(function(){ toast(d().tstErr); });
   });
-  $('row-logout').addEventListener('click', logout);
+  $('row-logout').addEventListener('click', function(){ doLogout(false); });
   function shareOrCopy(text){
     if (navigator.share) {
       navigator.share({title:'Talking Gym', text:text, url:APP_URL})
@@ -853,10 +965,10 @@
   $('plan-gym').addEventListener('click', function(){ toast(d().tstPlan); });
   $('plan-prem').addEventListener('click', function(){ toast(d().tstPlan); });
 
-  /* boot */
+  /* ---------- boot ---------- */
   applyLang();
   if (token) {
-    refreshMe().then(enterApp).catch(function(){ logout(); });
+    refreshMe().then(enterApp).catch(function(){ doLogout(true); });
   } else {
     $('onb').hidden = false;
   }

@@ -54,6 +54,11 @@ _SQLITE_SCHEMA = [
         text       TEXT,
         created_at TEXT
     )""",
+    """CREATE TABLE IF NOT EXISTS auth_tokens (
+        token      TEXT PRIMARY KEY,
+        user_id    INTEGER,
+        created_at TEXT
+    )""",
 ]
 
 # Telegram user/chat ids exceed 32-bit — BIGINT is required on Postgres.
@@ -91,6 +96,11 @@ _PG_SCHEMA = [
         user_id    BIGINT,
         name       TEXT,
         text       TEXT,
+        created_at TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS auth_tokens (
+        token      TEXT PRIMARY KEY,
+        user_id    BIGINT,
         created_at TEXT
     )""",
 ]
@@ -177,6 +187,9 @@ def _migrate() -> None:
         "ALTER TABLE users ADD COLUMN {} xp INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN {} channel TEXT DEFAULT 'telegram'",
         "ALTER TABLE users ADD COLUMN {} track TEXT DEFAULT 'business'",
+        "ALTER TABLE users ADD COLUMN {} email TEXT",
+        "ALTER TABLE users ADD COLUMN {} password_hash TEXT",
+        "ALTER TABLE users ADD COLUMN {} google_sub TEXT",
     ]
     for template in statements:
         if IS_POSTGRES:
@@ -225,6 +238,46 @@ def set_level(user_id: int, level: str) -> None:
 def set_track(user_id: int, track: str) -> None:
     with _conn() as con:
         con.execute("UPDATE users SET track=? WHERE user_id=?", (track, user_id))
+
+
+def set_auth(user_id: int, email: str | None = None, password_hash: str | None = None,
+             google_sub: str | None = None) -> None:
+    with _conn() as con:
+        if email is not None:
+            con.execute("UPDATE users SET email=? WHERE user_id=?", (email, user_id))
+        if password_hash is not None:
+            con.execute("UPDATE users SET password_hash=? WHERE user_id=?", (password_hash, user_id))
+        if google_sub is not None:
+            con.execute("UPDATE users SET google_sub=? WHERE user_id=?", (google_sub, user_id))
+
+
+def user_by_email(email: str):
+    with _conn() as con:
+        return con.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+
+
+def user_by_google_sub(sub: str):
+    with _conn() as con:
+        return con.execute("SELECT * FROM users WHERE google_sub=?", (sub,)).fetchone()
+
+
+def create_token(token: str, user_id: int) -> None:
+    with _conn() as con:
+        con.execute("INSERT INTO auth_tokens (token, user_id, created_at) VALUES (?,?,?)",
+                    (token, user_id, datetime.utcnow().isoformat()))
+
+
+def user_by_token(token: str):
+    with _conn() as con:
+        row = con.execute("SELECT user_id FROM auth_tokens WHERE token=?", (token,)).fetchone()
+        if not row:
+            return None
+        return con.execute("SELECT * FROM users WHERE user_id=?", (row["user_id"],)).fetchone()
+
+
+def delete_token(token: str) -> None:
+    with _conn() as con:
+        con.execute("DELETE FROM auth_tokens WHERE token=?", (token,))
 
 
 def set_reminder_hour(user_id: int, hour: int | None) -> None:
