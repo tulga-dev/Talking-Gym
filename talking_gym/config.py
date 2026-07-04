@@ -43,6 +43,8 @@ class Config:
     tts_enabled: bool = field(default_factory=lambda: _bool("TTS_ENABLED", True))
     tts_url: str = os.getenv("TTS_URL", "https://api.x.ai/v1/tts")
     tts_voice: str = os.getenv("TTS_VOICE", "ara")
+    # Base speech speed; per-level speeds in web_api scale learners down further.
+    tts_speed: float = float(os.getenv("TTS_SPEED", "1.0"))
 
     daily_voice_seconds_cap: int = int(os.getenv("DAILY_VOICE_SECONDS_CAP", "300"))
     turns_per_session: int = int(os.getenv("TURNS_PER_SESSION", "3"))
@@ -57,8 +59,8 @@ class Config:
     admin_chat_id: int | None = field(default_factory=_admin_chat_id)
 
     # Coach persona name (English + Mongolian Cyrillic rendering).
-    coach_name_en: str = os.getenv("COACH_NAME_EN", "Bagsh")
-    coach_name_mn: str = os.getenv("COACH_NAME_MN", "Багш")
+    coach_name_en: str = os.getenv("COACH_NAME_EN", "Sarah")
+    coach_name_mn: str = os.getenv("COACH_NAME_MN", "Сараа")
 
     # --- Facebook Messenger channel (optional; enabled when page token is set) ---
     messenger_page_token: str = os.getenv("MESSENGER_PAGE_TOKEN", "")

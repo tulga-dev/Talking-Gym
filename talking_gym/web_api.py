@@ -20,6 +20,15 @@ log = logging.getLogger(__name__)
 
 MAX_AUDIO_BYTES = 4 * 1024 * 1024  # ~4MB ≈ well over a minute of opus
 
+# Slower speech for lower levels — easier to follow, feels like a patient tutor.
+LEVEL_SPEED = {"beginner": 0.8, "intermediate": 0.9, "advanced": 1.0}
+
+
+def _speech_alike(a: str, b: str) -> bool:
+    """True when two sentences sound the same (ignoring case/punctuation)."""
+    strip = lambda s: "".join(c for c in s.lower() if c.isalnum() or c.isspace()).split()
+    return strip(a) == strip(b)
+
 
 def _user_from(request: web.Request):
     from .web_auth import user_from_request
@@ -110,11 +119,11 @@ async def api_profile(request: web.Request) -> web.Response:
     return web.json_response(_me_payload(db.get_user(user["user_id"])))
 
 
-async def _opener_tts(sc) -> str | None:
+async def _opener_tts(sc, level: str) -> str | None:
     if not config.tts_enabled:
         return None
     try:
-        audio = await tts.speak(sc.opener_en[:400])
+        audio = await tts.speak(sc.opener_en[:400], speed=LEVEL_SPEED.get(level, 1.0))
         return base64.b64encode(audio).decode()
     except ProviderError:
         return None
@@ -132,7 +141,7 @@ async def api_session_start(request: web.Request) -> web.Response:
             "scenario": _scenario_payload(sc, user["level"]),
             "turn": active["turns"] + 1,
             "resumed": True,
-            "tts_b64": await _opener_tts(sc),
+            "tts_b64": await _opener_tts(sc, user["level"]),
         })
     sc = pick_scenario(user["level"], user["sessions_done"])
     db.start_session(user["user_id"], sc.id)
@@ -140,7 +149,7 @@ async def api_session_start(request: web.Request) -> web.Response:
         "scenario": _scenario_payload(sc, user["level"]),
         "turn": 1,
         "resumed": False,
-        "tts_b64": await _opener_tts(sc),
+        "tts_b64": await _opener_tts(sc, user["level"]),
     })
 
 
@@ -229,13 +238,18 @@ async def api_turn(request: web.Request) -> web.Response:
 
     if spoken and config.tts_enabled:
         speak_parts = []
-        if reply.corrected:
-            speak_parts.append(f"Listen and repeat: {reply.corrected}")
+        # Only model the correction aloud when it actually differs from what
+        # the learner said — repeating a perfect sentence back sounds robotic.
+        if reply.corrected and not _speech_alike(reply.corrected, transcript):
+            speak_parts.append(f"You could say it like this... {reply.corrected}")
         if reply.reply_en:
-            speak_parts.append(reply.reply_en if reply.done else f"Now, my question: {reply.reply_en}")
+            speak_parts.append(reply.reply_en)
         if speak_parts:
             try:
-                audio_out = await tts.speak(". ".join(speak_parts)[:500])
+                audio_out = await tts.speak(
+                    " ... ".join(speak_parts)[:500],
+                    speed=LEVEL_SPEED.get(user["level"], 1.0),
+                )
                 out["tts_b64"] = base64.b64encode(audio_out).decode()
             except ProviderError:
                 log.warning("TTS failed for API turn; text-only response")

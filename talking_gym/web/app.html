@@ -92,6 +92,11 @@
   .dots{font-size:13px;color:var(--blue);font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums}
   .bubble{display:flex;gap:10px;margin-bottom:12px}
   .avatar{width:42px;height:42px;border-radius:50%;background:var(--yellow);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.08),0 2px 0 var(--yellow-d)}
+  .msg.typing{display:flex;gap:5px;align-items:center;min-height:20px}
+  .msg.typing b{width:7px;height:7px;border-radius:50%;background:#9db3c8;animation:tblink 1.1s infinite}
+  .msg.typing b:nth-child(2){animation-delay:.18s}
+  .msg.typing b:nth-child(3){animation-delay:.36s}
+  @keyframes tblink{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
   .bubble .msg{background:#fff;border-radius:4px 18px 18px 18px;padding:12px 14px;font-size:14px;box-shadow:var(--ring),0 3px 10px rgba(27,39,51,.07);min-width:0}
   .bubble .msg .mn{display:block;font-size:12.5px;color:var(--mut);font-style:italic;margin-top:5px}
   .example{background:#FFF6DE;border:2px dashed var(--yellow);border-radius:18px;padding:12px 14px;margin-bottom:14px}
@@ -411,7 +416,7 @@
       exLbl:"Жишээ хариулт — уншаад хэлээрэй",
       micHintIdle:"Дараад ярь — дуусаад дахин дар",
       micHintRec:"Ярьж байна... дуусгахдаа дар",
-      micHintBusy:"Багш сонсож байна...",
+      micHintBusy:"Сараа сонсож байна...",
       micHintDenied:"Микрофоны зөвшөөрөл хэрэгтэй — эсвэл бичээрэй",
       typeLink:"…эсвэл бичих",
       doneT:"Өнөөдрийн дасгал дууслаа!", doneStreak:"стрик", doneScore:"оноо", doneBtn:"Нүүр рүү",
@@ -457,7 +462,7 @@
       exLbl:"Example answer — read it aloud",
       micHintIdle:"Tap and speak — tap again to finish",
       micHintRec:"Recording... tap to finish",
-      micHintBusy:"Coach is listening...",
+      micHintBusy:"Sarah is listening...",
       micHintDenied:"Microphone permission needed — or type instead",
       typeLink:"…or type",
       doneT:"Workout complete!", doneStreak:"streak", doneScore:"score", doneBtn:"Home",
@@ -572,7 +577,7 @@
   }
   function addTeacher(en, mn, ttsB64, autoplay){
     var b = document.createElement('div'); b.className = 'bubble';
-    var av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'Б';
+    var av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'S';
     var msg = document.createElement('div'); msg.className = 'msg';
     var enEl = document.createElement('span'); enEl.textContent = en; msg.appendChild(enEl);
     if (mn) { var mnEl = document.createElement('span'); mnEl.className = 'mn'; mnEl.textContent = mn; msg.appendChild(mnEl); }
@@ -586,6 +591,20 @@
     }
     b.appendChild(av); b.appendChild(msg); chat.appendChild(b);
     scrollBottom();
+  }
+  function addTyping(){
+    var b = document.createElement('div'); b.className = 'bubble';
+    var av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'S';
+    var msg = document.createElement('div'); msg.className = 'msg typing';
+    msg.innerHTML = '<b></b><b></b><b></b>';
+    b.appendChild(av); b.appendChild(msg); chat.appendChild(b);
+    scrollBottom();
+    return b;
+  }
+  // Human pacing: Sarah "thinks" for a moment before her bubble appears.
+  function addTeacherSoon(en, mn, ttsB64, delayMs){
+    var t = addTyping();
+    setTimeout(function(){ t.remove(); addTeacher(en, mn, ttsB64, true); }, delayMs || 1000);
   }
   function addUser(text){
     var b = document.createElement('div'); b.className = 'bubble user';
@@ -902,7 +921,7 @@
     addFeedback(j);
     if (j.done) {
       session = null;
-      if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true);
+      if (j.reply_en) addTeacherSoon(j.reply_en, '', j.tts_b64, 900);
       else if (j.tts_b64) playB64(j.tts_b64);
       $('mic-zone').hidden = true;
       $('done-card').hidden = false;
@@ -913,7 +932,7 @@
       refreshMe(); refreshNext();
     } else {
       setDots(j.turn_no + 1, j.max_turns);
-      addTeacher(j.reply_en, '', j.tts_b64, true);
+      addTeacherSoon(j.reply_en, '', j.tts_b64, 1100);
       micState('idle');
       refreshMe();
     }

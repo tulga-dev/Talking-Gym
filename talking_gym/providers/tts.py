@@ -16,9 +16,15 @@ log = logging.getLogger(__name__)
 _TIMEOUT = httpx.Timeout(60.0, connect=10.0)
 
 
-async def speak(text: str, language: str = "en") -> bytes:
+async def speak(text: str, language: str = "en", speed: float | None = None) -> bytes:
     headers = {"Authorization": f"Bearer {config.xai_api_key}"}
-    payload = {"text": text, "voice_id": config.tts_voice, "language": language}
+    payload = {
+        "text": text,
+        "voice_id": config.tts_voice,
+        "language": language,
+        # xAI accepts 0.7-1.5; slower speech is easier for learners to follow.
+        "speed": max(0.7, min(1.5, speed if speed is not None else config.tts_speed)),
+    }
     async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         resp = await client.post(config.tts_url, headers=headers, json=payload)
     if resp.status_code != 200:
