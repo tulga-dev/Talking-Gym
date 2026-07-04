@@ -8,6 +8,8 @@
 <link rel="manifest" href="/app/manifest.webmanifest">
 <link rel="icon" href="/app/icon-192.png">
 <link rel="apple-touch-icon" href="/app/icon-192.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mongolian&display=swap">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -159,6 +161,7 @@
   .bubble .msg{background:#fff;border-radius:4px 18px 18px 18px;padding:12px 14px;font-size:14px;box-shadow:var(--ring),0 3px 10px rgba(27,39,51,.07);min-width:0}
   .bubble .msg .mn{display:block;font-size:12.5px;color:var(--mut);font-style:italic;margin-top:5px}
   .rom{display:block;font-size:12.5px;color:#7A8CA3;margin-top:4px;letter-spacing:.2px;font-weight:600}
+  body.mnt, body.mnt button, body.mnt input{font-family:'Noto Sans Mongolian','Mongolian Baiti','Poppins',sans-serif}
   .example{background:#FFF6DE;border:2px dashed var(--yellow);border-radius:18px;padding:12px 14px;margin-bottom:14px}
   .example .lbl{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--yellow-d);margin-bottom:5px}
   .example .lbl .i{width:14px;height:14px}
@@ -725,7 +728,30 @@
   var APP_URL = "https://talking-gym-mn.fly.dev/app";
   var lang = new URLSearchParams(location.search).get('lang') ||
              (function(){ try { return localStorage.getItem('tg-lang'); } catch(e){ return null; } })() || 'mn';
-  if (lang !== 'en') lang = 'mn';
+  if (lang !== 'en' && lang !== 'mnt') lang = 'mn';
+  // Inner Mongolian (traditional script) UI: partial translation over the
+  // Cyrillic base — untranslated keys fall back to Cyrillic Mongolian.
+  STR.mnt = Object.assign({}, STR.mn, {
+    langBtn:"ᠮᠣ", langRowVal:"ᠮᠣᠩᠭᠣᠯ ᠪᠢᠴᠢᠭ",
+    obTabReg:"ᠪᠦᠷᠢᠳᠬᠡᠭᠦᠯᠬᠦ", obTabLog:"ᠨᠡᠪᠲᠡᠷᠡᠬᠦ",
+    obEmail:"ᠢᠮᠧᠯ", obPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ (6+)", obName:"ᠲᠠᠨ ᠤ ᠨᠡᠷ᠎ᠡ",
+    obLevel:"ᠲᠦᠪᠰᠢᠨ", obLang:"ᠶᠠᠮᠠᠷ ᠬᠡᠯᠡ ᠰᠤᠷᠬᠤ ᠪᠤᠢ?",
+    lvB:"ᠠᠩᠬᠠᠨ", lvI:"ᠳᠤᠮᠳᠠ", lvA:"ᠠᠬᠢᠭᠰᠠᠨ",
+    greetM:"ᠥᠷᠯᠥᠭᠡ ᠶᠢᠨ ᠮᠡᠨᠳᠦ", greetD:"ᠡᠳᠦᠷ ᠦᠨ ᠮᠡᠨᠳᠦ", greetE:"ᠦᠳᠡᠰᠢ ᠶᠢᠨ ᠮᠡᠨᠳᠦ",
+    goalLbl:"ᠡᠳᠦᠷ ᠦᠨ ᠵᠣᠷᠢᠯᠭ᠎ᠠ", start:"ᠡᠬᠢᠯᠡᠬᠦ",
+    progT2:"ᠲᠠᠨ ᠤ ᠠᠬᠢᠴᠠ", curLvl:"ᠣᠳᠣ ᠶᠢᠨ ᠲᠦᠪᠰᠢᠨ",
+    recT:"ᠲᠠᠨ ᠳᠤ ᠰᠠᠨᠠᠯ ᠪᠣᠯᠭᠠᠬᠤ",
+    lbStreak:"ᠰᠲ᠋ᠷᠢᠺ", lbVoice:"ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ",
+    holdIdle:"ᠳᠠᠷᠤᠵᠤ ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", holdRec:"ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", tapIdle:"ᠳᠠᠷᠤᠵᠤ ᠡᠬᠢᠯᠡᠭᠦᠯᠬᠦ",
+    typeLink:"…ᠡᠰᠡᠪᠡᠯ ᠪᠢᠴᠢᠬᠦ",
+    exLbl:"ᠵᠢᠱᠢᠶ᠎ᠡ ᠬᠠᠷᠢᠭᠤᠯᠲᠠ — ᠤᠩᠰᠢᠭᠠᠳ ᠬᠡᠯᠡᠭᠡᠷᠡᠢ",
+    doneT:"ᠥᠨᠥᠳᠥᠷ ᠦᠨ ᠳᠠᠰᠬᠠᠯ ᠳᠠᠭᠤᠰᠤᠯ᠎ᠠ!", doneBtn:"ᠨᠢᠭᠤᠷ ᠲᠤ",
+    tbHome:"ᠨᠢᠭᠤᠷ", tbPath:"ᠵᠠᠮ", tbTrain:"ᠳᠠᠰᠬᠠᠯ", tbProg:"ᠠᠬᠢᠴᠠ", tbMe:"ᠪᠢ",
+    sRem:"ᠰᠠᠨᠠᠭᠤᠯᠭ᠎ᠠ", sStudy:"ᠰᠤᠳᠤᠯᠬᠤ ᠬᠡᠯᠡ", sLang:"ᠠᠫᠫ ᠤᠨ ᠬᠡᠯᠡ", sOut:"ᠭᠠᠷᠬᠤ",
+    callT:"ᠰᠠᠷᠠ ᠲᠠᠢ ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ", callNew:"ᠰᠢᠨ᠎ᠡ",
+    callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
+    planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ"
+  });
   var token = null;
   try { token = localStorage.getItem('tg-token'); } catch(e){}
   var me = null, session = null, sessionXp = 0;
@@ -746,10 +772,21 @@
     if (micMode === 'idle') micState('idle');   // refresh hold-bar label + hint
   }
   function toggleLang(){
-    lang = (lang === 'mn') ? 'en' : 'mn';
+    lang = (lang === 'mn') ? 'en' : (lang === 'en' ? 'mnt' : 'mn');
     try { localStorage.setItem('tg-lang', lang); } catch(e){}
+    document.body.classList.toggle('mnt', lang === 'mnt');
     applyLang();
+    // Coach explanations follow the script choice: traditional for Inner
+    // Mongolian UI, Cyrillic otherwise (English UI keeps the user's current).
+    if (me && lang !== 'en') {
+      var nat = (lang === 'mnt') ? 'mnt' : 'mn';
+      if (me.native_lang !== nat) {
+        req('/api/profile', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({native_lang: nat})})
+          .then(function(j){ me = j; }).catch(function(){});
+      }
+    }
   }
+  document.body.classList.toggle('mnt', lang === 'mnt');
   $('lang-btn').addEventListener('click', toggleLang);
   $('lang-btn-onb').addEventListener('click', toggleLang);
   $('row-lang').addEventListener('click', toggleLang);
@@ -1050,7 +1087,8 @@
       var name = $('ob-name').value.trim();
       if (!name) { err.textContent = d().errName; return; }
       path = '/api/auth/register';
-      body = {email:email, password:pass, name:name, level:obLevel, target_lang:obTarget};
+      body = {email:email, password:pass, name:name, level:obLevel, target_lang:obTarget,
+              native_lang: (lang === 'mnt' ? 'mnt' : 'mn')};
     } else {
       path = '/api/auth/login';
       body = {email:email, password:pass};

@@ -13,7 +13,7 @@ from aiohttp import web
 
 from . import coach, db
 from .config import config
-from .langs import lang_meta, target_of
+from .langs import lang_meta, native_of, target_of
 from .providers import ProviderError
 from .providers import stt, tts
 from .scenarios import by_id, pick_scenario
@@ -103,6 +103,7 @@ def _me_payload(user) -> dict:
         "reminder_hour": user["reminder_hour"],
         "turns_per_session": config.turns_per_session,
         "target_lang": target_of(user),
+        "native_lang": native_of(user),
         "plan": _effective_plan(user),
         "plan_expires": user["plan_expires"] if "plan_expires" in user.keys() else None,
         "trained_today": db.did_session_today(user["user_id"]),
@@ -116,7 +117,7 @@ async def _scenario_payload(sc, user) -> dict:
     language (keys keep their legacy _en names but carry target-lang text)."""
     level = user["level"]
     show_example = level != "advanced"
-    loc = await coach.localize_scenario(sc, target_of(user))
+    loc = await coach.localize_scenario(sc, target_of(user), native_of(user))
     return {
         "id": sc.id,
         "title_mn": sc.title_mn,
@@ -168,6 +169,8 @@ async def api_profile(request: web.Request) -> web.Response:
         db.set_level(user["user_id"], body["level"])
     if body.get("target_lang") in ("en", "ko", "zh", "ja"):
         db.set_target_lang(user["user_id"], body["target_lang"])
+    if body.get("native_lang") in ("mn", "mnt"):
+        db.set_native_lang(user["user_id"], body["native_lang"])
     if isinstance(body.get("track"), str) and body["track"] in (
         "business", "sales", "logistics", "travel", "movies", "daily", "dating"
     ):

@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 from . import db
 from .config import config
-from .langs import lang_meta, target_of
+from .langs import lang_meta, native_of, native_prompt, target_of
 from .prompts import (FINISH_HINT, LOCALIZE_SYSTEM, LOCALIZE_TEMPLATE,
                       TURN_TEMPLATE, system_prompt)
 from .providers import ProviderError
@@ -134,25 +134,27 @@ def start_daily_session(user_id: int) -> SessionIntro:
 _loc_cache: dict[tuple, dict] = {}
 
 
-async def localize_scenario(scenario: Scenario, target_lang: str) -> dict:
-    """The scenario's opener + model answer in the target language (+ Mongolian
-    translations). English uses the authored text; other languages are
-    LLM-generated once and cached, with an English fallback on any failure."""
+async def localize_scenario(scenario: Scenario, target_lang: str, native: str = "mn") -> dict:
+    """The scenario's opener + model answer in the target language, with
+    translations in the learner's native script (Cyrillic or traditional
+    Mongolian). English-target/Cyrillic-native uses the authored text; other
+    combinations are LLM-generated once and cached, English fallback on failure."""
     authored = {
         "opener": scenario.opener_en, "opener_mn": scenario.opener_mn,
         "opener_latin": "",
         "example": scenario.example_en, "example_mn": scenario.example_mn,
         "example_latin": "",
     }
-    if target_lang == "en":
+    if target_lang == "en" and native == "mn":
         return authored
-    key = (scenario.id, target_lang)
+    key = (scenario.id, target_lang, native)
     if key in _loc_cache:
         return _loc_cache[key]
     meta = lang_meta(target_lang)
     prompt = LOCALIZE_TEMPLATE.format(
         lang=meta["name_en"],
         roman=meta["roman"] or "Latin letters",
+        native=native_prompt(native),
         setup_mn=scenario.setup_mn,
         coach=config.coach_name_en,
         opener_en=scenario.opener_en,
@@ -189,9 +191,10 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
     user = db.get_user(user_id)
     scenario = by_id(session["scenario_id"])
     target_lang = target_of(user)
+    native = native_of(user)
     lmeta = lang_meta(target_lang)
     lang_name = lmeta["name_en"]
-    loc = await localize_scenario(scenario, target_lang)
+    loc = await localize_scenario(scenario, target_lang, native)
     turn = session["turns"] + 1
     max_turns = config.turns_per_session
     finish_hint = FINISH_HINT if turn >= max_turns else ""
@@ -208,7 +211,7 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         transcript=transcript,
     )
 
-    raw = await llm.chat(system_prompt(lang_name, lmeta["roman"]), prompt)
+    raw = await llm.chat(system_prompt(lang_name, lmeta["roman"], native_prompt(native)), prompt)
     try:
         data = llm.parse_json_block(raw)
     except ProviderError:

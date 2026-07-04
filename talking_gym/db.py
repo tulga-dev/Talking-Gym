@@ -33,6 +33,7 @@ _SQLITE_SCHEMA = [
         channel       TEXT DEFAULT 'telegram',
         track         TEXT DEFAULT 'business',
         target_lang   TEXT DEFAULT 'en',
+        native_lang   TEXT DEFAULT 'mn',
         plan          TEXT DEFAULT 'free',
         plan_expires  TEXT,
         created_at    TEXT
@@ -89,6 +90,7 @@ _PG_SCHEMA = [
         channel       TEXT DEFAULT 'telegram',
         track         TEXT DEFAULT 'business',
         target_lang   TEXT DEFAULT 'en',
+        native_lang   TEXT DEFAULT 'mn',
         plan          TEXT DEFAULT 'free',
         plan_expires  TEXT,
         created_at    TEXT
@@ -212,6 +214,7 @@ def _migrate() -> None:
         "ALTER TABLE users ADD COLUMN {} channel TEXT DEFAULT 'telegram'",
         "ALTER TABLE users ADD COLUMN {} track TEXT DEFAULT 'business'",
         "ALTER TABLE users ADD COLUMN {} target_lang TEXT DEFAULT 'en'",
+        "ALTER TABLE users ADD COLUMN {} native_lang TEXT DEFAULT 'mn'",
         "ALTER TABLE users ADD COLUMN {} plan TEXT DEFAULT 'free'",
         "ALTER TABLE users ADD COLUMN {} plan_expires TEXT",
         "ALTER TABLE active_sessions ADD COLUMN {} last_example TEXT DEFAULT ''",
@@ -271,6 +274,11 @@ def set_track(user_id: int, track: str) -> None:
 def set_target_lang(user_id: int, target_lang: str) -> None:
     with _conn() as con:
         con.execute("UPDATE users SET target_lang=? WHERE user_id=?", (target_lang, user_id))
+
+
+def set_native_lang(user_id: int, native_lang: str) -> None:
+    with _conn() as con:
+        con.execute("UPDATE users SET native_lang=? WHERE user_id=?", (native_lang, user_id))
 
 
 # ---------- plans / promo codes ----------

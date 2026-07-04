@@ -27,6 +27,38 @@ def lang_meta(code: str) -> dict:
     return TARGET_LANGS.get(code, TARGET_LANGS[DEFAULT_LANG])
 
 
+# ---- native (platform) languages: what the UI and coaching feedback use ----
+# 'mn'  = Mongolian in Cyrillic (Mongolia)
+# 'mnt' = Mongolian in traditional script (Inner Mongolia, ᠮᠣᠩᠭᠣᠯ ᠪᠢᠴᠢᠭ)
+NATIVE_LANGS = {
+    "mn": {
+        "name": "Mongolian (Cyrillic)",
+        "prompt": "Mongolian in CYRILLIC script",
+    },
+    "mnt": {
+        "name": "Mongolian (traditional script)",
+        "prompt": ("Mongolian in TRADITIONAL MONGOLIAN SCRIPT (Hudum bichig, "
+                   "Unicode Mongolian block, e.g. ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ ᠤᠤ) — never Cyrillic"),
+    },
+}
+DEFAULT_NATIVE = "mn"
+
+
+def native_of(user) -> str:
+    try:
+        if user is not None and "native_lang" in user.keys():
+            v = user["native_lang"]
+            if v in NATIVE_LANGS:
+                return v
+    except Exception:
+        pass
+    return DEFAULT_NATIVE
+
+
+def native_prompt(code: str) -> str:
+    return NATIVE_LANGS.get(code, NATIVE_LANGS[DEFAULT_NATIVE])["prompt"]
+
+
 def target_of(user) -> str:
     """The user's chosen study language, defaulting to English (and tolerating
     rows created before the column existed)."""
