@@ -353,7 +353,8 @@ def _file_route(filename: str, content_type: str | None = None):
 
 async def start_web_server() -> web.AppRunner:
     app = web.Application()
-    app.router.add_get("/", _health)
+    app.router.add_get("/", _file_route("landing.html"))   # public landing page
+    app.router.add_get("/health", _health)
     app.router.add_get("/webhooks/messenger", _webhook_get)
     app.router.add_post("/webhooks/messenger", _webhook_post)
     # PWA app prototype (installable; served from talking_gym/web/)
