@@ -422,8 +422,11 @@
       exLbl:"Жишээ хариулт — уншаад хэлээрэй",
       holdIdle:"Дарж яриарай",
       holdRec:"Ярьж байна...",
+      tapIdle:"Дарж эхлүүлэх",
       micHintIdle:"Товчийг дарж байгаад ярь — суллахад илгээгдэнэ",
       micHintRec:"Гараа суллахад илгээгдэнэ",
+      tapHintIdle:"Дарж эхлүүлээд, ярьж дуусаад дахин дар",
+      tapHintRec:"Дуусгахдаа дахин дар — илгээгдэнэ",
       micHintBusy:"Сараа сонсож байна...",
       micHintDenied:"Микрофоны зөвшөөрөл хэрэгтэй — эсвэл бичээрэй",
       typeLink:"…эсвэл бичих",
@@ -470,8 +473,11 @@
       exLbl:"Example answer — read it aloud",
       holdIdle:"Hold to talk",
       holdRec:"Recording...",
+      tapIdle:"Click to talk",
       micHintIdle:"Press and hold to speak — release to send",
       micHintRec:"Release to send",
+      tapHintIdle:"Click to start, click again when you finish",
+      tapHintRec:"Click again to finish — it will send",
       micHintBusy:"Sarah is listening...",
       micHintDenied:"Microphone permission needed — or type instead",
       typeLink:"…or type",
@@ -873,21 +879,24 @@
     $('les-dots').textContent = s + ' ' + Math.min(turn, max) + '/' + max;
   }
 
-  /* ---------- mic: WeChat-style hold-to-talk ---------- */
+  /* ---------- mic: hold-to-talk on touch, click-to-toggle on desktop ----------
+     A mouse can't "hold" through the first permission prompt, and desktop users
+     click rather than press-and-hold — so mouse/pen use a start/stop toggle. */
   var mediaRecorder = null, chunks = [], micMode = 'idle';
-  var holdActive = false, holdStart = 0;
+  var recStart = 0, holdMode = false, releasedEarly = false;
+  var COARSE = !(window.matchMedia && window.matchMedia('(pointer: fine)').matches);
   function micState(st){
     micMode = st;
     var btn = $('mic-btn');
     btn.classList.remove('rec','busy');
     if (st === 'idle') {
-      btn.innerHTML = '<svg class="i"><use href="#i-mic"/></svg><span>' + d().holdIdle + '</span>';
-      $('mic-hint').textContent = d().micHintIdle;
+      btn.innerHTML = '<svg class="i"><use href="#i-mic"/></svg><span>' + (COARSE ? d().holdIdle : d().tapIdle) + '</span>';
+      $('mic-hint').textContent = COARSE ? d().micHintIdle : d().tapHintIdle;
     }
     if (st === 'rec') {
       btn.classList.add('rec');
       btn.innerHTML = '<svg class="i"><use href="#i-sound"/></svg><span>' + d().holdRec + '</span>';
-      $('mic-hint').textContent = d().micHintRec;
+      $('mic-hint').textContent = COARSE ? d().micHintRec : d().tapHintRec;
     }
     if (st === 'busy') {
       btn.classList.add('busy');
@@ -902,20 +911,18 @@
     }
     return '';
   }
-  function beginHold(e){
-    if (micMode !== 'idle') return;
-    e.preventDefault();
-    try { $('mic-btn').setPointerCapture(e.pointerId); } catch(err){}
+  function startRecording(hold){
     unlockVoice();
     voiceEl.pause();   // don't record over Sarah's voice
     if (!navigator.mediaDevices || !window.MediaRecorder) {
       $('mic-hint').textContent = d().micHintDenied; $('type-row').hidden = false; return;
     }
-    holdActive = true;
+    holdMode = hold;
+    releasedEarly = false;
+    micState('busy');   // feedback while the mic permission/stream resolves
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-      if (!holdActive) { stream.getTracks().forEach(function(t){ t.stop(); }); return; }
       chunks = [];
-      holdStart = Date.now();
+      recStart = Date.now();
       var mime = pickMime();
       mediaRecorder = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream);
       mediaRecorder.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
@@ -924,29 +931,48 @@
         var type = (mediaRecorder.mimeType || 'audio/webm').split(';')[0];
         var blob = new Blob(chunks, {type:type});
         // Too short = accidental tap; don't send half-words to the coach.
-        if (blob.size < 1000 || Date.now() - holdStart < 400) { micState('idle'); return; }
+        if (blob.size < 1000 || Date.now() - recStart < 400) { micState('idle'); return; }
         sendAudio(blob, type);
       };
       mediaRecorder.start();
       micState('rec');
+      // Held mode: if the button was released during the permission wait
+      // (e.g. first-run prompt), stop right away instead of hanging on record.
+      if (holdMode && releasedEarly) stopRecording();
     }).catch(function(){
-      holdActive = false;
+      micState('idle');
       $('mic-hint').textContent = d().micHintDenied;
       $('type-row').hidden = false;
     });
   }
-  function endHold(){
-    if (!holdActive) return;
-    holdActive = false;
+  function stopRecording(){
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       try { mediaRecorder.stop(); } catch(e){ micState('idle'); }
-    } else if (micMode === 'rec') {
+    } else {
       micState('idle');
     }
   }
-  $('mic-btn').addEventListener('pointerdown', beginHold);
-  $('mic-btn').addEventListener('pointerup', endHold);
-  $('mic-btn').addEventListener('pointercancel', endHold);
+  $('mic-btn').addEventListener('pointerdown', function(e){
+    if (micMode === 'busy') return;
+    if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+      e.preventDefault();
+      try { $('mic-btn').setPointerCapture(e.pointerId); } catch(err){}
+      if (micMode === 'idle') startRecording(true);   // touch: hold to talk
+    } else {
+      if (micMode === 'rec') stopRecording();          // mouse: click toggles
+      else if (micMode === 'idle') startRecording(false);
+    }
+  });
+  $('mic-btn').addEventListener('pointerup', function(){
+    if (!holdMode) return;                 // desktop toggle handled on pointerdown
+    if (micMode === 'rec') stopRecording();
+    else if (micMode === 'busy') releasedEarly = true;   // released before mic was ready
+  });
+  $('mic-btn').addEventListener('pointercancel', function(){
+    if (!holdMode) return;
+    if (micMode === 'rec') stopRecording();
+    else if (micMode === 'busy') releasedEarly = true;
+  });
   $('mic-btn').addEventListener('contextmenu', function(e){ e.preventDefault(); });
   function sendAudio(blob, type){
     micState('busy');
