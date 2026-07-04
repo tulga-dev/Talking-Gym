@@ -40,6 +40,7 @@ _SQLITE_SCHEMA = [
         scenario_id  TEXT,
         turns        INTEGER DEFAULT 0,
         history      TEXT DEFAULT '',
+        last_example TEXT DEFAULT '',
         started_at   TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS voice_usage (
@@ -85,6 +86,7 @@ _PG_SCHEMA = [
         scenario_id  TEXT,
         turns        INTEGER DEFAULT 0,
         history      TEXT DEFAULT '',
+        last_example TEXT DEFAULT '',
         started_at   TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS voice_usage (
@@ -190,6 +192,7 @@ def _migrate() -> None:
         "ALTER TABLE users ADD COLUMN {} channel TEXT DEFAULT 'telegram'",
         "ALTER TABLE users ADD COLUMN {} track TEXT DEFAULT 'business'",
         "ALTER TABLE users ADD COLUMN {} target_lang TEXT DEFAULT 'en'",
+        "ALTER TABLE active_sessions ADD COLUMN {} last_example TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN {} email TEXT",
         "ALTER TABLE users ADD COLUMN {} password_hash TEXT",
         "ALTER TABLE users ADD COLUMN {} google_sub TEXT",
@@ -314,6 +317,14 @@ def start_session(user_id: int, scenario_id: str) -> None:
             "turns=0, history='', started_at=excluded.started_at",
             (user_id, scenario_id, datetime.utcnow().isoformat()),
         )
+
+
+def set_last_example(user_id: int, example: str) -> None:
+    """Remember the example answer the coach just offered — used to recognize
+    when the learner reads it aloud (and STT slightly mishears it)."""
+    with _conn() as con:
+        con.execute("UPDATE active_sessions SET last_example=? WHERE user_id=?",
+                    (example or "", user_id))
 
 
 def record_turn(user_id: int, history_line: str) -> int:

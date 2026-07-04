@@ -5,6 +5,7 @@ client stores in localStorage and sends as the X-User header. Good enough
 for focus testing; replace with phone/OTP auth before public launch.
 """
 import base64
+import difflib
 import logging
 import secrets
 
@@ -38,6 +39,23 @@ def _speech_alike(a: str, b: str) -> bool:
     """True when two sentences sound the same (ignoring case/punctuation)."""
     strip = lambda s: "".join(c for c in s.lower() if c.isalnum() or c.isspace()).split()
     return strip(a) == strip(b)
+
+
+def _snap_to_example(transcript: str, example: str) -> str:
+    """Learners are told to read the example aloud — when STT mishears a word
+    or two of accented speech, the coach ends up 'correcting' its own example.
+    If the transcript is clearly the example, trust the known text instead."""
+    if not example or not transcript:
+        return transcript
+    norm = lambda s: " ".join(
+        "".join(c.lower() if (c.isalnum() or c.isspace()) else " " for c in s).split()
+    )
+    a, b = norm(transcript), norm(example)
+    if not a or not b:
+        return transcript
+    if difflib.SequenceMatcher(None, a, b).ratio() >= 0.75:
+        return example
+    return transcript
 
 
 def _user_from(request: web.Request):
@@ -175,6 +193,7 @@ async def api_session_start(request: web.Request) -> web.Response:
     sc = pick_scenario(user["level"], user["sessions_done"])
     db.start_session(user["user_id"], sc.id)
     payload = await _scenario_payload(sc, user)
+    db.set_last_example(user["user_id"], payload["example_en"])
     return web.json_response({
         "scenario": payload,
         "turn": 1,
@@ -241,6 +260,12 @@ async def api_turn(request: web.Request) -> web.Response:
         spoken = True
         if not transcript:
             return _err(422, "empty_transcript")
+        sess = db.get_active_session(uid)
+        if sess is not None:
+            try:
+                transcript = _snap_to_example(transcript, sess["last_example"])
+            except (KeyError, IndexError):
+                pass  # row predates the last_example column
     else:
         try:
             body = await request.json()

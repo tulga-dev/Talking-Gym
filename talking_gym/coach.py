@@ -215,7 +215,12 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         max_turns=max_turns,
     )
 
-    db.record_turn(user_id, f'Learner: "{transcript}" / Coach: "{reply.reply_en}"')
+    line = f'Learner: "{transcript}" / Coach: "{reply.reply_en}"'
+    if reply.suggested_en:
+        line += f' / Coach offered example answer: "{reply.suggested_en}"'
+    db.record_turn(user_id, line)
+    if not reply.done:
+        db.set_last_example(user_id, reply.suggested_en)
 
     reply.xp_earned = xp_for_turn(reply.score, reply.done)
     db.add_xp(user_id, reply.xp_earned)
