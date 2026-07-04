@@ -61,6 +61,30 @@
   .pill.lang{color:var(--mut);letter-spacing:.5px;transition:transform .35s var(--ease)}
   .pill.lang:active{transform:scale(.92)}
 
+  .home-h{align-items:flex-start}
+  .greet-sm{display:block;font-size:12.5px;font-weight:600;color:var(--mut)}
+  .big-name{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chip-lang{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;background:#fff;color:var(--ink);border-radius:60px;padding:6px 12px;margin-top:8px;box-shadow:var(--ring),0 2px 8px rgba(27,39,51,.06);transition:transform .35s var(--ease)}
+  .chip-lang:active{transform:scale(.94)}
+  .h-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+  .avatar-me{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18),0 5px 12px -3px rgba(0,99,255,.4)}
+  .sec-t{font-size:14.5px;font-weight:800;margin:16px 2px 9px;letter-spacing:-.01em}
+  .goal-prog{display:flex;align-items:center;gap:10px;margin-top:12px}
+  .goal-prog .gp-bar{flex:1;height:8px;background:rgba(255,255,255,.22);border-radius:5px;overflow:hidden}
+  .goal-prog .gp-bar>div{height:100%;background:var(--yellow);border-radius:5px;transition:width .5s var(--ease)}
+  .goal-prog span{font-size:12px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+  .pc-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .ringwrap{position:relative;width:64px;height:64px;flex:none}
+  .ringwrap svg{transform:rotate(-90deg)}
+  .ringwrap #home-ring{transition:stroke-dashoffset .8s var(--ease)}
+  .ringwrap .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
+  .pc-stats{display:flex;gap:10px;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line)}
+  .pc-stats>div{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+  .pc-stats .lb{font-size:10.5px;color:var(--mut);font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+  .pc-stats .vl{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:800}
+  .pc-stats .vl .i{width:16px;height:16px;flex:none}
+  .pc-stats .vl.hot .i{color:var(--orange)}
+  .pc-stats .vl.xp .i{color:var(--blue)}
   .acard{background:#fff;border-radius:22px;padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow-card)}
   .acard h4{font-size:14.5px;font-weight:800;margin-bottom:4px;letter-spacing:-.01em}
   .acard .sub{font-size:12px;color:var(--mut)}
@@ -276,24 +300,56 @@
 
   <!-- HOME -->
   <div class="scr active" id="scr-home">
-    <div class="app-h">
-      <div class="hi"><span id="greet"></span><span class="sub2" id="greet-sub"></span></div>
-      <div class="stat-pills">
+    <div class="app-h home-h">
+      <div class="hi">
+        <span class="greet-sm" id="greet"></span>
+        <span class="big-name" id="home-name"></span>
+        <button class="chip-lang" id="home-tlang"></button>
+      </div>
+      <div class="h-right">
         <button class="pill lang" id="lang-btn" aria-label="Switch language">EN</button>
-        <span class="pill hot"><svg class="i"><use href="#i-flame"/></svg><span id="p-streak">0</span></span>
-        <span class="pill xp"><svg class="i"><use href="#i-bolt"/></svg><span id="p-xp">0</span></span>
+        <div class="avatar-me" id="home-avatar">Т</div>
       </div>
     </div>
     <div class="acard today-card">
-      <div class="track"><svg class="i"><use href="#i-route"/></svg><span data-i18n="todayLbl">Өнөөдрийн дасгал</span></div>
+      <div class="track"><svg class="i"><use href="#i-route"/></svg><span data-i18n="goalLbl">Өдрийн зорилго</span></div>
       <h4 id="today-title">…</h4>
       <div class="sub" id="today-sub"></div>
       <button class="start-btn" id="btn-start"><svg class="i" style="width:18px;height:18px"><use href="#i-mic"/></svg><span data-i18n="start">Эхлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
+      <div class="goal-prog"><div class="gp-bar"><div id="goal-fill" style="width:0%"></div></div><span id="goal-count">0/5</span></div>
     </div>
+
+    <h3 class="sec-t" data-i18n="progT2">Таны ахиц</h3>
     <div class="acard">
-      <h4 class="h-ico"><svg class="i"><use href="#i-mic"/></svg><span data-i18n="capT">Өнөөдрийн дуут дасгал</span></h4>
-      <div class="sub"><span id="cap-used">0</span>s / <span id="cap-max">300</span>s</div>
-      <div class="capbar"><div id="cap-fill" style="width:0%"></div></div>
+      <div class="pc-top">
+        <div style="min-width:0">
+          <div class="sub" data-i18n="curLvl">Одоогийн түвшин</div>
+          <h4 id="home-lvl" style="font-size:18px;margin:2px 0">…</h4>
+          <div class="sub" id="home-rank"></div>
+        </div>
+        <div class="ringwrap">
+          <svg viewBox="0 0 64 64" width="64" height="64">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#E5EDF6" stroke-width="7"/>
+            <circle id="home-ring" cx="32" cy="32" r="26" fill="none" stroke="var(--blue)" stroke-width="7"
+                    stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4"/>
+          </svg>
+          <span class="pct" id="home-pct">0%</span>
+        </div>
+      </div>
+      <div class="pc-stats">
+        <div><span class="lb">XP</span><span class="vl xp"><svg class="i"><use href="#i-bolt"/></svg><b id="p-xp">0</b></span></div>
+        <div><span class="lb" data-i18n="lbStreak">Стрик</span><span class="vl hot"><svg class="i"><use href="#i-flame"/></svg><b id="p-streak">0</b></span></div>
+        <div><span class="lb" data-i18n="lbVoice">Дуут дасгал</span><span class="vl"><svg class="i" style="color:var(--green)"><use href="#i-mic"/></svg><b><span id="cap-used">0</span>с</b></span></div>
+      </div>
+      <div class="capbar" style="margin-top:10px"><div id="cap-fill" style="width:0%"></div></div>
+      <div class="sub" style="margin-top:5px;font-size:11px"><span data-i18n="capT">Өнөөдрийн дуут дасгал</span>: <span id="cap-used2">0</span>s / <span id="cap-max">300</span>s</div>
+    </div>
+
+    <h3 class="sec-t" data-i18n="recT">Танд санал болгох</h3>
+    <div class="acard icon-lead" id="rec-card" style="cursor:pointer">
+      <div class="lead bk"><svg class="i"><use href="#i-msg"/></svg></div>
+      <div style="flex:1;min-width:0"><h4 style="margin:0" id="rec-title">…</h4><div class="sub" data-i18n="recSub">Дараагийн хичээл — Сараатай ярилцъя</div></div>
+      <button class="row-btn" id="rec-go" aria-label="Start"><svg class="i"><use href="#i-arrow"/></svg></button>
     </div>
     <div class="acard icon-lead">
       <div class="lead fr"><svg class="i"><use href="#i-gift"/></svg></div>
@@ -452,6 +508,9 @@
       shareB:"Амжилтаа хуваалцах",
       soonProg:"Удахгүй: алдааны сан, долоо хоногийн лиг, дэлгэрэнгүй тайлан",
       sRem:"Сануулга", sStudy:"Судлах хэл", sLang:"Апп-ын хэл", sOut:"Гарах",
+      goalLbl:"Өдрийн зорилго", progT2:"Таны ахиц", curLvl:"Одоогийн түвшин",
+      recT:"Танд санал болгох", recSub:"Дараагийн хичээл — Сараатай ярилцъя",
+      lbStreak:"Стрик", lbVoice:"Дуут дасгал",
       pBadge:"Удахгүй", perMo:"/сар",
       pGym1:"Өдөр бүр дуут дасгал + давталт", pGym2:"Бүх мэргэжлийн зам",
       pPr1:"AI видео дуудлага + ярилцлагын симуляци", pPr2:"IELTS Speaking оноо",
@@ -503,6 +562,9 @@
       shareB:"Share your progress",
       soonProg:"Coming soon: mistake bank, weekly league, detailed reports",
       sRem:"Reminder", sStudy:"Study language", sLang:"App language", sOut:"Log out",
+      goalLbl:"Daily goal", progT2:"Your progress", curLvl:"Current level",
+      recT:"Recommended for you", recSub:"Next lesson — talk with Sarah",
+      lbStreak:"Streak", lbVoice:"Voice today",
       pBadge:"Coming soon", perMo:"/mo",
       pGym1:"Daily voice workouts + review", pGym2:"All profession paths",
       pPr1:"AI video calls + interview simulation", pPr2:"IELTS Speaking scores",
@@ -712,13 +774,26 @@
   var LVL_LABEL = {beginner:{mn:"Анхан",en:"Beginner"}, intermediate:{mn:"Дунд",en:"Intermediate"}, advanced:{mn:"Ахисан",en:"Advanced"}};
 
   function renderMe(){
-    $('greet').textContent = greetWord() + ', ' + me.name;
-    $('greet-sub').textContent = trackLabel(me.track) + ' · ' + LVL_LABEL[me.level][lang];
+    $('greet').textContent = greetWord() + ',';
+    $('home-name').textContent = me.name;
+    $('home-avatar').textContent = (me.name || 'T').trim().charAt(0).toUpperCase();
+    var tl0 = TLANGS[me.target_lang] || TLANGS.en;
+    $('home-tlang').textContent = tl0.f + ' ' + tl0.n + ' · ' + LVL_LABEL[me.level][lang];
+    $('home-lvl').textContent = LVL_LABEL[me.level][lang];
+    $('home-rank').textContent = me.rank;
+    // Level ring: progress toward the next rank (same math as the rank bar).
+    var rspan = (me.rank_next_xp || (me.xp + 1)) - me.rank_cur_xp;
+    var rgot = Math.max(0, me.xp - me.rank_cur_xp);
+    var rpct = me.rank_next_xp ? Math.min(100, Math.round(rgot * 100 / rspan)) : 100;
+    $('home-ring').style.strokeDashoffset = (163.4 * (1 - rpct / 100)).toFixed(1);
+    $('home-pct').textContent = rpct + '%';
     $('p-streak').textContent = me.streak;
     $('p-streak2').textContent = me.streak;
     $('p-xp').textContent = me.xp;
     $('today-sub').textContent = me.trained_today ? d().doneToday : d().turnsMeta.replace('{n}', me.turns_per_session || 5);
+    if (me.trained_today) { $('goal-fill').style.width = '100%'; $('goal-count').textContent = (me.turns_per_session||5) + '/' + (me.turns_per_session||5); }
     $('cap-used').textContent = me.voice_seconds_today;
+    $('cap-used2').textContent = me.voice_seconds_today;
     $('cap-max').textContent = me.voice_seconds_cap;
     $('cap-fill').style.width = Math.min(100, me.voice_seconds_today * 100 / me.voice_seconds_cap) + '%';
     document.querySelectorAll('#tracks [data-track]').forEach(function(b){
@@ -752,6 +827,15 @@
     return req('/api/session').then(function(j){
       $('today-title').textContent = j.active ? j.active.scenario.title_mn : j.next_title_mn;
       $('next-title').textContent = j.next_title_mn;
+      $('rec-title').textContent = j.next_title_mn;
+      // Daily-goal progress: turns completed in the active session (a finished
+      // day is set to full by renderMe via trained_today).
+      if (!(me && me.trained_today)) {
+        var max = (j.active && j.active.scenario.max_turns) || (me && me.turns_per_session) || 5;
+        var got2 = j.active ? Math.min(max, j.active.turn - 1) : 0;
+        $('goal-fill').style.width = (got2 * 100 / max) + '%';
+        $('goal-count').textContent = got2 + '/' + max;
+      }
     }).catch(function(){});
   }
 
@@ -892,6 +976,8 @@
   }
   $('btn-start').addEventListener('click', startSession);
   $('btn-start2').addEventListener('click', startSession);
+  $('rec-card').addEventListener('click', startSession);
+  $('home-tlang').addEventListener('click', function(){ show('prof'); });
   $('tab-train').addEventListener('click', function(){
     if (session) { show('lesson'); } else { startSession(); }
   });
