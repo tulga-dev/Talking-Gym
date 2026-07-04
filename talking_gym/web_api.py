@@ -245,7 +245,9 @@ async def api_turn(request: web.Request) -> web.Response:
         if reply.corrected and not _speech_alike(reply.corrected, transcript):
             speak_parts.append(f"You could say it like this... {reply.corrected}")
         if reply.reply_en:
-            speak_parts.append(reply.reply_en)
+            # Spoken cue so the correction and the question don't blur together.
+            speak_parts.append(reply.reply_en if reply.done
+                               else f"Okay... next question. {reply.reply_en}")
         if speak_parts:
             try:
                 audio_out = await tts.speak(
