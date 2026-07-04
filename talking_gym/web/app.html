@@ -91,36 +91,35 @@
   .pc-stats .vl .i{width:16px;height:16px;flex:none}
   .pc-stats .vl.hot .i{color:var(--orange)}
   .pc-stats .vl.xp .i{color:var(--blue)}
-  #call-overlay{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100dvh;z-index:60;background:linear-gradient(180deg,#0A4FD6,#0063FF 55%,#3E86F5);display:flex;flex-direction:column;align-items:center;color:#fff;padding:calc(env(safe-area-inset-top) + 20px) 22px calc(env(safe-area-inset-bottom) + 26px)}
-  .call-min{position:absolute;top:calc(env(safe-area-inset-top) + 16px);right:18px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center}
-  .call-min .i{width:18px;height:18px}
-  .call-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;width:100%}
-  .sarah-av{position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center}
-  .sarah-av svg{position:relative;z-index:2;border-radius:50%;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-  .sarah-av .ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.5);opacity:0}
-  .sarah-av.speaking .ring{animation:callring 2.1s ease-out infinite}
-  .sarah-av.speaking .r2{animation-delay:.7s}
-  .sarah-av.speaking .r3{animation-delay:1.4s}
-  @keyframes callring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.9);opacity:0}}
-  .sarah-av.listening svg{box-shadow:0 0 0 6px rgba(54,179,93,.4),0 10px 30px rgba(0,0,0,.25);animation:listenpulse 1.4s ease-in-out infinite}
-  @keyframes listenpulse{50%{box-shadow:0 0 0 12px rgba(54,179,93,.22),0 10px 30px rgba(0,0,0,.25)}}
-  .av-mouth{transition:d .15s}
-  .sarah-av.speaking .av-mouth{animation:talk .32s ease-in-out infinite alternate}
-  @keyframes talk{to{transform:translateY(1px) scaleY(1.5)}}
-  .call-name{font-size:22px;font-weight:800;letter-spacing:-.01em}
-  .call-state{font-size:13.5px;font-weight:600;color:#CFE0FF;min-height:20px}
-  .call-cap{width:100%;min-height:96px;background:rgba(255,255,255,.12);border-radius:18px;padding:14px 16px;text-align:center;backdrop-filter:blur(4px)}
-  .call-cap .cap-en{font-size:16px;font-weight:700;line-height:1.4}
-  .call-cap .cap-rom{font-size:13px;color:#DDE9FF;margin-top:5px;font-weight:600}
-  .call-cap .cap-mn{font-size:12.5px;color:#B9CEFF;margin-top:5px;font-style:italic}
-  .call-controls{display:flex;gap:14px;align-items:center;margin-top:22px}
-  .call-btn{height:56px;border-radius:60px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:800;font-size:14.5px;transition:transform .2s var(--ease)}
+  #call-overlay{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100dvh;z-index:60;background:#0C121D;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 18px);gap:12px}
+  .call-video{position:relative;flex:1;min-height:0;border-radius:22px;overflow:hidden;background:#232F44;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+  .call-video svg{position:absolute;inset:0;width:100%;height:100%}
+  #av-body{animation:breathe 4.6s ease-in-out infinite;transform-origin:180px 480px}
+  @keyframes breathe{50%{transform:translateY(3px)}}
+  .call-topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 14px 26px;background:linear-gradient(180deg,rgba(6,10,18,.72),rgba(6,10,18,0))}
+  .ct-left{display:flex;flex-direction:column;line-height:1.25}
+  .ct-name{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+  .ct-sub{font-size:11px;color:#ABC0DE;font-weight:600}
+  .ct-right{display:flex;align-items:center;gap:10px}
+  .ct-timer{font-size:13px;font-weight:700;color:#D9E5F6;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:60px}
+  .ct-x{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center}
+  .ct-x .i{width:16px;height:16px}
+  #call-self{position:absolute;top:64px;right:12px;width:92px;height:124px;object-fit:cover;border-radius:14px;border:2px solid rgba(255,255,255,.55);box-shadow:0 6px 18px rgba(0,0,0,.4);transform:scaleX(-1);background:#101826}
+  .call-state-chip{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:12.5px;font-weight:700;padding:8px 16px;border-radius:60px;background:rgba(10,16,26,.62);color:#D9E5F6;backdrop-filter:blur(6px);white-space:nowrap;transition:background .3s,color .3s}
+  #sarah-av.listening .call-state-chip{background:rgba(23,94,48,.75);color:#CFF5DC}
+  #sarah-av.listening{box-shadow:0 0 0 3px rgba(54,179,93,.55),0 14px 40px rgba(0,0,0,.5)}
+  .call-cap{width:100%;min-height:88px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:13px 16px;text-align:center;backdrop-filter:blur(6px)}
+  .call-cap .cap-en{font-size:15.5px;font-weight:700;line-height:1.45}
+  .call-cap .cap-rom{font-size:12.5px;color:#C4D6F0;margin-top:4px;font-weight:600}
+  .call-cap .cap-mn{font-size:12px;color:#93A9C9;margin-top:4px;font-style:italic}
+  .call-controls{display:flex;gap:14px;align-items:center}
+  .call-btn{height:54px;border-radius:60px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:800;font-size:14.5px;transition:transform .2s var(--ease)}
   .call-btn:active{transform:scale(.94)}
-  .call-btn.send{flex:1;padding:0 22px;background:#fff;color:var(--blue)}
+  .call-btn.send{flex:1;padding:0 22px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);color:#fff}
   .call-btn.send .i{width:18px;height:18px}
-  .call-btn.send:disabled{opacity:.45}
-  .call-btn.end{width:56px;background:var(--red);color:#fff}
-  .call-btn.end .i{width:22px;height:22px}
+  .call-btn.send:disabled{opacity:.4}
+  .call-btn.end{width:64px;height:64px;border-radius:50%;background:#E5443B;color:#fff;box-shadow:0 8px 22px rgba(229,68,59,.45)}
+  .call-btn.end .i{width:24px;height:24px}
   .acard{background:#fff;border-radius:22px;padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow-card)}
   .acard h4{font-size:14.5px;font-weight:800;margin-bottom:4px;letter-spacing:-.01em}
   .acard .sub{font-size:12px;color:var(--mut)}
@@ -515,23 +514,67 @@
 
 <!-- AI VIDEO CALL -->
 <div id="call-overlay" hidden>
-  <button class="call-min" id="call-min" aria-label="End call"><svg class="i"><use href="#i-x"/></svg></button>
-  <div class="call-stage">
-    <div class="sarah-av" id="sarah-av">
-      <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
-      <svg viewBox="0 0 120 120" width="132" height="132" aria-hidden="true">
-        <circle cx="60" cy="60" r="58" fill="#EAF1FF"/>
-        <path d="M22 74a38 38 0 0 1 76 0 58 58 0 0 1-76 0Z" fill="#FFCF8B"/>
-        <path d="M60 20a30 30 0 0 1 30 30v10c0-6-4-10-10-11-3-6-11-9-20-9s-17 3-20 9c-6 1-10 5-10 11V50a30 30 0 0 1 30-30Z" fill="#6B3D2E"/>
-        <circle cx="48" cy="55" r="4.2" fill="#3A2A22"/>
-        <circle cx="72" cy="55" r="4.2" fill="#3A2A22"/>
-        <path class="av-mouth" d="M50 68 Q60 76 70 68" stroke="#B5533E" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-        <circle cx="42" cy="64" r="4" fill="#FFB3A0" opacity=".55"/>
-        <circle cx="78" cy="64" r="4" fill="#FFB3A0" opacity=".55"/>
-      </svg>
+  <div class="call-video" id="sarah-av">
+    <svg id="sarah-portrait" viewBox="0 0 360 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="cw" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#3A4A63"/><stop offset="1" stop-color="#232F44"/>
+        </linearGradient>
+        <linearGradient id="chair" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#4A3B55"/><stop offset="1" stop-color="#37293F"/>
+        </linearGradient>
+      </defs>
+      <rect width="360" height="480" fill="url(#cw)"/>
+      <circle cx="300" cy="90" r="60" fill="#F3D9A4" opacity=".14"/>
+      <circle cx="300" cy="90" r="34" fill="#F3D9A4" opacity=".16"/>
+      <rect x="18" y="150" width="70" height="200" rx="8" fill="#1B2433" opacity=".7"/>
+      <rect x="26" y="162" width="54" height="38" rx="4" fill="#2C3A52" opacity=".8"/>
+      <rect x="26" y="208" width="54" height="38" rx="4" fill="#2C3A52" opacity=".8"/>
+      <path d="M330 330c-16-40 8-58 2-86 22 18 22 60 10 88Z" fill="#2F5D48"/>
+      <path d="M342 332c-2-34-22-44-18-74 18 10 30 48 26 76Z" fill="#3B7258"/>
+      <rect x="318" y="326" width="38" height="30" rx="6" fill="#7A5B44"/>
+      <g id="av-body">
+        <ellipse cx="180" cy="470" rx="118" ry="86" fill="url(#chair)"/>
+        <path d="M96 480c0-66 34-104 84-104s84 38 84 104Z" fill="#2AA7A0"/>
+        <path d="M150 384c8 14 22 22 30 22s22-8 30-22l-14-16h-32Z" fill="#F2C6A0"/>
+        <rect x="163" y="330" width="34" height="52" rx="16" fill="#E8B790"/>
+        <path d="M100 218c0-70 34-118 80-118s80 48 80 118c0 30-6 58-18 80l-62 30-62-30c-12-22-18-50-18-80Z" fill="#5A3A2B"/>
+        <ellipse cx="180" cy="238" rx="62" ry="72" fill="#F2C6A0"/>
+        <path d="M118 232c-8 0-14 8-12 18 2 9 8 14 14 13Z" fill="#F2C6A0"/>
+        <path d="M242 232c8 0 14 8 12 18-2 9-8 14-14 13Z" fill="#F2C6A0"/>
+        <circle cx="116" cy="268" r="4" fill="#E8B04B"/>
+        <circle cx="244" cy="268" r="4" fill="#E8B04B"/>
+        <path d="M112 226c-2-52 26-92 68-92s70 40 68 92c-4-10-10-16-20-18-6-22-24-34-48-34s-42 12-48 34c-10 2-16 8-20 18Z" fill="#6B4633"/>
+        <path d="M148 214c8-6 22-6 28 0" stroke="#4A3123" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M212 214c-8-6-22-6-28 0" stroke="#4A3123" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <g id="av-eyes">
+          <ellipse cx="156" cy="238" rx="10" ry="11" fill="#FFF"/>
+          <ellipse cx="204" cy="238" rx="10" ry="11" fill="#FFF"/>
+          <circle class="av-iris" cx="157" cy="240" r="5.6" fill="#4A2F23"/>
+          <circle class="av-iris" cx="205" cy="240" r="5.6" fill="#4A2F23"/>
+          <circle cx="159" cy="238" r="1.8" fill="#FFF"/>
+          <circle cx="207" cy="238" r="1.8" fill="#FFF"/>
+          <rect class="av-lid" x="144" y="224" width="24" height="26" rx="10" fill="#F2C6A0" opacity="0"/>
+          <rect class="av-lid" x="192" y="224" width="24" height="26" rx="10" fill="#F2C6A0" opacity="0"/>
+        </g>
+        <path d="M178 252c1 6 1 10-3 13" stroke="#D9A276" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="140" cy="266" r="8" fill="#F0A78E" opacity=".5"/>
+        <circle cx="220" cy="266" r="8" fill="#F0A78E" opacity=".5"/>
+        <g id="av-mouth-g">
+          <path id="av-smile" d="M162 282 Q180 294 198 282" stroke="#B5533E" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <ellipse id="av-mouth" cx="180" cy="286" rx="13" ry="1.5" fill="#8E3B2C" opacity="0"/>
+          <ellipse id="av-tongue" cx="180" cy="291" rx="7" ry="1" fill="#C96A57" opacity="0"/>
+        </g>
+      </g>
+    </svg>
+    <div class="call-topbar">
+      <div class="ct-left"><span class="ct-name">Sarah</span><span class="ct-sub">Talking Gym</span></div>
+      <div class="ct-right"><span class="ct-timer" id="call-timer">00:00</span>
+        <button class="ct-x" id="call-min" aria-label="End call"><svg class="i"><use href="#i-x"/></svg></button>
+      </div>
     </div>
-    <div class="call-name">Sarah</div>
-    <div class="call-state" id="call-state"></div>
+    <video id="call-self" autoplay muted playsinline hidden></video>
+    <div class="call-state-chip" id="call-state"></div>
   </div>
   <div class="call-cap" id="call-cap">
     <div class="cap-en" id="cap-en"></div>
@@ -1347,6 +1390,72 @@
       callChunks = [], callSilenceStart = 0, callHeardSpeech = false, callRAF = 0, callRecStart = 0;
   var CALL_SILENCE_MS = 1400, CALL_RMS = 0.022, CALL_MAX_MS = 20000, CALL_MIN_MS = 500;
 
+  /* Sarah's face: blink loop + mouth movement while her audio is playing. */
+  var blinkTimer = 0, mouthRAF = 0, mouthTarget = 0, mouthCur = 0, mouthFlip = 0;
+  function startFaceLoops(){
+    stopFaceLoops();
+    (function blink(){
+      blinkTimer = setTimeout(function(){
+        document.querySelectorAll('.av-lid').forEach(function(l){ l.setAttribute('opacity','1'); });
+        setTimeout(function(){
+          document.querySelectorAll('.av-lid').forEach(function(l){ l.setAttribute('opacity','0'); });
+        }, 130);
+        blink();
+      }, 2400 + Math.random() * 2800);
+    })();
+    (function mouth(){
+      mouthRAF = requestAnimationFrame(mouth);
+      var speaking = callOn && !voiceEl.paused && !voiceEl.ended;
+      if (speaking) {
+        // Pseudo lip-sync: retarget openness every ~90ms while audio plays.
+        if (!mouthFlip || Date.now() - mouthFlip > 90) {
+          mouthFlip = Date.now();
+          mouthTarget = 0.25 + Math.random() * 0.75;
+        }
+      } else { mouthTarget = 0; }
+      mouthCur += (mouthTarget - mouthCur) * 0.35;
+      var m = document.getElementById('av-mouth'), s = document.getElementById('av-smile'),
+          t = document.getElementById('av-tongue');
+      if (m) {
+        var open = mouthCur > 0.08;
+        m.setAttribute('opacity', open ? '1' : '0');
+        m.setAttribute('ry', (1.5 + mouthCur * 8.5).toFixed(1));
+        if (t) { t.setAttribute('opacity', open ? '0.9' : '0'); t.setAttribute('ry', (mouthCur * 3).toFixed(1)); t.setAttribute('cy', (288 + mouthCur * 5).toFixed(1)); }
+        if (s) s.setAttribute('opacity', open ? '0' : '1');
+      }
+    })();
+  }
+  function stopFaceLoops(){
+    if (blinkTimer) { clearTimeout(blinkTimer); blinkTimer = 0; }
+    if (mouthRAF) { cancelAnimationFrame(mouthRAF); mouthRAF = 0; }
+    mouthCur = mouthTarget = 0;
+  }
+
+  /* Call timer + self camera preview (local only — never uploaded). */
+  var callTimerInt = 0, callT0 = 0, selfStream = null;
+  function startCallTimer(){
+    callT0 = Date.now();
+    $('call-timer').textContent = '00:00';
+    callTimerInt = setInterval(function(){
+      var s = Math.floor((Date.now() - callT0) / 1000);
+      $('call-timer').textContent = ('0' + Math.floor(s / 60)).slice(-2) + ':' + ('0' + (s % 60)).slice(-2);
+    }, 1000);
+  }
+  function startSelfCam(){
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: {ideal: 320}}, audio: false})
+      .then(function(s){
+        if (!callOn) { s.getTracks().forEach(function(t){ t.stop(); }); return; }
+        selfStream = s;
+        var v = $('call-self'); v.srcObject = s; v.hidden = false;
+      })
+      .catch(function(){ $('call-self').hidden = true; });
+  }
+  function stopSelfCam(){
+    if (selfStream) { try { selfStream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){} selfStream = null; }
+    var v = $('call-self'); v.srcObject = null; v.hidden = true;
+  }
+
   function callState(cls, text){
     var av = $('sarah-av'); av.classList.remove('speaking','listening');
     if (cls) av.classList.add(cls);
@@ -1375,6 +1484,9 @@
     callOn = true;
     callState('', d().callConnecting);
     callCaption('', '', '');
+    startCallTimer();
+    startFaceLoops();
+    startSelfCam();
     getMicStream().then(function(stream){
       try {
         callAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1463,6 +1575,9 @@
   function closeCall(){
     callOn = false;
     if (callRAF) cancelAnimationFrame(callRAF), callRAF = 0;
+    if (callTimerInt) { clearInterval(callTimerInt); callTimerInt = 0; }
+    stopFaceLoops();
+    stopSelfCam();
     if (callRec && callRec.state === 'recording') { try { callRec.stop(); } catch(e){} }
     callRec = null;
     voiceEl.onended = null; try { voiceEl.pause(); } catch(e){}
