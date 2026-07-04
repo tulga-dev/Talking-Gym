@@ -16,21 +16,22 @@
     --yellow:#FFCB3D; --yellow-d:#E8AE1B; --orange:#FF9900; --green:#36B35D;
     --purple:#A142F5; --purple-t:#F1E2FD; --red:#ED5C3B;
     --ink:#1B2733; --mut:#5E6B7A; --line:#E5E7EB;
-    --ease:cubic-bezier(.32,.72,0,1);          /* weighty spring feel */
-    --shadow-card:inset 0 1px 0 rgba(255,255,255,.9), 0 10px 28px -14px rgba(30,90,190,.28);
+    --ease:cubic-bezier(.32,.72,0,1);
+    --ring:0 0 0 1px rgba(27,60,110,.07);
+    --shadow-card:var(--ring), inset 0 1px 0 rgba(255,255,255,.9), 0 12px 30px -14px rgba(30,90,190,.3);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important} }
   html,body{height:100%}
-  body{font-family:'Poppins','Century Gothic','Segoe UI',Roboto,sans-serif;background:#DCE7F2;color:var(--ink);line-height:1.5;font-size:15px}
+  body{font-family:'Poppins','Century Gothic','Segoe UI',Roboto,sans-serif;background:#D7E3F0;color:var(--ink);line-height:1.5;font-size:15px}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:8px}
+  .i{width:20px;height:20px;flex:none;display:inline-block;vertical-align:-4px}
 
-  .shell{max-width:480px;margin:0 auto;min-height:100dvh;background:var(--sky-2);display:flex;flex-direction:column;position:relative;box-shadow:0 0 40px rgba(27,39,51,.15);overflow-x:hidden}
-  main{flex:1;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) 16px calc(86px + env(safe-area-inset-bottom))}
+  .shell{max-width:480px;margin:0 auto;min-height:100dvh;background:var(--sky-2);display:flex;flex-direction:column;position:relative;box-shadow:0 0 40px rgba(27,39,51,.18);overflow-x:hidden}
+  main{flex:1;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) 16px calc(88px + env(safe-area-inset-bottom))}
   .scr{display:none}
   .scr.active{display:block}
-  /* staggered waterfall entrance on every screen switch */
   .scr.active > *{animation:rise .5s var(--ease) backwards}
   .scr.active > *:nth-child(2){animation-delay:.05s}
   .scr.active > *:nth-child(3){animation-delay:.1s}
@@ -39,81 +40,109 @@
   .scr.active > *:nth-child(6){animation-delay:.25s}
   @keyframes rise{from{opacity:0;transform:translateY(14px)}}
 
-  .tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:calc(68px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;align-items:stretch;z-index:20}
-  .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:700;color:var(--mut)}
-  .tabbar button .ico{font-size:21px;line-height:1;transition:transform .35s var(--ease)}
+  /* ------- tab bar ------- */
+  .tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:calc(70px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;align-items:stretch;z-index:20}
+  .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;font-weight:700;color:#93A1B3}
+  .tabbar button .i{width:23px;height:23px;transition:transform .35s var(--ease)}
   .tabbar button[aria-pressed="true"]{color:var(--blue)}
-  .tabbar button[aria-pressed="true"] .ico{transform:translateY(-2px) scale(1.08)}
-  .tabbar .mic-tab .ico{width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:23px;margin-top:-26px;box-shadow:0 6px 16px rgba(0,99,255,.4)}
+  .tabbar button[aria-pressed="true"] .i{transform:translateY(-2px) scale(1.1)}
+  .tabbar .mic-tab .tw{width:54px;height:54px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-28px;box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 8px 18px rgba(0,99,255,.45);transition:transform .35s var(--ease)}
+  .tabbar .mic-tab .tw .i{width:24px;height:24px}
+  .tabbar .mic-tab:active .tw{transform:scale(.92)}
 
-  .app-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
-  .app-h .hi{font-size:17px;font-weight:800;flex:1;min-width:0}
-  .app-h .hi span{display:block;font-size:11.5px;font-weight:600;color:var(--mut)}
-  .stat-pills{display:flex;gap:7px}
-  .pill{font-size:12px;font-weight:800;background:#fff;border-radius:60px;padding:6px 12px;box-shadow:0 2px 8px rgba(27,39,51,.08);font-variant-numeric:tabular-nums}
+  /* ------- header ------- */
+  .app-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:13px}
+  .app-h .hi{font-size:17px;font-weight:800;letter-spacing:-.01em;flex:1;min-width:0}
+  .app-h .hi .sub2{display:block;font-size:11.5px;font-weight:600;color:var(--mut);letter-spacing:0}
+  .stat-pills{display:flex;gap:6px;align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;background:#fff;border-radius:60px;padding:7px 11px;box-shadow:var(--ring),0 2px 8px rgba(27,39,51,.06);font-variant-numeric:tabular-nums}
+  .pill .i{width:15px;height:15px}
   .pill.hot{color:var(--orange)}
   .pill.enr{color:var(--blue)}
-  .acard{background:#fff;border-radius:20px;padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow-card)}
-  .acard h4{font-size:14.5px;font-weight:800;margin-bottom:5px}
+  .pill.lang{color:var(--mut);letter-spacing:.5px;transition:transform .35s var(--ease)}
+  .pill.lang:active{transform:scale(.92)}
+
+  /* ------- cards ------- */
+  .acard{background:#fff;border-radius:22px;padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow-card)}
+  .acard h4{font-size:14.5px;font-weight:800;margin-bottom:4px;letter-spacing:-.01em}
   .acard .sub{font-size:12px;color:var(--mut)}
+  .icon-lead{display:flex;align-items:center;gap:12px}
+  .icon-lead .lead{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .icon-lead .lead .i{width:21px;height:21px}
+  .lead.bk{background:var(--sky);color:var(--blue)}
+  .lead.fr{background:#FFF1D6;color:var(--orange)}
   .week{display:flex;justify-content:space-between;gap:4px;margin:4px 2px 14px}
-  .week span{flex:1;max-width:36px;aspect-ratio:1;height:auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:#fff;color:var(--mut);box-shadow:inset 0 0 0 2px var(--line)}
+  .week span{flex:1;max-width:38px;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:#fff;color:#93A1B3;box-shadow:inset 0 0 0 2px var(--line)}
   .week span.done{background:var(--green);color:#fff;box-shadow:none}
   .week span.today{background:var(--yellow);color:var(--ink);box-shadow:0 0 0 3px rgba(255,203,61,.35)}
-  .today-card{background:var(--blue);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.25), 0 16px 34px -12px rgba(0,99,255,.45)}
-  .today-card .track{font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--yellow)}
-  .today-card h4{color:#fff;font-size:17px;margin:6px 0 3px}
-  .today-card .sub{color:#BBD4FF}
-  .start-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--yellow);color:var(--ink);font-weight:800;font-size:15px;padding:13px;border-radius:60px;margin-top:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 4px 0 var(--yellow-d);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+
+  .today-card{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 42%),var(--blue);color:#fff;box-shadow:0 0 0 1px rgba(0,60,160,.35), inset 0 1px 0 rgba(255,255,255,.35), 0 18px 36px -12px rgba(0,99,255,.5)}
+  .today-card .track{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--yellow)}
+  .today-card .track .i{width:14px;height:14px}
+  .today-card h4{color:#fff;font-size:17.5px;margin:7px 0 3px}
+  .today-card .sub{color:#BBD4FF;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .today-card .sub .i{width:13px;height:13px}
+  .start-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--yellow);color:var(--ink);font-weight:800;font-size:15px;padding:13px;border-radius:60px;margin-top:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 4px 0 var(--yellow-d);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
   .start-btn:active{transform:translateY(3px) scale(.985);box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 1px 0 var(--yellow-d)}
-  .start-btn .go{width:28px;height:28px;border-radius:50%;background:rgba(27,39,51,.14);display:inline-flex;align-items:center;justify-content:center;font-size:14px;transition:transform .35s var(--ease)}
+  .start-btn .go{width:28px;height:28px;border-radius:50%;background:rgba(27,39,51,.14);display:inline-flex;align-items:center;justify-content:center;transition:transform .35s var(--ease)}
+  .start-btn .go .i{width:15px;height:15px}
   .start-btn:active .go{transform:translateX(3px)}
-  .live-band{display:flex;gap:10px;align-items:center;background:#FDEEEA;box-shadow:none;border:2px solid #F6CDC2}
+  .live-band{display:flex;gap:10px;align-items:center;background:#FDEEEA;box-shadow:var(--ring);border:0}
   .live-dot{width:10px;height:10px;border-radius:50%;background:var(--red);flex:none;animation:blink 1.4s infinite}
   @keyframes blink{50%{opacity:.35}}
-  .live-band .t{font-size:12.5px;font-weight:700;line-height:1.4;min-width:0}
+  .live-band .t{font-size:12.5px;font-weight:700;line-height:1.4;min-width:0;flex:1}
   .live-band .t span{color:var(--mut);font-weight:600;font-size:11px;display:block}
-  .row-btn{font-size:12.5px;font-weight:800;color:#fff;background:var(--blue);padding:11px 18px;border-radius:60px;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 6px 14px -6px rgba(0,99,255,.5);transition:transform .35s var(--ease)}
+  .row-btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#fff;background:var(--blue);padding:11px 16px;border-radius:60px;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 6px 14px -6px rgba(0,99,255,.5);transition:transform .35s var(--ease)}
+  .row-btn .i{width:14px;height:14px}
   .row-btn:active{transform:scale(.94)}
 
+  /* ------- lesson ------- */
   .les-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-  .les-head .t{font-size:14px;font-weight:800}
+  .les-head .t{font-size:14px;font-weight:800;letter-spacing:-.01em}
   .les-head .t span{display:block;font-size:11px;color:var(--mut);font-weight:600}
-  .dots{font-size:13px;color:var(--blue);font-weight:800;letter-spacing:1px}
+  .dots{font-size:13px;color:var(--blue);font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums}
   .bubble{display:flex;gap:10px;margin-bottom:12px}
-  .avatar{width:42px;height:42px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-size:21px;flex:none;box-shadow:0 2px 0 var(--yellow-d)}
-  .bubble .msg{background:#fff;border-radius:4px 18px 18px 18px;padding:12px 14px;font-size:14px;box-shadow:0 3px 10px rgba(27,39,51,.08)}
+  .avatar{width:42px;height:42px;border-radius:50%;background:var(--yellow);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.08),0 2px 0 var(--yellow-d)}
+  .bubble .msg{background:#fff;border-radius:4px 18px 18px 18px;padding:12px 14px;font-size:14px;box-shadow:var(--ring),0 3px 10px rgba(27,39,51,.07)}
   .bubble .msg .mn{display:block;font-size:12.5px;color:var(--mut);font-style:italic;margin-top:5px}
   .example{background:#FFF6DE;border:2px dashed var(--yellow);border-radius:18px;padding:12px 14px;margin-bottom:14px}
-  .example .lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--yellow-d);margin-bottom:4px}
+  .example .lbl{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--yellow-d);margin-bottom:5px}
+  .example .lbl .i{width:14px;height:14px}
   .example .en{font-size:15px;font-weight:800}
   .example .mn{font-size:12.5px;color:var(--mut);font-style:italic;margin-top:2px}
   .mic-zone{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0 8px}
-  .mic-big{width:88px;height:88px;border-radius:50%;background:var(--blue);color:#fff;font-size:36px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 10px 24px rgba(0,99,255,.4),0 0 0 14px var(--sky);animation:breath 3.4s var(--ease) infinite;transition:transform .35s var(--ease)}
+  .mic-big{width:88px;height:88px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 10px 24px rgba(0,99,255,.4),0 0 0 14px var(--sky);animation:breath 3.4s var(--ease) infinite;transition:transform .35s var(--ease)}
+  .mic-big .i{width:34px;height:34px}
   .mic-big:active{transform:scale(.94)}
   @keyframes breath{50%{transform:scale(1.04)}}
   .mic-big.rec{animation:pulse 1s infinite;background:var(--red)}
-  @keyframes pulse{50%{box-shadow:0 10px 24px rgba(237,92,59,.4),0 0 0 26px rgba(237,92,59,.12)}}
+  @keyframes pulse{50%{box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 10px 24px rgba(237,92,59,.4),0 0 0 26px rgba(237,92,59,.12)}}
   .mic-hint{font-size:12.5px;color:var(--mut);font-weight:600}
-  .fb-card{background:#fff;border-radius:20px;padding:15px;box-shadow:0 6px 18px rgba(27,39,51,.1)}
+  .fb-card{background:#fff;border-radius:22px;padding:15px;box-shadow:var(--shadow-card)}
   .fb-top{display:flex;gap:14px;align-items:center;margin-bottom:10px}
   .ring{width:70px;height:70px;flex:none}
   .fb-top .yours{font-size:12px;color:var(--mut);text-decoration:line-through}
   .fb-top .corr{font-size:14.5px;font-weight:800;margin-top:3px}
   .tip{font-size:13px;background:var(--sky);border-radius:14px;padding:10px 12px;margin-bottom:9px}
   .tense{font-size:12px;background:var(--purple-t);color:#6B2FB3;border-radius:14px;padding:10px 12px;margin-bottom:11px;line-height:1.5}
-  .tense b{display:block;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px}
+  .tense b{display:flex;align-items:center;gap:5px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:3px}
+  .tense b .i{width:13px;height:13px}
   .fb-actions{display:flex;gap:8px}
-  .fb-actions button{flex:1;font-size:12px;font-weight:800;padding:12px 4px;border-radius:60px}
+  .fb-actions button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:800;padding:12px 4px;border-radius:60px;transition:transform .35s var(--ease)}
+  .fb-actions button .i{width:14px;height:14px}
+  .fb-actions button:active{transform:scale(.95)}
   .fb-actions .retry{background:#EEF1F4;color:var(--ink)}
   .fb-actions .shadow{background:var(--yellow);color:var(--ink);box-shadow:0 3px 0 var(--yellow-d)}
   .fb-actions .next{background:var(--blue);color:#fff}
   .shadow-ok{background:#E4F5EA;border-radius:14px;padding:11px 13px;font-size:12.5px;font-weight:700;color:#1F7A3F;margin-top:10px}
 
+  /* ------- path ------- */
   .tracks{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
-  .tracks button{font-size:12px;font-weight:700;padding:8px 15px;border-radius:60px;background:#fff;color:var(--mut);box-shadow:inset 0 0 0 2px var(--line)}
+  .tracks button{font-size:12px;font-weight:700;padding:8px 15px;border-radius:60px;background:#fff;color:var(--mut);box-shadow:inset 0 0 0 2px var(--line);transition:transform .35s var(--ease)}
+  .tracks button:active{transform:scale(.94)}
   .tracks button.on{background:var(--blue);color:#fff;box-shadow:none}
-  .lvl-chip{display:inline-block;font-size:11px;font-weight:800;background:#E4F5EA;color:var(--green);padding:6px 14px;border-radius:60px;margin-bottom:13px}
+  .lvl-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;background:#E4F5EA;color:var(--green);padding:6px 14px;border-radius:60px;margin-bottom:13px}
+  .lvl-chip .i{width:14px;height:14px}
   .path{position:relative;padding-left:28px}
   .path::before{content:"";position:absolute;left:12px;top:8px;bottom:8px;width:4px;background:#DDE7F2;border-radius:2px}
   .node{position:relative;margin-bottom:11px}
@@ -121,16 +150,21 @@
   .node.done::before{background:var(--green)}
   .node.cur::before{background:var(--yellow);box-shadow:0 0 0 4px rgba(255,203,61,.4)}
   .node .acard{margin-bottom:0}
-  .node .st{font-size:10.5px;font-weight:800;color:var(--green)}
+  .node .st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;color:var(--green)}
+  .node .st .i{width:13px;height:13px}
   .node.cur .st{color:var(--yellow-d)}
   .node.lock{opacity:.55}
-  .prem-star{color:var(--purple)}
+  .node h4 .i{width:15px;height:15px;vertical-align:-2px;margin-right:3px}
+  .node .prem{color:var(--purple)}
 
+  /* ------- progress ------- */
   .wk-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:5px}
   .wk-grid .m{background:var(--sky);border-radius:14px;padding:10px 12px}
-  .wk-grid .m b{font-size:18px;font-variant-numeric:tabular-nums;display:block}
+  .wk-grid .m b{font-size:18px;font-variant-numeric:tabular-nums;display:block;letter-spacing:-.01em}
   .wk-grid .m span{font-size:10.5px;color:var(--mut);font-weight:700}
   .wk-grid .m .up{color:var(--green);font-size:11px;font-weight:800}
+  .coach-note{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--mut);margin-top:9px}
+  .coach-note .i{width:15px;height:15px;color:var(--blue);margin-top:1px}
   .mist{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
   .mist:last-child{border:none}
   .mist .due{font-size:10.5px;font-weight:800;padding:4px 11px;border-radius:60px;background:#FFF1D6;color:var(--yellow-d);flex:none;margin-left:8px}
@@ -141,8 +175,12 @@
   .lg-row .nm{flex:1;font-weight:700}
   .lg-row .xp{font-weight:800;font-variant-numeric:tabular-nums;color:var(--blue)}
   .lg-row.me{background:#FFF6DE;border-radius:12px;padding:8px 10px}
-  .demote{font-size:10.5px;color:var(--red);font-weight:700;text-align:center;padding-top:7px}
+  .demote{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:var(--red);font-weight:700;padding-top:7px}
+  .demote .i{width:12px;height:12px;transform:rotate(90deg)}
+  .h-ico{display:inline-flex;align-items:center;gap:7px}
+  .h-ico .i{width:16px;height:16px;color:var(--blue)}
 
+  /* ------- profile ------- */
   .plan{border:2.5px solid var(--line);border-radius:18px;padding:13px 14px;margin-bottom:9px;position:relative;background:#fff}
   .plan.cur{border-color:var(--green)}
   .plan.hot{border-color:var(--blue);background:var(--sky-2)}
@@ -150,70 +188,107 @@
   .plan .pr{font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
   .plan .pr span{font-size:11px;color:var(--mut);font-weight:600}
   .plan ul{list-style:none;margin-top:6px}
-  .plan li{font-size:12px;color:var(--mut);padding-left:18px;position:relative;margin-bottom:3px}
-  .plan li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:900}
+  .plan li{font-size:12px;color:var(--mut);padding-left:19px;position:relative;margin-bottom:3px}
+  .plan li .i{position:absolute;left:0;top:2px;width:13px;height:13px;color:var(--green)}
   .plan .badge{position:absolute;top:-11px;right:13px;background:var(--yellow);color:var(--ink);font-size:9.5px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:60px;text-transform:uppercase}
-  .setrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px;font-weight:700}
+  .setrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:13px;font-weight:700}
   .setrow:last-child{border:none}
-  .setrow .val{color:var(--mut);font-weight:600}
+  .setrow .i{width:17px;height:17px;color:var(--blue);flex:none}
+  .setrow .lbl2{flex:1}
+  .setrow .val{color:var(--mut);font-weight:600;font-size:12.5px}
   .proto{font-size:11px;color:var(--mut);text-align:center;padding:14px 10px 4px}
 </style>
 </head>
 <body>
+
+<!-- icon sprite: 24px grid, 1.9 stroke, round caps -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none"><defs>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 11.5 12 4l8.5 7.5M6 10.5V20h12v-9.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><path d="M6 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8.5 17.5H15a3.25 3.25 0 0 0 0-6.5H9A3.25 3.25 0 0 1 9 4.5h6.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M6.5 16.5v-4M11 16.5V7M15.5 16.5v-6.5M20 16.5V4.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path d="M12 11.5a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5zM5 20c1.2-3.4 3.9-5 7-5s5.8 1.6 7 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c.8 3.2-4.2 5-4.2 9.4a4.6 4.6 0 0 0 9.2 0c0-2-1-3.6-1.9-4.9-.8 1-1.6 1.5-1.6 1.5C14.3 7 13.2 4.6 12 3z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5 4.5 14H10l-1 7.5L17.5 10H12l1-7.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 4v16M5.1 8l13.8 8M18.9 8 5.1 16M12 4l-1.8 1.8M12 4l1.8 1.8M12 20l-1.8-1.8M12 20l1.8-1.8M5.1 8l.6 2.4M5.1 8l2.4-.6M18.9 16l-.6-2.4M18.9 16l-2.4.6M18.9 8l-2.4-.6M18.9 8l-.6 2.4M5.1 16l2.4.6M5.1 16l.6-2.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16v-5.5a5.5 5.5 0 0 1 11 0V16l1.5 2.5H5L6.5 16zM10 21a2.3 2.3 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 6a2.5 2.5 0 0 1 2.5-2.5H20V17H6.5A2.5 2.5 0 0 0 4 19.5V6zM20 17v3.5H6.5A2.5 2.5 0 0 1 4 19.5M8 8h8M8 11.5h5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path d="M12 14V3.5M8 7l4-3.5L16 7M5 12v8.5h14V12" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4.5 12h15M13.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5 10-11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><path d="M6 11h12v9.5H6V11zM8.5 11V7.5a3.5 3.5 0 0 1 7 0V11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.5 5.2 5.7.7-4.2 4 1.1 5.6L12 16.2 6.9 19l1.1-5.6-4.2-4 5.7-.7L12 3.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><path d="M4.5 8.5h15V12h-15V8.5zM6 12v8.5h12V12M12 8.5v12M12 8.5C9 8.5 7.5 6.8 8 5.2 8.6 3.5 12 4.5 12 8.5zm0 0c3 0 4.5-1.7 4-3.3C15.4 3.5 12 4.5 12 8.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7.5V12l3.5 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M9.5 11a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5zM3.5 19.5c1-2.9 3.3-4.3 6-4.3s5 1.4 6 4.3M15.5 4.8a3.25 3.25 0 0 1 0 6M17.5 15.4c1.6.6 2.6 1.9 3 4.1" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7.5 4h9v4.5a4.5 4.5 0 0 1-9 0V4zM7.5 5H4.5c0 3 1.3 4.6 3.4 4.9M16.5 5h3c0 3-1.3 4.6-3.4 4.9M12 13v3.5M8.5 20.5h7M9.5 20.5c0-2.5 1-4 2.5-4s2.5 1.5 2.5 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.8 3.2 2.8 14.8 0 18-2.8-3.2-2.8-14.8 0-18z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8.5 6.5 17 12l-8.5 5.5v-11z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="M4.5 10.5a8 8 0 1 1 2 5.5M4.5 10.5V5.5m0 5h5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9L4 20.5v-15z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><path d="M5 20.5V4.5h9v16M14 8.5h5v12M8 8h3M8 11.5h3M8 15h3M3.5 20.5h17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs></svg>
+
 <div class="shell">
 <main>
 
   <!-- HOME -->
   <div class="scr active" id="scr-home">
     <div class="app-h">
-      <div class="hi">Өглөөний мэнд, Болд 👋<span>Business English · B1</span></div>
-      <div class="stat-pills"><span class="pill hot">🔥 12</span><span class="pill enr">⚡ 4/5</span></div>
+      <div class="hi"><span data-i18n="greet">Өглөөний мэнд, Болд</span><span class="sub2">Business English · B1</span></div>
+      <div class="stat-pills">
+        <button class="pill lang" id="lang-btn" aria-label="Switch language">EN</button>
+        <span class="pill hot"><svg class="i"><use href="#i-flame"/></svg>12</span>
+        <span class="pill enr"><svg class="i"><use href="#i-bolt"/></svg>4/5</span>
+      </div>
     </div>
     <div class="week">
-      <span class="done">Да</span><span class="done">Мя</span><span class="done">Лх</span>
-      <span class="today">Пү</span><span>Ба</span><span>Бя</span><span>Ня</span>
+      <span class="done" data-i18n="d1">Да</span><span class="done" data-i18n="d2">Мя</span><span class="done" data-i18n="d3">Лх</span>
+      <span class="today" data-i18n="d4">Пү</span><span data-i18n="d5">Ба</span><span data-i18n="d6">Бя</span><span data-i18n="d7">Ня</span>
     </div>
     <div class="acard today-card">
-      <div class="track">Өнөөдрийн дасгал · таны зам</div>
-      <h4>Хурал дээр саналаа хэлэх</h4>
-      <div class="sub">5 мин · 3 солилцоо · +40 XP · ❄️ хамгаалагч: 1</div>
-      <button class="start-btn" data-goto="lesson">🎤 Эхлэх <span class="go">→</span></button>
+      <div class="track"><svg class="i"><use href="#i-route"/></svg><span data-i18n="todayLbl">Өнөөдрийн дасгал · таны зам</span></div>
+      <h4 data-i18n="lesTitle">Хурал дээр саналаа хэлэх</h4>
+      <div class="sub"><svg class="i"><use href="#i-clock"/></svg><span data-i18n="lesMeta">5 мин · 3 солилцоо · +40 XP</span>·<svg class="i"><use href="#i-snow"/></svg>1</div>
+      <button class="start-btn" data-goto="lesson"><svg class="i" style="width:18px;height:18px"><use href="#i-mic"/></svg><span data-i18n="start">Эхлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
     </div>
     <div class="acard live-band">
       <div class="live-dot"></div>
-      <div class="t" style="flex:1">Өнөөдөр 20:00 — багш Сараатай live хичээл<span>Premium · түвшин тус бүрээр · 30 мин</span></div>
-      <button class="row-btn">Орох</button>
+      <div class="t"><span data-i18n="liveT">Өнөөдөр 20:00 — багш Сараатай live хичээл</span><span data-i18n="liveS">Premium · түвшин тус бүрээр · 30 мин</span></div>
+      <button class="row-btn"><svg class="i"><use href="#i-play"/></svg><span data-i18n="join">Орох</span></button>
     </div>
-    <div class="acard" style="display:flex;align-items:center;gap:10px">
-      <div style="flex:1"><h4 style="margin:0">Давталтын цаг 📚</h4><div class="sub">Алдааны сангаас 3 өгүүлбэр бэлэн боллоо</div></div>
-      <button class="row-btn" data-goto="prog">Давтах</button>
+    <div class="acard icon-lead">
+      <div class="lead bk"><svg class="i"><use href="#i-book"/></svg></div>
+      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="revT">Давталтын цаг</h4><div class="sub" data-i18n="revS">Алдааны сангаас 3 өгүүлбэр бэлэн боллоо</div></div>
+      <button class="row-btn" data-goto="prog"><span data-i18n="revB">Давтах</span></button>
     </div>
-    <div class="acard" style="display:flex;align-items:center;gap:10px">
-      <div style="flex:1"><h4 style="margin:0">Найзын стрик 🤝</h4><div class="sub">Сараа өнөөдөр дасгалаа хийгээгүй байна</div></div>
-      <button class="row-btn">🔔 Сануул</button>
+    <div class="acard icon-lead">
+      <div class="lead fr"><svg class="i"><use href="#i-users"/></svg></div>
+      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="frT">Найзын стрик</h4><div class="sub" data-i18n="frS">Сараа өнөөдөр дасгалаа хийгээгүй байна</div></div>
+      <button class="row-btn"><svg class="i"><use href="#i-bell"/></svg><span data-i18n="frB">Сануул</span></button>
     </div>
   </div>
 
   <!-- LESSON -->
   <div class="scr" id="scr-lesson">
     <div class="les-head">
-      <div class="t">Хурал дээр саналаа хэлэх<span>Business English · B1</span></div>
+      <div class="t"><span data-i18n="lesTitle">Хурал дээр саналаа хэлэх</span><span>Business English · B1</span></div>
       <div class="dots">●●○ 2/3</div>
     </div>
     <div class="bubble">
-      <div class="avatar">🧑‍🏫</div>
-      <div class="msg"><b>Багш:</b> What do you think about the new schedule?
+      <div class="avatar">С</div>
+      <div class="msg"><b data-i18n="coach">Багш:</b> What do you think about the new schedule?
         <span class="mn">Шинэ хуваарийн талаар та юу гэж бодож байна?</span></div>
     </div>
     <div class="example">
-      <div class="lbl">Жишээ хариулт — уншаад хэлээрэй</div>
+      <div class="lbl"><svg class="i"><use href="#i-msg"/></svg><span data-i18n="exLbl">Жишээ хариулт — уншаад хэлээрэй</span></div>
       <div class="en">I think it's a good idea, but we need more time.</div>
       <div class="mn">Сайн санаа гэж бодож байна, гэхдээ бидэнд илүү хугацаа хэрэгтэй.</div>
     </div>
 
     <div class="mic-zone" id="mic-zone">
-      <button class="mic-big" id="mic-btn" aria-label="Ярих">🎤</button>
-      <div class="mic-hint" id="mic-hint">Дараад ярь — 10-30 секунд</div>
+      <button class="mic-big" id="mic-btn" aria-label="Speak"><svg class="i"><use href="#i-mic"/></svg></button>
+      <div class="mic-hint" id="mic-hint" data-i18n="micHint">Дараад ярь — 10-30 секунд</div>
     </div>
 
     <div class="fb-card" id="fb-card" hidden>
@@ -230,107 +305,218 @@
           <div class="corr">"I think it's a good idea, but we need more time."</div>
         </div>
       </div>
-      <div class="tip">💡 «good idea» гэхийн өмнө <b>it's a</b> хэрэгтэй — ганц тоот нэр үгэнд <b>a/an</b> заавал орно.</div>
-      <div class="tense"><b>Дүрмийн тайлбар</b>Таны өгүүлбэр Present Simple хэвээрээ — багш цагийг өөрчлөөгүй, зөвхөн бүтцийг гүйцээсэн. ✅</div>
+      <div class="tip" data-i18n="tip">«good idea» гэхийн өмнө it's a хэрэгтэй — ганц тоот нэр үгэнд a/an заавал орно.</div>
+      <div class="tense"><b><svg class="i"><use href="#i-book"/></svg><span data-i18n="tenseLbl">Дүрмийн тайлбар</span></b><span data-i18n="tenseTxt">Таны өгүүлбэр Present Simple хэвээрээ — багш цагийг өөрчлөөгүй, зөвхөн бүтцийг гүйцээсэн.</span></div>
       <div class="fb-actions">
-        <button class="retry" id="btn-retry">🔁 Дахин</button>
-        <button class="shadow" id="btn-shadow">🗣 Дуурайж хэл</button>
-        <button class="next" data-goto="home">Цааш →</button>
+        <button class="retry" id="btn-retry"><svg class="i"><use href="#i-redo"/></svg><span data-i18n="btnRetry">Дахин</span></button>
+        <button class="shadow" id="btn-shadow"><svg class="i"><use href="#i-mic"/></svg><span data-i18n="btnShadow">Дуурайж хэл</span></button>
+        <button class="next" data-goto="home"><span data-i18n="btnNext">Цааш</span><svg class="i"><use href="#i-arrow"/></svg></button>
       </div>
-      <div class="shadow-ok" id="shadow-ok" hidden>🎯 Сайн давтлаа! Pronunciation 86 — «idea» дээр [aɪˈdɪə] гэж хоёр үет. +6 XP</div>
+      <div class="shadow-ok" id="shadow-ok" hidden data-i18n="shadowOk">Сайн давтлаа! Pronunciation 86 — «idea» дээр [aɪˈdɪə] гэж хоёр үет. +6 XP</div>
     </div>
   </div>
 
   <!-- PATH -->
   <div class="scr" id="scr-path">
-    <div class="app-h"><div class="hi">Миний зам<span>мэргэжилдээ тохируулж сур</span></div></div>
+    <div class="app-h"><div class="hi"><span data-i18n="pathT">Миний зам</span><span class="sub2" data-i18n="pathS">мэргэжилдээ тохируулж сур</span></div></div>
     <div class="tracks">
-      <button class="on">💼 Business</button><button>📞 Sales</button><button>🚚 Logistics</button>
-      <button>✈️ Travel</button><button>🎬 Кино</button><button>☕ Өдөр тутам</button><button>💛 Болзоо</button>
+      <button class="on">Business</button><button>Sales</button><button>Logistics</button>
+      <button>Travel</button><button data-i18n="trMovies">Кино</button><button data-i18n="trDaily">Өдөр тутам</button><button data-i18n="trDating">Болзоо</button>
     </div>
-    <span class="lvl-chip">Түвшин: B1 — 60 сек ярианы шалгалтаар тогтоосон</span>
+    <span class="lvl-chip"><svg class="i"><use href="#i-check"/></svg><span data-i18n="lvlChip">Түвшин: B1 — 60 сек ярианы шалгалтаар тогтоосон</span></span>
     <div class="path">
-      <div class="node done"><div class="acard"><span class="st">✓ Дууссан</span><h4>Өөрийгөө танилцуулах</h4><div class="sub">Оноо 84 · +42 XP</div></div></div>
-      <div class="node done"><div class="acard"><span class="st">✓ Дууссан</span><h4>Утсаар ярих</h4><div class="sub">Оноо 79 · +38 XP</div></div></div>
-      <div class="node cur"><div class="acard"><span class="st">● Одоо</span><h4>Хурал дээр саналаа хэлэх</h4><div class="sub">2/3 солилцоо · үргэлжлүүлэх</div></div></div>
-      <div class="node lock"><div class="acard"><h4>🔒 Имэйлээ ярьж тайлбарлах</h4><div class="sub">Өмнөхөө дуусгаад нээгдэнэ</div></div></div>
-      <div class="node lock"><div class="acard"><h4><span class="prem-star">⭐</span> Ажлын ярилцлагын симуляци</h4><div class="sub">Premium · ОТ, банк, олон улсын компанийн загвараар</div></div></div>
+      <div class="node done"><div class="acard"><span class="st"><svg class="i"><use href="#i-check"/></svg><span data-i18n="stDone">Дууссан</span></span><h4 data-i18n="n1">Өөрийгөө танилцуулах</h4><div class="sub"><span data-i18n="score">Оноо</span> 84 · +42 XP</div></div></div>
+      <div class="node done"><div class="acard"><span class="st"><svg class="i"><use href="#i-check"/></svg><span data-i18n="stDone">Дууссан</span></span><h4 data-i18n="n2">Утсаар ярих</h4><div class="sub"><span data-i18n="score">Оноо</span> 79 · +38 XP</div></div></div>
+      <div class="node cur"><div class="acard"><span class="st"><svg class="i"><use href="#i-play"/></svg><span data-i18n="stCur">Одоо</span></span><h4 data-i18n="lesTitle">Хурал дээр саналаа хэлэх</h4><div class="sub" data-i18n="n3s">2/3 солилцоо — үргэлжлүүлэх</div></div></div>
+      <div class="node lock"><div class="acard"><h4><svg class="i"><use href="#i-lock"/></svg><span data-i18n="n4">Имэйлээ ярьж тайлбарлах</span></h4><div class="sub" data-i18n="n4s">Өмнөхөө дуусгаад нээгдэнэ</div></div></div>
+      <div class="node lock"><div class="acard"><h4><svg class="i prem"><use href="#i-star"/></svg><span data-i18n="n5">Ажлын ярилцлагын симуляци</span></h4><div class="sub" data-i18n="n5s">Premium · банк, уул уурхай, олон улсын компанийн загвараар</div></div></div>
     </div>
   </div>
 
   <!-- PROGRESS -->
   <div class="scr" id="scr-prog">
-    <div class="app-h"><div class="hi">Миний ахиц<span>7 хоногийн тайлан</span></div><span class="pill">🥈 Тууштай</span></div>
+    <div class="app-h"><div class="hi"><span data-i18n="prgT">Миний ахиц</span><span class="sub2" data-i18n="prgS">7 хоногийн тайлан</span></div><span class="pill"><svg class="i" style="color:#8A97A8"><use href="#i-trophy"/></svg><span data-i18n="rank">Тууштай</span></span></div>
     <div class="acard">
-      <h4>Энэ долоо хоног</h4>
+      <h4 class="h-ico"><svg class="i"><use href="#i-chart"/></svg><span data-i18n="wkT">Энэ долоо хоног</span></h4>
       <div class="wk-grid">
-        <div class="m"><b>47 мин</b><span>ярьсан</span> <span class="up">▲ 12</span></div>
-        <div class="m"><b>78 → 84</b><span>дундаж оноо</span> <span class="up">▲ 6</span></div>
-        <div class="m"><b>12</b><span>шинэ хэллэг</span></div>
-        <div class="m"><b>6/7</b><span>өдөр дасгал</span></div>
+        <div class="m"><b>47 <span style="font-size:12px" data-i18n="min">мин</span></b><span data-i18n="mSpoke">ярьсан</span> <span class="up">▲ 12</span></div>
+        <div class="m"><b>78 → 84</b><span data-i18n="mScore">дундаж оноо</span> <span class="up">▲ 6</span></div>
+        <div class="m"><b>12</b><span data-i18n="mPhr">шинэ хэллэг</span></div>
+        <div class="m"><b>6/7</b><span data-i18n="mDays">өдөр дасгал</span></div>
       </div>
-      <div class="sub" style="margin-top:9px">💬 Багш: Past tense алдаа тань 34%-иар багасчээ. Одоо “make/do” хослол дээр анхаарья.</div>
-      <button class="start-btn">📤 Амжилтаа хуваалцах</button>
+      <div class="coach-note"><svg class="i"><use href="#i-msg"/></svg><span data-i18n="insight">Багш: Past tense алдаа тань 34%-иар багасчээ. Одоо "make/do" хослол дээр анхаарья.</span></div>
+      <button class="start-btn"><svg class="i" style="width:17px;height:17px"><use href="#i-share"/></svg><span data-i18n="shareB">Амжилтаа хуваалцах</span></button>
     </div>
     <div class="acard">
-      <h4>Алдааны сан — давталт 📚</h4>
-      <div class="mist"><span>"I <b>am agree</b> with you" → I agree</span><span class="due">өнөөдөр</span></div>
-      <div class="mist"><span>"We <b>discussed about</b> it" → discussed it</span><span class="due">өнөөдөр</span></div>
-      <div class="mist"><span>"a <b>informations</b>" → information</span><span class="due later">маргааш</span></div>
+      <h4 class="h-ico"><svg class="i"><use href="#i-book"/></svg><span data-i18n="mbT">Алдааны сан — давталт</span></h4>
+      <div class="mist"><span>"I <b>am agree</b> with you" → I agree</span><span class="due" data-i18n="dueNow">өнөөдөр</span></div>
+      <div class="mist"><span>"We <b>discussed about</b> it" → discussed it</span><span class="due" data-i18n="dueNow">өнөөдөр</span></div>
+      <div class="mist"><span>"a <b>informations</b>" → information</span><span class="due later" data-i18n="dueTom">маргааш</span></div>
     </div>
     <div class="acard">
-      <h4>Мөнгөн лиг 🏆 <span class="sub" style="font-weight:600">· 3 хоног үлдсэн</span></h4>
+      <h4 class="h-ico"><svg class="i" style="color:#8A97A8"><use href="#i-trophy"/></svg><span data-i18n="lgT">Мөнгөн лиг</span> <span class="sub" style="font-weight:600">· <span data-i18n="lgLeft">3 хоног үлдсэн</span></span></h4>
       <div class="lg-row"><span class="rank">1</span><span class="nm">Энхжин</span><span class="xp">412 XP</span></div>
       <div class="lg-row"><span class="rank">2</span><span class="nm">Тэмүүлэн</span><span class="xp">380 XP</span></div>
-      <div class="lg-row me"><span class="rank">3</span><span class="nm">Болд (та)</span><span class="xp">356 XP</span></div>
+      <div class="lg-row me"><span class="rank">3</span><span class="nm">Болд <span data-i18n="you">(та)</span></span><span class="xp">356 XP</span></div>
       <div class="lg-row"><span class="rank">4</span><span class="nm">Сараа</span><span class="xp">341 XP</span></div>
-      <div class="demote">▼ Сүүлийн 5 нь Хүрэл лиг рүү буна</div>
+      <div class="demote"><svg class="i"><use href="#i-arrow"/></svg><span data-i18n="demote">Сүүлийн 5 нь Хүрэл лиг рүү буна</span></div>
     </div>
   </div>
 
   <!-- PROFILE -->
   <div class="scr" id="scr-prof">
-    <div class="app-h"><div class="hi">Болд<span>Business зам · B1 · 1,240 XP</span></div><span class="pill hot">🔥 12</span></div>
+    <div class="app-h"><div class="hi">Болд<span class="sub2"><span data-i18n="profS">Business зам · B1</span> · 1,240 XP</span></div><span class="pill hot"><svg class="i"><use href="#i-flame"/></svg>12</span></div>
     <div class="plan cur">
-      <div style="display:flex;justify-content:space-between"><span class="nm">Үнэгүй</span><span class="pr">₮0</span></div>
-      <ul><li>Өдөрт 1 дасгал, текст горим</li></ul>
+      <div style="display:flex;justify-content:space-between"><span class="nm" data-i18n="pFree">Үнэгүй</span><span class="pr">₮0</span></div>
+      <ul><li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pFree1">Өдөрт 1 дасгал, текст горим</span></li></ul>
     </div>
     <div class="plan hot">
-      <span class="badge">Санал болгож буй</span>
-      <div style="display:flex;justify-content:space-between"><span class="nm">Gym</span><span class="pr">₮14,900<span>/сар</span></span></div>
-      <ul><li>Өдөр бүр дуут дасгал + давталт</li><li>Бүх мэргэжлийн зам</li><li>3 сар ₮37,900 · 6 сар ₮66,900</li></ul>
+      <span class="badge" data-i18n="pBadge">Санал болгож буй</span>
+      <div style="display:flex;justify-content:space-between"><span class="nm">Gym</span><span class="pr">₮14,900<span data-i18n="perMo">/сар</span></span></div>
+      <ul>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pGym1">Өдөр бүр дуут дасгал + давталт</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pGym2">Бүх мэргэжлийн зам</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pGym3">3 сар ₮37,900 · 6 сар ₮66,900</span></li>
+      </ul>
     </div>
     <div class="plan">
-      <div style="display:flex;justify-content:space-between"><span class="nm">⭐ Premium</span><span class="pr">₮39,900<span>/сар</span></span></div>
-      <ul><li>AI видео дуудлага + ярилцлагын симуляци</li><li>IELTS Speaking оноо, дуудлагын задаргаа</li><li>Өдөр бүр 20:00 live багштай хичээл</li></ul>
+      <div style="display:flex;justify-content:space-between"><span class="nm">Premium</span><span class="pr">₮39,900<span data-i18n="perMo">/сар</span></span></div>
+      <ul>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pPr1">AI видео дуудлага + ярилцлагын симуляци</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pPr2">IELTS Speaking оноо, дуудлагын задаргаа</span></li>
+        <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pPr3">Өдөр бүр 20:00 live багштай хичээл</span></li>
+      </ul>
     </div>
-    <div class="acard" style="display:flex;align-items:center;gap:10px">
-      <div style="flex:1"><h4 style="margin:0">Найзаа урь 🎁</h4><div class="sub">Найз тань 7 хоног Premium авна, та ❄️ хамгаалагч</div></div>
-      <button class="row-btn">Урих</button>
+    <div class="acard icon-lead">
+      <div class="lead fr"><svg class="i"><use href="#i-gift"/></svg></div>
+      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="refT">Найзаа урь</h4><div class="sub" data-i18n="refS">Найз тань 7 хоног Premium авна, та стрик хамгаалагч</div></div>
+      <button class="row-btn"><span data-i18n="refB">Урих</span></button>
     </div>
     <div class="acard">
-      <div class="setrow"><span>⏰ Сануулга</span><span class="val">19:00</span></div>
-      <div class="setrow"><span>🗣 Багшийн хоолой</span><span class="val">Сараа (эмэгтэй)</span></div>
-      <div class="setrow"><span>🇲🇳 Монгол орчуулга</span><span class="val">Асаалттай</span></div>
-      <div class="setrow"><span>🏢 Байгууллагын багц</span><span class="val">Холбогдох →</span></div>
+      <div class="setrow"><svg class="i"><use href="#i-clock"/></svg><span class="lbl2" data-i18n="sRem">Сануулга</span><span class="val">19:00</span></div>
+      <div class="setrow"><svg class="i"><use href="#i-mic"/></svg><span class="lbl2" data-i18n="sVoice">Багшийн хоолой</span><span class="val" data-i18n="sVoiceV">Сараа (эмэгтэй)</span></div>
+      <div class="setrow"><svg class="i"><use href="#i-globe"/></svg><span class="lbl2" data-i18n="sLang">Апп-ын хэл</span><button class="val" id="lang-btn2" style="font-weight:800;color:var(--blue)">Монгол → English</button></div>
+      <div class="setrow"><svg class="i"><use href="#i-building"/></svg><span class="lbl2" data-i18n="sCorp">Байгууллагын багц</span><span class="val" data-i18n="sCorpV">Холбогдох →</span></div>
     </div>
-    <div class="proto">Prototype v0 — дата жишээ. Жинхэнэ дасгал: <b>t.me/Talking_gym_bot</b></div>
+    <div class="proto"><span data-i18n="proto">Prototype v0 — дата жишээ. Жинхэнэ дасгал:</span> <b>t.me/Talking_gym_bot</b></div>
   </div>
 
 </main>
 
 <!-- TAB BAR -->
 <div class="tabbar">
-  <button data-scr="home" aria-pressed="true"><span class="ico">🏠</span>Нүүр</button>
-  <button data-scr="path" aria-pressed="false"><span class="ico">🧭</span>Зам</button>
-  <button data-scr="lesson" aria-pressed="false" class="mic-tab"><span class="ico">🎤</span>Дасгал</button>
-  <button data-scr="prog" aria-pressed="false"><span class="ico">📈</span>Ахиц</button>
-  <button data-scr="prof" aria-pressed="false"><span class="ico">👤</span>Би</button>
+  <button data-scr="home" aria-pressed="true"><svg class="i"><use href="#i-home"/></svg><span data-i18n="tbHome">Нүүр</span></button>
+  <button data-scr="path" aria-pressed="false"><svg class="i"><use href="#i-route"/></svg><span data-i18n="tbPath">Зам</span></button>
+  <button data-scr="lesson" aria-pressed="false" class="mic-tab"><span class="tw"><svg class="i"><use href="#i-mic"/></svg></span><span data-i18n="tbTrain">Дасгал</span></button>
+  <button data-scr="prog" aria-pressed="false"><svg class="i"><use href="#i-chart"/></svg><span data-i18n="tbProg">Ахиц</span></button>
+  <button data-scr="prof" aria-pressed="false"><svg class="i"><use href="#i-user"/></svg><span data-i18n="tbMe">Би</span></button>
 </div>
 </div>
 
 <script>
 (function(){
+  /* ---------- i18n ---------- */
+  var STR = {
+    mn: {
+      greet:"Өглөөний мэнд, Болд", d1:"Да",d2:"Мя",d3:"Лх",d4:"Пү",d5:"Ба",d6:"Бя",d7:"Ня",
+      todayLbl:"Өнөөдрийн дасгал · таны зам", lesTitle:"Хурал дээр саналаа хэлэх",
+      lesMeta:"5 мин · 3 солилцоо · +40 XP", start:"Эхлэх",
+      liveT:"Өнөөдөр 20:00 — багш Сараатай live хичээл", liveS:"Premium · түвшин тус бүрээр · 30 мин", join:"Орох",
+      revT:"Давталтын цаг", revS:"Алдааны сангаас 3 өгүүлбэр бэлэн боллоо", revB:"Давтах",
+      frT:"Найзын стрик", frS:"Сараа өнөөдөр дасгалаа хийгээгүй байна", frB:"Сануул",
+      coach:"Багш:", exLbl:"Жишээ хариулт — уншаад хэлээрэй",
+      micHint:"Дараад ярь — 10-30 секунд", micRec:"Сонсож байна... дахин дарж дуусга",
+      tip:"«good idea» гэхийн өмнө it's a хэрэгтэй — ганц тоот нэр үгэнд a/an заавал орно.",
+      tenseLbl:"Дүрмийн тайлбар",
+      tenseTxt:"Таны өгүүлбэр Present Simple хэвээрээ — багш цагийг өөрчлөөгүй, зөвхөн бүтцийг гүйцээсэн.",
+      btnRetry:"Дахин", btnShadow:"Дуурайж хэл", btnNext:"Цааш",
+      shadowOk:"Сайн давтлаа! Pronunciation 86 — «idea» дээр [aɪˈdɪə] гэж хоёр үет. +6 XP",
+      pathT:"Миний зам", pathS:"мэргэжилдээ тохируулж сур",
+      trMovies:"Кино", trDaily:"Өдөр тутам", trDating:"Болзоо",
+      lvlChip:"Түвшин: B1 — 60 сек ярианы шалгалтаар тогтоосон",
+      stDone:"Дууссан", stCur:"Одоо", score:"Оноо",
+      n1:"Өөрийгөө танилцуулах", n2:"Утсаар ярих", n3s:"2/3 солилцоо — үргэлжлүүлэх",
+      n4:"Имэйлээ ярьж тайлбарлах", n4s:"Өмнөхөө дуусгаад нээгдэнэ",
+      n5:"Ажлын ярилцлагын симуляци", n5s:"Premium · банк, уул уурхай, олон улсын компанийн загвараар",
+      prgT:"Миний ахиц", prgS:"7 хоногийн тайлан", rank:"Тууштай", wkT:"Энэ долоо хоног", min:"мин",
+      mSpoke:"ярьсан", mScore:"дундаж оноо", mPhr:"шинэ хэллэг", mDays:"өдөр дасгал",
+      insight:"Багш: Past tense алдаа тань 34%-иар багасчээ. Одоо \"make/do\" хослол дээр анхаарья.",
+      shareB:"Амжилтаа хуваалцах", mbT:"Алдааны сан — давталт", dueNow:"өнөөдөр", dueTom:"маргааш",
+      lgT:"Мөнгөн лиг", lgLeft:"3 хоног үлдсэн", you:"(та)", demote:"Сүүлийн 5 нь Хүрэл лиг рүү буна",
+      profS:"Business зам · B1", pFree:"Үнэгүй", pFree1:"Өдөрт 1 дасгал, текст горим",
+      pBadge:"Санал болгож буй", perMo:"/сар",
+      pGym1:"Өдөр бүр дуут дасгал + давталт", pGym2:"Бүх мэргэжлийн зам", pGym3:"3 сар ₮37,900 · 6 сар ₮66,900",
+      pPr1:"AI видео дуудлага + ярилцлагын симуляци", pPr2:"IELTS Speaking оноо, дуудлагын задаргаа", pPr3:"Өдөр бүр 20:00 live багштай хичээл",
+      refT:"Найзаа урь", refS:"Найз тань 7 хоног Premium авна, та стрик хамгаалагч", refB:"Урих",
+      sRem:"Сануулга", sVoice:"Багшийн хоолой", sVoiceV:"Сараа (эмэгтэй)", sLang:"Апп-ын хэл",
+      sCorp:"Байгууллагын багц", sCorpV:"Холбогдох →",
+      proto:"Prototype v0 — дата жишээ. Жинхэнэ дасгал:",
+      tbHome:"Нүүр", tbPath:"Зам", tbTrain:"Дасгал", tbProg:"Ахиц", tbMe:"Би",
+      langBtn:"EN", langRow:"Монгол → English"
+    },
+    en: {
+      greet:"Good morning, Bold", d1:"Mo",d2:"Tu",d3:"We",d4:"Th",d5:"Fr",d6:"Sa",d7:"Su",
+      todayLbl:"Today's workout · your path", lesTitle:"Speaking up in a meeting",
+      lesMeta:"5 min · 3 turns · +40 XP", start:"Start",
+      liveT:"Today 20:00 — live class with teacher Saraa", liveS:"Premium · by level · 30 min", join:"Join",
+      revT:"Review time", revS:"3 sentences ready from your mistake bank", revB:"Review",
+      frT:"Friend streak", frS:"Saraa hasn't trained today", frB:"Nudge",
+      coach:"Coach:", exLbl:"Example answer — read it aloud",
+      micHint:"Tap and speak — 10-30 seconds", micRec:"Listening... tap again to finish",
+      tip:"Add \"it's a\" before \"good idea\" — singular nouns need a/an.",
+      tenseLbl:"Grammar note",
+      tenseTxt:"Your sentence stays in Present Simple — the coach kept your tense and only completed the structure.",
+      btnRetry:"Retry", btnShadow:"Repeat after", btnNext:"Next",
+      shadowOk:"Great repeat! Pronunciation 86 — \"idea\" has two syllables [aɪˈdɪə]. +6 XP",
+      pathT:"My path", pathS:"learn for your profession",
+      trMovies:"Movies", trDaily:"Daily life", trDating:"Dating",
+      lvlChip:"Level: B1 — set by a 60-sec speaking test",
+      stDone:"Done", stCur:"Now", score:"Score",
+      n1:"Introducing yourself", n2:"Talking on the phone", n3s:"2/3 turns — continue",
+      n4:"Explaining your email", n4s:"Finish the previous one to unlock",
+      n5:"Job interview simulation", n5s:"Premium · bank, mining & international company formats",
+      prgT:"My progress", prgS:"weekly report", rank:"Consistent", wkT:"This week", min:"min",
+      mSpoke:"spoken", mScore:"average score", mPhr:"new phrases", mDays:"days trained",
+      insight:"Coach: your past-tense errors dropped 34%. Next up: \"make/do\" collocations.",
+      shareB:"Share your progress", mbT:"Mistake bank — review", dueNow:"today", dueTom:"tomorrow",
+      lgT:"Silver League", lgLeft:"3 days left", you:"(you)", demote:"Bottom 5 drop to Bronze League",
+      profS:"Business path · B1", pFree:"Free", pFree1:"1 workout per day, text mode",
+      pBadge:"Recommended", perMo:"/mo",
+      pGym1:"Daily voice workouts + review", pGym2:"All profession paths", pGym3:"3 mo ₮37,900 · 6 mo ₮66,900",
+      pPr1:"AI video calls + interview simulation", pPr2:"IELTS Speaking scores, pronunciation breakdown", pPr3:"Daily 20:00 live class with a real teacher",
+      refT:"Invite a friend", refS:"They get 7 days of Premium, you get a streak freeze", refB:"Invite",
+      sRem:"Reminder", sVoice:"Coach voice", sVoiceV:"Saraa (female)", sLang:"App language",
+      sCorp:"For teams", sCorpV:"Contact us →",
+      proto:"Prototype v0 — sample data. Real workouts:",
+      tbHome:"Home", tbPath:"Path", tbTrain:"Train", tbProg:"Progress", tbMe:"Me",
+      langBtn:"МН", langRow:"English → Монгол"
+    }
+  };
+  var lang = new URLSearchParams(location.search).get('lang') ||
+             (function(){ try { return localStorage.getItem('tg-lang'); } catch(e){ return null; } })() || 'mn';
+  if (lang !== 'en') lang = 'mn';
+
+  function applyLang(){
+    var d = STR[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var k = el.getAttribute('data-i18n');
+      if (d[k] !== undefined) el.textContent = d[k];
+    });
+    var b1 = document.getElementById('lang-btn'), b2 = document.getElementById('lang-btn2');
+    if (b1) b1.textContent = d.langBtn;
+    if (b2) b2.textContent = d.langRow;
+  }
+  function toggleLang(){
+    lang = (lang === 'mn') ? 'en' : 'mn';
+    try { localStorage.setItem('tg-lang', lang); } catch(e){}
+    applyLang();
+  }
+  document.getElementById('lang-btn').addEventListener('click', toggleLang);
+  document.getElementById('lang-btn2').addEventListener('click', toggleLang);
+  applyLang();
+
+  /* ---------- navigation ---------- */
   var screens = ['home','lesson','path','prog','prof'];
   var main = document.querySelector('main');
   function show(id){
@@ -350,6 +536,7 @@
     b.addEventListener('click', function(){ show(b.getAttribute('data-goto')); });
   });
 
+  /* ---------- lesson demo ---------- */
   var mic = document.getElementById('mic-btn'),
       hint = document.getElementById('mic-hint'),
       zone = document.getElementById('mic-zone'),
@@ -358,18 +545,20 @@
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function resetLesson(){
     fb.hidden = true; shadowOk.hidden = true; zone.style.display='';
-    mic.classList.remove('rec'); hint.textContent = 'Дараад ярь — 10-30 секунд';
+    mic.classList.remove('rec'); hint.textContent = STR[lang].micHint;
+    var ring = document.getElementById('prog-ring');
+    if (ring) ring.style.strokeDasharray = '0 157';
   }
   if(mic){
     mic.addEventListener('click', function(){
       if(mic.classList.contains('rec')) return;
-      mic.classList.add('rec'); hint.textContent = '🔴 Сонсож байна... дахин дарж дуусга';
+      mic.classList.add('rec'); hint.textContent = STR[lang].micRec;
       setTimeout(function(){
         mic.classList.remove('rec'); zone.style.display='none'; fb.hidden = false;
         fb.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'nearest'});
         var ring = document.getElementById('prog-ring');
         if (ring) requestAnimationFrame(function(){ requestAnimationFrame(function(){
-          ring.style.strokeDasharray = '129 157';   // score ring sweeps to 82
+          ring.style.strokeDasharray = '129 157';
         });});
       }, reduced ? 200 : 1600);
     });
