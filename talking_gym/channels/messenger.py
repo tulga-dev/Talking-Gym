@@ -17,9 +17,12 @@ import html as html_mod
 import json
 import logging
 import re
+from pathlib import Path
 
 import httpx
 from aiohttp import web
+
+_WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
 from .. import coach, db
 from ..config import config
@@ -338,11 +341,27 @@ async def _health(request: web.Request) -> web.Response:
     return web.Response(text="Talking Gym is up 🏋️")
 
 
+def _file_route(filename: str, content_type: str | None = None):
+    path = _WEB_DIR / filename
+
+    async def handler(request: web.Request) -> web.FileResponse:
+        headers = {"Content-Type": content_type} if content_type else None
+        return web.FileResponse(path, headers=headers)
+
+    return handler
+
+
 async def start_web_server() -> web.AppRunner:
     app = web.Application()
     app.router.add_get("/", _health)
     app.router.add_get("/webhooks/messenger", _webhook_get)
     app.router.add_post("/webhooks/messenger", _webhook_post)
+    # PWA app prototype (installable; served from talking_gym/web/)
+    app.router.add_get("/app", _file_route("app.html"))
+    app.router.add_get("/app/manifest.webmanifest", _file_route("manifest.webmanifest", "application/manifest+json"))
+    app.router.add_get("/app/sw.js", _file_route("sw.js", "text/javascript"))
+    app.router.add_get("/app/icon-192.png", _file_route("icon-192.png"))
+    app.router.add_get("/app/icon-512.png", _file_route("icon-512.png"))
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", config.web_port)

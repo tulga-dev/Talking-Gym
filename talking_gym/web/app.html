@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Talking Gym</title>
+<meta name="theme-color" content="#0063FF">
+<link rel="manifest" href="/app/manifest.webmanifest">
+<link rel="icon" href="/app/icon-192.png">
+<link rel="apple-touch-icon" href="/app/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+  :root{
+    --blue:#0063FF; --blue-2:#4094ED; --sky:#EBF6FD; --sky-2:#F5FAFF;
+    --yellow:#FFCB3D; --yellow-d:#E8AE1B; --orange:#FF9900; --green:#36B35D;
+    --purple:#A142F5; --purple-t:#F1E2FD; --red:#ED5C3B;
+    --ink:#1B2733; --mut:#5E6B7A; --line:#E5E7EB;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important} }
+  html,body{height:100%}
+  body{font-family:'Poppins','Century Gothic','Segoe UI',Roboto,sans-serif;background:#DCE7F2;color:var(--ink);line-height:1.5;font-size:15px}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:8px}
+
+  .shell{max-width:480px;margin:0 auto;min-height:100dvh;background:var(--sky-2);display:flex;flex-direction:column;position:relative;box-shadow:0 0 40px rgba(27,39,51,.15)}
+  main{flex:1;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) 16px calc(86px + env(safe-area-inset-bottom))}
+  .scr{display:none}
+  .scr.active{display:block;animation:fadein .18s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:calc(68px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;align-items:stretch;z-index:20}
+  .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:700;color:var(--mut)}
+  .tabbar button .ico{font-size:21px;line-height:1}
+  .tabbar button[aria-pressed="true"]{color:var(--blue)}
+  .tabbar .mic-tab .ico{width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:23px;margin-top:-26px;box-shadow:0 6px 16px rgba(0,99,255,.4)}
+
+  .app-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+  .app-h .hi{font-size:17px;font-weight:800}
+  .app-h .hi span{display:block;font-size:11.5px;font-weight:600;color:var(--mut)}
+  .stat-pills{display:flex;gap:7px}
+  .pill{font-size:12px;font-weight:800;background:#fff;border-radius:60px;padding:6px 12px;box-shadow:0 2px 8px rgba(27,39,51,.08);font-variant-numeric:tabular-nums}
+  .pill.hot{color:var(--orange)}
+  .pill.enr{color:var(--blue)}
+  .acard{background:#fff;border-radius:20px;padding:15px 16px;margin-bottom:11px;box-shadow:0 4px 14px rgba(27,39,51,.07)}
+  .acard h4{font-size:14.5px;font-weight:800;margin-bottom:5px}
+  .acard .sub{font-size:12px;color:var(--mut)}
+  .week{display:flex;justify-content:space-between;margin:4px 2px 14px}
+  .week span{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:#fff;color:var(--mut);box-shadow:inset 0 0 0 2px var(--line)}
+  .week span.done{background:var(--green);color:#fff;box-shadow:none}
+  .week span.today{background:var(--yellow);color:var(--ink);box-shadow:0 0 0 3px rgba(255,203,61,.35)}
+  .today-card{background:var(--blue);color:#fff;box-shadow:0 10px 24px rgba(0,99,255,.3)}
+  .today-card .track{font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--yellow)}
+  .today-card h4{color:#fff;font-size:17px;margin:6px 0 3px}
+  .today-card .sub{color:#BBD4FF}
+  .start-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--yellow);color:var(--ink);font-weight:800;font-size:15px;padding:14px;border-radius:60px;margin-top:12px;box-shadow:0 4px 0 var(--yellow-d)}
+  .start-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--yellow-d)}
+  .live-band{display:flex;gap:10px;align-items:center;background:#FDEEEA;box-shadow:none;border:2px solid #F6CDC2}
+  .live-dot{width:10px;height:10px;border-radius:50%;background:var(--red);flex:none;animation:blink 1.4s infinite}
+  @keyframes blink{50%{opacity:.35}}
+  .live-band .t{font-size:12.5px;font-weight:700;line-height:1.4}
+  .live-band .t span{color:var(--mut);font-weight:600;font-size:11px;display:block}
+  .row-btn{font-size:12.5px;font-weight:800;color:#fff;background:var(--blue);padding:9px 16px;border-radius:60px;flex:none}
+
+  .les-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .les-head .t{font-size:14px;font-weight:800}
+  .les-head .t span{display:block;font-size:11px;color:var(--mut);font-weight:600}
+  .dots{font-size:13px;color:var(--blue);font-weight:800;letter-spacing:1px}
+  .bubble{display:flex;gap:10px;margin-bottom:12px}
+  .avatar{width:42px;height:42px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-size:21px;flex:none;box-shadow:0 2px 0 var(--yellow-d)}
+  .bubble .msg{background:#fff;border-radius:4px 18px 18px 18px;padding:12px 14px;font-size:14px;box-shadow:0 3px 10px rgba(27,39,51,.08)}
+  .bubble .msg .mn{display:block;font-size:12.5px;color:var(--mut);font-style:italic;margin-top:5px}
+  .example{background:#FFF6DE;border:2px dashed var(--yellow);border-radius:18px;padding:12px 14px;margin-bottom:14px}
+  .example .lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--yellow-d);margin-bottom:4px}
+  .example .en{font-size:15px;font-weight:800}
+  .example .mn{font-size:12.5px;color:var(--mut);font-style:italic;margin-top:2px}
+  .mic-zone{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0 8px}
+  .mic-big{width:88px;height:88px;border-radius:50%;background:var(--blue);color:#fff;font-size:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,99,255,.4),0 0 0 14px var(--sky)}
+  .mic-big.rec{animation:pulse 1s infinite;background:var(--red)}
+  @keyframes pulse{50%{box-shadow:0 10px 24px rgba(237,92,59,.4),0 0 0 26px rgba(237,92,59,.12)}}
+  .mic-hint{font-size:12.5px;color:var(--mut);font-weight:600}
+  .fb-card{background:#fff;border-radius:20px;padding:15px;box-shadow:0 6px 18px rgba(27,39,51,.1)}
+  .fb-top{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+  .ring{width:70px;height:70px;flex:none}
+  .fb-top .yours{font-size:12px;color:var(--mut);text-decoration:line-through}
+  .fb-top .corr{font-size:14.5px;font-weight:800;margin-top:3px}
+  .tip{font-size:13px;background:var(--sky);border-radius:14px;padding:10px 12px;margin-bottom:9px}
+  .tense{font-size:12px;background:var(--purple-t);color:#6B2FB3;border-radius:14px;padding:10px 12px;margin-bottom:11px;line-height:1.5}
+  .tense b{display:block;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px}
+  .fb-actions{display:flex;gap:8px}
+  .fb-actions button{flex:1;font-size:12px;font-weight:800;padding:12px 4px;border-radius:60px}
+  .fb-actions .retry{background:#EEF1F4;color:var(--ink)}
+  .fb-actions .shadow{background:var(--yellow);color:var(--ink);box-shadow:0 3px 0 var(--yellow-d)}
+  .fb-actions .next{background:var(--blue);color:#fff}
+  .shadow-ok{background:#E4F5EA;border-radius:14px;padding:11px 13px;font-size:12.5px;font-weight:700;color:#1F7A3F;margin-top:10px}
+
+  .tracks{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+  .tracks button{font-size:12px;font-weight:700;padding:8px 15px;border-radius:60px;background:#fff;color:var(--mut);box-shadow:inset 0 0 0 2px var(--line)}
+  .tracks button.on{background:var(--blue);color:#fff;box-shadow:none}
+  .lvl-chip{display:inline-block;font-size:11px;font-weight:800;background:#E4F5EA;color:var(--green);padding:6px 14px;border-radius:60px;margin-bottom:13px}
+  .path{position:relative;padding-left:28px}
+  .path::before{content:"";position:absolute;left:12px;top:8px;bottom:8px;width:4px;background:#DDE7F2;border-radius:2px}
+  .node{position:relative;margin-bottom:11px}
+  .node::before{content:"";position:absolute;left:-23px;top:14px;width:16px;height:16px;border-radius:50%;background:#C9D6E6;border:3px solid var(--sky-2)}
+  .node.done::before{background:var(--green)}
+  .node.cur::before{background:var(--yellow);box-shadow:0 0 0 4px rgba(255,203,61,.4)}
+  .node .acard{margin-bottom:0}
+  .node .st{font-size:10.5px;font-weight:800;color:var(--green)}
+  .node.cur .st{color:var(--yellow-d)}
+  .node.lock{opacity:.55}
+  .prem-star{color:var(--purple)}
+
+  .wk-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:5px}
+  .wk-grid .m{background:var(--sky);border-radius:14px;padding:10px 12px}
+  .wk-grid .m b{font-size:18px;font-variant-numeric:tabular-nums;display:block}
+  .wk-grid .m span{font-size:10.5px;color:var(--mut);font-weight:700}
+  .wk-grid .m .up{color:var(--green);font-size:11px;font-weight:800}
+  .mist{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+  .mist:last-child{border:none}
+  .mist .due{font-size:10.5px;font-weight:800;padding:4px 11px;border-radius:60px;background:#FFF1D6;color:var(--yellow-d);flex:none;margin-left:8px}
+  .mist .due.later{background:#EEF1F4;color:var(--mut)}
+  .lg-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .lg-row:last-child{border:none}
+  .lg-row .rank{width:20px;font-weight:800;color:var(--mut);font-variant-numeric:tabular-nums}
+  .lg-row .nm{flex:1;font-weight:700}
+  .lg-row .xp{font-weight:800;font-variant-numeric:tabular-nums;color:var(--blue)}
+  .lg-row.me{background:#FFF6DE;border-radius:12px;padding:8px 10px}
+  .demote{font-size:10.5px;color:var(--red);font-weight:700;text-align:center;padding-top:7px}
+
+  .plan{border:2.5px solid var(--line);border-radius:18px;padding:13px 14px;margin-bottom:9px;position:relative;background:#fff}
+  .plan.cur{border-color:var(--green)}
+  .plan.hot{border-color:var(--blue);background:var(--sky-2)}
+  .plan .nm{font-weight:800;font-size:14.5px}
+  .plan .pr{font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+  .plan .pr span{font-size:11px;color:var(--mut);font-weight:600}
+  .plan ul{list-style:none;margin-top:6px}
+  .plan li{font-size:12px;color:var(--mut);padding-left:18px;position:relative;margin-bottom:3px}
+  .plan li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:900}
+  .plan .badge{position:absolute;top:-11px;right:13px;background:var(--yellow);color:var(--ink);font-size:9.5px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:60px;text-transform:uppercase}
+  .setrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px;font-weight:700}
+  .setrow:last-child{border:none}
+  .setrow .val{color:var(--mut);font-weight:600}
+  .proto{font-size:11px;color:var(--mut);text-align:center;padding:14px 10px 4px}
+</style>
+</head>
+<body>
+<div class="shell">
+<main>
+
+  <!-- HOME -->
+  <div class="scr active" id="scr-home">
+    <div class="app-h">
+      <div class="hi">Өглөөний мэнд, Болд 👋<span>Business English · B1</span></div>
+      <div class="stat-pills"><span class="pill hot">🔥 12</span><span class="pill enr">⚡ 4/5</span></div>
+    </div>
+    <div class="week">
+      <span class="done">Да</span><span class="done">Мя</span><span class="done">Лх</span>
+      <span class="today">Пү</span><span>Ба</span><span>Бя</span><span>Ня</span>
+    </div>
+    <div class="acard today-card">
+      <div class="track">Өнөөдрийн дасгал · таны зам</div>
+      <h4>Хурал дээр саналаа хэлэх</h4>
+      <div class="sub">5 мин · 3 солилцоо · +40 XP · ❄️ хамгаалагч: 1</div>
+      <button class="start-btn" data-goto="lesson">🎤 Эхлэх</button>
+    </div>
+    <div class="acard live-band">
+      <div class="live-dot"></div>
+      <div class="t" style="flex:1">Өнөөдөр 20:00 — багш Сараатай live хичээл<span>Premium · түвшин тус бүрээр · 30 мин</span></div>
+      <button class="row-btn">Орох</button>
+    </div>
+    <div class="acard" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><h4 style="margin:0">Давталтын цаг 📚</h4><div class="sub">Алдааны сангаас 3 өгүүлбэр бэлэн боллоо</div></div>
+      <button class="row-btn" data-goto="prog">Давтах</button>
+    </div>
+    <div class="acard" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><h4 style="margin:0">Найзын стрик 🤝</h4><div class="sub">Сараа өнөөдөр дасгалаа хийгээгүй байна</div></div>
+      <button class="row-btn">🔔 Сануул</button>
+    </div>
+  </div>
+
+  <!-- LESSON -->
+  <div class="scr" id="scr-lesson">
+    <div class="les-head">
+      <div class="t">Хурал дээр саналаа хэлэх<span>Business English · B1</span></div>
+      <div class="dots">●●○ 2/3</div>
+    </div>
+    <div class="bubble">
+      <div class="avatar">🧑‍🏫</div>
+      <div class="msg"><b>Багш:</b> What do you think about the new schedule?
+        <span class="mn">Шинэ хуваарийн талаар та юу гэж бодож байна?</span></div>
+    </div>
+    <div class="example">
+      <div class="lbl">Жишээ хариулт — уншаад хэлээрэй</div>
+      <div class="en">I think it's a good idea, but we need more time.</div>
+      <div class="mn">Сайн санаа гэж бодож байна, гэхдээ бидэнд илүү хугацаа хэрэгтэй.</div>
+    </div>
+
+    <div class="mic-zone" id="mic-zone">
+      <button class="mic-big" id="mic-btn" aria-label="Ярих">🎤</button>
+      <div class="mic-hint" id="mic-hint">Дараад ярь — 10-30 секунд</div>
+    </div>
+
+    <div class="fb-card" id="fb-card" hidden>
+      <div class="fb-top">
+        <svg class="ring" viewBox="0 0 60 60" aria-hidden="true">
+          <circle cx="30" cy="30" r="25" fill="none" stroke="#E5EDF6" stroke-width="7"/>
+          <circle cx="30" cy="30" r="25" fill="none" stroke="#36B35D" stroke-width="7"
+            stroke-linecap="round" stroke-dasharray="129 157" transform="rotate(-90 30 30)"/>
+          <text x="30" y="35" text-anchor="middle" font-size="15" font-weight="800" fill="#1B2733">82</text>
+        </svg>
+        <div>
+          <div class="yours">I think good idea but need more time</div>
+          <div class="corr">"I think it's a good idea, but we need more time."</div>
+        </div>
+      </div>
+      <div class="tip">💡 «good idea» гэхийн өмнө <b>it's a</b> хэрэгтэй — ганц тоот нэр үгэнд <b>a/an</b> заавал орно.</div>
+      <div class="tense"><b>Дүрмийн тайлбар</b>Таны өгүүлбэр Present Simple хэвээрээ — багш цагийг өөрчлөөгүй, зөвхөн бүтцийг гүйцээсэн. ✅</div>
+      <div class="fb-actions">
+        <button class="retry" id="btn-retry">🔁 Дахин</button>
+        <button class="shadow" id="btn-shadow">🗣 Дуурайж хэл</button>
+        <button class="next" data-goto="home">Цааш →</button>
+      </div>
+      <div class="shadow-ok" id="shadow-ok" hidden>🎯 Сайн давтлаа! Pronunciation 86 — «idea» дээр [aɪˈdɪə] гэж хоёр үет. +6 XP</div>
+    </div>
+  </div>
+
+  <!-- PATH -->
+  <div class="scr" id="scr-path">
+    <div class="app-h"><div class="hi">Миний зам<span>мэргэжилдээ тохируулж сур</span></div></div>
+    <div class="tracks">
+      <button class="on">💼 Business</button><button>📞 Sales</button><button>🚚 Logistics</button>
+      <button>✈️ Travel</button><button>🎬 Кино</button><button>☕ Өдөр тутам</button><button>💛 Болзоо</button>
+    </div>
+    <span class="lvl-chip">Түвшин: B1 — 60 сек ярианы шалгалтаар тогтоосон</span>
+    <div class="path">
+      <div class="node done"><div class="acard"><span class="st">✓ Дууссан</span><h4>Өөрийгөө танилцуулах</h4><div class="sub">Оноо 84 · +42 XP</div></div></div>
+      <div class="node done"><div class="acard"><span class="st">✓ Дууссан</span><h4>Утсаар ярих</h4><div class="sub">Оноо 79 · +38 XP</div></div></div>
+      <div class="node cur"><div class="acard"><span class="st">● Одоо</span><h4>Хурал дээр саналаа хэлэх</h4><div class="sub">2/3 солилцоо · үргэлжлүүлэх</div></div></div>
+      <div class="node lock"><div class="acard"><h4>🔒 Имэйлээ ярьж тайлбарлах</h4><div class="sub">Өмнөхөө дуусгаад нээгдэнэ</div></div></div>
+      <div class="node lock"><div class="acard"><h4><span class="prem-star">⭐</span> Ажлын ярилцлагын симуляци</h4><div class="sub">Premium · ОТ, банк, олон улсын компанийн загвараар</div></div></div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="scr" id="scr-prog">
+    <div class="app-h"><div class="hi">Миний ахиц<span>7 хоногийн тайлан</span></div><span class="pill">🥈 Тууштай</span></div>
+    <div class="acard">
+      <h4>Энэ долоо хоног</h4>
+      <div class="wk-grid">
+        <div class="m"><b>47 мин</b><span>ярьсан</span> <span class="up">▲ 12</span></div>
+        <div class="m"><b>78 → 84</b><span>дундаж оноо</span> <span class="up">▲ 6</span></div>
+        <div class="m"><b>12</b><span>шинэ хэллэг</span></div>
+        <div class="m"><b>6/7</b><span>өдөр дасгал</span></div>
+      </div>
+      <div class="sub" style="margin-top:9px">💬 Багш: Past tense алдаа тань 34%-иар багасчээ. Одоо “make/do” хослол дээр анхаарья.</div>
+      <button class="start-btn">📤 Амжилтаа хуваалцах</button>
+    </div>
+    <div class="acard">
+      <h4>Алдааны сан — давталт 📚</h4>
+      <div class="mist"><span>"I <b>am agree</b> with you" → I agree</span><span class="due">өнөөдөр</span></div>
+      <div class="mist"><span>"We <b>discussed about</b> it" → discussed it</span><span class="due">өнөөдөр</span></div>
+      <div class="mist"><span>"a <b>informations</b>" → information</span><span class="due later">маргааш</span></div>
+    </div>
+    <div class="acard">
+      <h4>Мөнгөн лиг 🏆 <span class="sub" style="font-weight:600">· 3 хоног үлдсэн</span></h4>
+      <div class="lg-row"><span class="rank">1</span><span class="nm">Энхжин</span><span class="xp">412 XP</span></div>
+      <div class="lg-row"><span class="rank">2</span><span class="nm">Тэмүүлэн</span><span class="xp">380 XP</span></div>
+      <div class="lg-row me"><span class="rank">3</span><span class="nm">Болд (та)</span><span class="xp">356 XP</span></div>
+      <div class="lg-row"><span class="rank">4</span><span class="nm">Сараа</span><span class="xp">341 XP</span></div>
+      <div class="demote">▼ Сүүлийн 5 нь Хүрэл лиг рүү буна</div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="scr" id="scr-prof">
+    <div class="app-h"><div class="hi">Болд<span>Business зам · B1 · 1,240 XP</span></div><span class="pill hot">🔥 12</span></div>
+    <div class="plan cur">
+      <div style="display:flex;justify-content:space-between"><span class="nm">Үнэгүй</span><span class="pr">₮0</span></div>
+      <ul><li>Өдөрт 1 дасгал, текст горим</li></ul>
+    </div>
+    <div class="plan hot">
+      <span class="badge">Санал болгож буй</span>
+      <div style="display:flex;justify-content:space-between"><span class="nm">Gym</span><span class="pr">₮14,900<span>/сар</span></span></div>
+      <ul><li>Өдөр бүр дуут дасгал + давталт</li><li>Бүх мэргэжлийн зам</li><li>3 сар ₮37,900 · 6 сар ₮66,900</li></ul>
+    </div>
+    <div class="plan">
+      <div style="display:flex;justify-content:space-between"><span class="nm">⭐ Premium</span><span class="pr">₮39,900<span>/сар</span></span></div>
+      <ul><li>AI видео дуудлага + ярилцлагын симуляци</li><li>IELTS Speaking оноо, дуудлагын задаргаа</li><li>Өдөр бүр 20:00 live багштай хичээл</li></ul>
+    </div>
+    <div class="acard" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><h4 style="margin:0">Найзаа урь 🎁</h4><div class="sub">Найз тань 7 хоног Premium авна, та ❄️ хамгаалагч</div></div>
+      <button class="row-btn">Урих</button>
+    </div>
+    <div class="acard">
+      <div class="setrow"><span>⏰ Сануулга</span><span class="val">19:00</span></div>
+      <div class="setrow"><span>🗣 Багшийн хоолой</span><span class="val">Сараа (эмэгтэй)</span></div>
+      <div class="setrow"><span>🇲🇳 Монгол орчуулга</span><span class="val">Асаалттай</span></div>
+      <div class="setrow"><span>🏢 Байгууллагын багц</span><span class="val">Холбогдох →</span></div>
+    </div>
+    <div class="proto">Prototype v0 — дата жишээ. Жинхэнэ дасгал: <b>t.me/Talking_gym_bot</b></div>
+  </div>
+
+</main>
+
+<!-- TAB BAR -->
+<div class="tabbar">
+  <button data-scr="home" aria-pressed="true"><span class="ico">🏠</span>Нүүр</button>
+  <button data-scr="path" aria-pressed="false"><span class="ico">🧭</span>Зам</button>
+  <button data-scr="lesson" aria-pressed="false" class="mic-tab"><span class="ico">🎤</span>Дасгал</button>
+  <button data-scr="prog" aria-pressed="false"><span class="ico">📈</span>Ахиц</button>
+  <button data-scr="prof" aria-pressed="false"><span class="ico">👤</span>Би</button>
+</div>
+</div>
+
+<script>
+(function(){
+  var screens = ['home','lesson','path','prog','prof'];
+  var main = document.querySelector('main');
+  function show(id){
+    screens.forEach(function(s){
+      var el = document.getElementById('scr-'+s);
+      if(el) el.classList.toggle('active', s===id);
+    });
+    document.querySelectorAll('[data-scr]').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-scr')===id));
+    });
+    main.scrollTo(0,0);
+  }
+  document.querySelectorAll('[data-scr]').forEach(function(b){
+    b.addEventListener('click', function(){ show(b.getAttribute('data-scr')); });
+  });
+  document.querySelectorAll('[data-goto]').forEach(function(b){
+    b.addEventListener('click', function(){ show(b.getAttribute('data-goto')); });
+  });
+
+  var mic = document.getElementById('mic-btn'),
+      hint = document.getElementById('mic-hint'),
+      zone = document.getElementById('mic-zone'),
+      fb = document.getElementById('fb-card'),
+      shadowOk = document.getElementById('shadow-ok');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resetLesson(){
+    fb.hidden = true; shadowOk.hidden = true; zone.style.display='';
+    mic.classList.remove('rec'); hint.textContent = 'Дараад ярь — 10-30 секунд';
+  }
+  if(mic){
+    mic.addEventListener('click', function(){
+      if(mic.classList.contains('rec')) return;
+      mic.classList.add('rec'); hint.textContent = '🔴 Сонсож байна... дахин дарж дуусга';
+      setTimeout(function(){
+        mic.classList.remove('rec'); zone.style.display='none'; fb.hidden = false;
+        fb.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'nearest'});
+      }, reduced ? 200 : 1600);
+    });
+    document.getElementById('btn-retry').addEventListener('click', resetLesson);
+    document.getElementById('btn-shadow').addEventListener('click', function(){
+      shadowOk.hidden = false;
+      shadowOk.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'nearest'});
+    });
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/app/sw.js', {scope: '/app'}).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>

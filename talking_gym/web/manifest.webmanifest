@@ -1,0 +1,15 @@
+{
+  "name": "Talking Gym — Англиар ярьж сур",
+  "short_name": "Talking Gym",
+  "description": "Өдөрт 5 минут — мэргэжилдээ тохирсон англи ярианы дасгал",
+  "start_url": "/app",
+  "scope": "/app",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5FAFF",
+  "theme_color": "#0063FF",
+  "icons": [
+    { "src": "/app/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
