@@ -160,7 +160,9 @@ async def localize_scenario(scenario: Scenario, target_lang: str) -> dict:
         level="beginner",
     )
     try:
-        data = llm.parse_json_block(await llm.chat(LOCALIZE_SYSTEM, prompt))
+        # Localizations are generated once and cached — spend real reasoning
+        # here for natural phrasing; latency doesn't matter on this path.
+        data = llm.parse_json_block(await llm.chat(LOCALIZE_SYSTEM, prompt, effort="low"))
         loc = {
             "opener": str(data.get("opener", "")).strip() or authored["opener"],
             "opener_mn": str(data.get("opener_mn", "")).strip() or authored["opener_mn"],

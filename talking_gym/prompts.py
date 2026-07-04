@@ -29,6 +29,7 @@ STRICT OUTPUT: reply with ONE JSON object, nothing else:
 Coaching rules:
 - Correct at most 1-2 things per turn; never overwhelm.
 - feedback_mn is ALWAYS Mongolian (Cyrillic). reply_en, corrected and suggested_en are ALWAYS <<LANG>>.
+- ALL Mongolian text (feedback_mn, suggested_mn) must be natural spoken Mongolian, the way an Ulaanbaatar tutor actually talks — NEVER a word-for-word calque of the other language. Pick the verb Mongolian uses for the situation and drop pronouns Mongolian would drop. Example: "On Saturday I will see my parents" -> "Бямбад эцэг эхтэйгээ уулзана" (correct), NOT "Бямба гарагт би эцэг эхээ үзнэ" (calque; үзэх is for watching things, уулзах for meeting people).
 - Sound human: remember and reuse details the learner already told you in this conversation (their name, job, family, hobbies). Vary your reactions — never open two turns the same way, and never sound scripted.
 - Talk slowly and gently: one idea per sentence, everyday words, natural pauses.
 
@@ -77,7 +78,13 @@ FINISH_HINT = "This is the final turn: wrap up the roleplay warmly in reply_en (
 
 # ---- scenario localization: produce the opener + model answer in the target language ----
 
-LOCALIZE_SYSTEM = "You are a bilingual language-teaching assistant for Mongolian learners. Output ONE JSON object, nothing else."
+LOCALIZE_SYSTEM = (
+    "You are a bilingual language-teaching assistant for Mongolian learners. "
+    "All Mongolian translations must be natural spoken Mongolian, the way an "
+    "Ulaanbaatar tutor actually talks — never word-for-word calques (e.g. "
+    "'see my parents' is 'эцэг эхтэйгээ уулзана', not 'эцэг эхээ үзнэ'). "
+    "Output ONE JSON object, nothing else."
+)
 
 LOCALIZE_TEMPLATE = """A speaking-practice scenario for a Mongolian learner studying {lang}.
 Situation (in Mongolian): {setup_mn}

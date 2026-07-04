@@ -15,8 +15,12 @@ _TIMEOUT = httpx.Timeout(60.0, connect=10.0)
 _client = httpx.AsyncClient(timeout=_TIMEOUT)
 
 
-async def chat(system: str, user: str) -> str:
-    """Return the assistant's raw text for a system+user prompt pair."""
+async def chat(system: str, user: str, effort: str | None = None) -> str:
+    """Return the assistant's raw text for a system+user prompt pair.
+
+    `effort` overrides the reasoning effort per call: live turns stay at the
+    fast config default ("none"), while cached one-time generations (scenario
+    localization) can afford real reasoning for better output quality."""
     payload = {
         "model": config.llm_model,
         "messages": [
@@ -24,9 +28,7 @@ async def chat(system: str, user: str) -> str:
             {"role": "user", "content": user},
         ],
         "temperature": 0.4,
-        # Coaching turns are simple structured output; skipping the model's
-        # thinking phase cuts several seconds off every reply.
-        "reasoning_effort": config.llm_reasoning_effort,
+        "reasoning_effort": effort or config.llm_reasoning_effort,
     }
     headers = {"Authorization": f"Bearer {config.xai_api_key}"}
     resp = await _client.post(
