@@ -1,5 +1,7 @@
-/* Talking Gym PWA — minimal app-shell cache (offline-capable prototype). */
-const CACHE = "tg-app-v1";
+/* Talking Gym PWA — app shell cache.
+   HTML is network-first (UI updates propagate on next online load);
+   static assets are cache-first. Offline falls back to the cached shell. */
+const CACHE = "tg-app-v2";
 const ASSETS = ["/app", "/app/manifest.webmanifest", "/app/icon-192.png", "/app/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -18,7 +20,20 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
-  if (url.pathname === "/app" || url.pathname.startsWith("/app/")) {
+  if (url.pathname !== "/app" && !url.pathname.startsWith("/app/")) return;
+
+  if (url.pathname === "/app") {
+    // network-first: always try to get the freshest UI, cache it, fall back offline
+    e.respondWith(
+      fetch(e.request)
+        .then((resp) => {
+          const copy = resp.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copy));
+          return resp;
+        })
+        .catch(() => caches.match(e.request, { ignoreSearch: true }))
+    );
+  } else {
     e.respondWith(
       caches.match(e.request, { ignoreSearch: true }).then((r) => r || fetch(e.request))
     );
