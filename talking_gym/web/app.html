@@ -123,6 +123,7 @@
   @keyframes tblink{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
   .bubble .msg{background:#fff;border-radius:4px 18px 18px 18px;padding:12px 14px;font-size:14px;box-shadow:var(--ring),0 3px 10px rgba(27,39,51,.07);min-width:0}
   .bubble .msg .mn{display:block;font-size:12.5px;color:var(--mut);font-style:italic;margin-top:5px}
+  .rom{display:block;font-size:12.5px;color:#7A8CA3;margin-top:4px;letter-spacing:.2px;font-weight:600}
   .example{background:#FFF6DE;border:2px dashed var(--yellow);border-radius:18px;padding:12px 14px;margin-bottom:14px}
   .example .lbl{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--yellow-d);margin-bottom:5px}
   .example .lbl .i{width:14px;height:14px}
@@ -680,11 +681,12 @@
     var m = $('main');
     requestAnimationFrame(function(){ m.scrollTo({top: m.scrollHeight, behavior:'smooth'}); });
   }
-  function addTeacher(en, mn, ttsB64, autoplay){
+  function addTeacher(en, mn, ttsB64, autoplay, latin){
     var b = document.createElement('div'); b.className = 'bubble';
     var av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'S';
     var msg = document.createElement('div'); msg.className = 'msg';
     var enEl = document.createElement('span'); enEl.textContent = en; msg.appendChild(enEl);
+    if (latin) { var lt = document.createElement('span'); lt.className = 'rom'; lt.textContent = latin; msg.appendChild(lt); }
     if (mn) { var mnEl = document.createElement('span'); mnEl.className = 'mn'; mnEl.textContent = mn; msg.appendChild(mnEl); }
     if (ttsB64) {
       var pb = document.createElement('button'); pb.className = 'play'; pb.setAttribute('aria-label','Listen');
@@ -721,11 +723,13 @@
     b.appendChild(msg); chat.appendChild(b);
     scrollBottom();
   }
-  function addExample(en, mn){
+  function addExample(en, mn, latin){
     var e = document.createElement('div'); e.className = 'example';
     e.innerHTML = '<div class="lbl"><svg class="i"><use href="#i-msg"/></svg><span>' +
-      (d().exLbl) + '</span></div><div class="en"></div><div class="mn"></div>';
+      (d().exLbl) + '</span></div><div class="en"></div><div class="rom"></div><div class="mn"></div>';
     e.querySelector('.en').textContent = en;
+    e.querySelector('.rom').textContent = latin || '';
+    e.querySelector('.rom').style.display = latin ? '' : 'none';
     e.querySelector('.mn').textContent = mn;
     chat.appendChild(e);
     scrollBottom();
@@ -751,6 +755,10 @@
     if (j.corrected && j.corrected.toLowerCase() !== j.transcript.toLowerCase()) {
       var c = document.createElement('div'); c.className = 'corr';
       c.textContent = '✓ ' + j.corrected; f.appendChild(c);
+      if (j.corrected_latin) {
+        var cl = document.createElement('div'); cl.className = 'rom';
+        cl.textContent = j.corrected_latin; f.appendChild(cl);
+      }
     }
     if (j.feedback_mn) {
       var t = document.createElement('div'); t.className = 'tip2';
@@ -968,8 +976,8 @@
         show('lesson');
         if (j.resumed) toast(d().resumed);
         // The teacher speaks first — voice plays as the bubble appears.
-        addTeacher(j.scenario.opener_en, j.scenario.opener_mn, j.tts_b64, true);
-        if (j.scenario.example_en) addExample(j.scenario.example_en, j.scenario.example_mn);
+        addTeacher(j.scenario.opener_en, j.scenario.opener_mn, j.tts_b64, true, j.scenario.opener_latin);
+        if (j.scenario.example_en) addExample(j.scenario.example_en, j.scenario.example_mn, j.scenario.example_latin);
         micState('idle');
       })
       .catch(function(){ toast(d().tstErr); })
@@ -1152,7 +1160,7 @@
     if (j.done) {
       session = null;
       releaseMic();   // lesson over — turn the tab's recording indicator off
-      if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true);
+      if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true, j.reply_latin);
       else if (j.tts_b64) playB64(j.tts_b64);
       $('mic-zone').hidden = true;
       $('done-card').hidden = false;
@@ -1163,8 +1171,8 @@
       refreshMe(); refreshNext();
     } else {
       setDots(j.turn_no + 1, j.max_turns);
-      addTeacher(j.reply_en, '', j.tts_b64, true);
-      if (j.suggested_en) addExample(j.suggested_en, j.suggested_mn || '');
+      addTeacher(j.reply_en, '', j.tts_b64, true, j.reply_latin);
+      if (j.suggested_en) addExample(j.suggested_en, j.suggested_mn || '', j.suggested_latin);
       micState('idle');
       refreshMe();
     }

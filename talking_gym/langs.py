@@ -11,10 +11,14 @@ speech still transcribes). All languages use the same warm voice.
 """
 
 TARGET_LANGS = {
-    "en": {"name_en": "English",  "name_mn": "Англи хэл",   "native": "English", "flag": "🇬🇧", "stt": "en"},
-    "ko": {"name_en": "Korean",   "name_mn": "Солонгос хэл", "native": "한국어",   "flag": "🇰🇷", "stt": "ko"},
-    "zh": {"name_en": "Chinese (Mandarin)", "name_mn": "Хятад хэл", "native": "中文", "flag": "🇨🇳", "stt": None},
-    "ja": {"name_en": "Japanese", "name_mn": "Япон хэл",     "native": "日本語",  "flag": "🇯🇵", "stt": "ja"},
+    "en": {"name_en": "English",  "name_mn": "Англи хэл",   "native": "English", "flag": "🇬🇧", "stt": "en",
+           "roman": None},
+    "ko": {"name_en": "Korean",   "name_mn": "Солонгос хэл", "native": "한국어",   "flag": "🇰🇷", "stt": "ko",
+           "roman": "Revised Romanization (e.g. 소녀 -> sonyeo)"},
+    "zh": {"name_en": "Chinese (Mandarin)", "name_mn": "Хятад хэл", "native": "中文", "flag": "🇨🇳", "stt": None,
+           "roman": "Hanyu Pinyin with tone marks (e.g. 你好 -> nǐ hǎo)"},
+    "ja": {"name_en": "Japanese", "name_mn": "Япон хэл",     "native": "日本語",  "flag": "🇯🇵", "stt": "ja",
+           "roman": "Hepburn romaji (e.g. こんにちは -> konnichiwa)"},
 }
 DEFAULT_LANG = "en"
 

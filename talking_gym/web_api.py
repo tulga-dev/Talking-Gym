@@ -102,8 +102,10 @@ async def _scenario_payload(sc, user) -> dict:
         "setup_mn": sc.setup_mn,
         "opener_en": loc["opener"],
         "opener_mn": loc["opener_mn"],
+        "opener_latin": loc.get("opener_latin", ""),
         "example_en": loc["example"] if show_example else "",
         "example_mn": loc["example_mn"] if show_example else "",
+        "example_latin": loc.get("example_latin", "") if show_example else "",
         "max_turns": config.turns_per_session,
     }
 
@@ -292,6 +294,9 @@ async def api_turn(request: web.Request) -> web.Response:
         "done": reply.done,
         "suggested_en": reply.suggested_en,
         "suggested_mn": reply.suggested_mn,
+        "reply_latin": reply.reply_latin,
+        "corrected_latin": reply.corrected_latin,
+        "suggested_latin": reply.suggested_latin,
         "turn_no": reply.turn_no,
         "max_turns": reply.max_turns,
         "xp_earned": reply.xp_earned,

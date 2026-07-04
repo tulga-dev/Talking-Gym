@@ -39,6 +39,9 @@ class CoachReply:
     done: bool
     suggested_en: str = ""          # model answer for the coach's next question
     suggested_mn: str = ""          # its Mongolian meaning
+    reply_latin: str = ""           # romanization for non-Latin target languages
+    corrected_latin: str = ""
+    suggested_latin: str = ""
     turn_no: int = 1
     max_turns: int = 3
     xp_earned: int = 0
@@ -137,15 +140,19 @@ async def localize_scenario(scenario: Scenario, target_lang: str) -> dict:
     LLM-generated once and cached, with an English fallback on any failure."""
     authored = {
         "opener": scenario.opener_en, "opener_mn": scenario.opener_mn,
+        "opener_latin": "",
         "example": scenario.example_en, "example_mn": scenario.example_mn,
+        "example_latin": "",
     }
     if target_lang == "en":
         return authored
     key = (scenario.id, target_lang)
     if key in _loc_cache:
         return _loc_cache[key]
+    meta = lang_meta(target_lang)
     prompt = LOCALIZE_TEMPLATE.format(
-        lang=lang_meta(target_lang)["name_en"],
+        lang=meta["name_en"],
+        roman=meta["roman"] or "Latin letters",
         setup_mn=scenario.setup_mn,
         coach=config.coach_name_en,
         opener_en=scenario.opener_en,
@@ -157,8 +164,10 @@ async def localize_scenario(scenario: Scenario, target_lang: str) -> dict:
         loc = {
             "opener": str(data.get("opener", "")).strip() or authored["opener"],
             "opener_mn": str(data.get("opener_mn", "")).strip() or authored["opener_mn"],
+            "opener_latin": str(data.get("opener_latin", "")).strip(),
             "example": str(data.get("example", "")).strip() or authored["example"],
             "example_mn": str(data.get("example_mn", "")).strip() or authored["example_mn"],
+            "example_latin": str(data.get("example_latin", "")).strip(),
         }
     except Exception:
         log.warning("Scenario localization failed for %s/%s; using English", scenario.id, target_lang)
@@ -178,7 +187,8 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
     user = db.get_user(user_id)
     scenario = by_id(session["scenario_id"])
     target_lang = target_of(user)
-    lang_name = lang_meta(target_lang)["name_en"]
+    lmeta = lang_meta(target_lang)
+    lang_name = lmeta["name_en"]
     loc = await localize_scenario(scenario, target_lang)
     turn = session["turns"] + 1
     max_turns = config.turns_per_session
@@ -196,7 +206,7 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         transcript=transcript,
     )
 
-    raw = await llm.chat(system_prompt(lang_name), prompt)
+    raw = await llm.chat(system_prompt(lang_name, lmeta["roman"]), prompt)
     try:
         data = llm.parse_json_block(raw)
     except ProviderError:
@@ -211,6 +221,9 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         done=bool(data.get("done", False)) or turn >= max_turns,
         suggested_en=str(data.get("suggested_en", "")).strip(),
         suggested_mn=str(data.get("suggested_mn", "")).strip(),
+        reply_latin=str(data.get("reply_latin", "")).strip(),
+        corrected_latin=str(data.get("corrected_latin", "")).strip(),
+        suggested_latin=str(data.get("suggested_latin", "")).strip(),
         turn_no=turn,
         max_turns=max_turns,
     )

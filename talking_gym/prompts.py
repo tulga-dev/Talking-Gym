@@ -20,7 +20,10 @@ STRICT OUTPUT: reply with ONE JSON object, nothing else:
   "score": <integer 0-100: intelligibility + grammar + task success for THIS turn>,
   "done": <true if this was a natural end of the conversation, else false>,
   "suggested_en": "a natural 1-2 sentence model answer IN <<LANG>> the learner could give to your reply_en question — they may read it aloud or adapt it. REQUIRED for beginner level, brief for intermediate, EMPTY STRING for advanced or when done=true",
-  "suggested_mn": "Mongolian translation of suggested_en (empty when suggested_en is empty)"
+  "suggested_mn": "Mongolian translation of suggested_en (empty when suggested_en is empty)",
+  "reply_latin": <<ROMAN_SPEC_REPLY>>,
+  "corrected_latin": <<ROMAN_SPEC_CORRECTED>>,
+  "suggested_latin": <<ROMAN_SPEC_SUGGESTED>>
 }
 
 Coaching rules:
@@ -40,11 +43,20 @@ Level rules (follow STRICTLY):
 """
 
 
-def system_prompt(lang_name: str) -> str:
-    """Build the coach system prompt for a given target language."""
+def system_prompt(lang_name: str, roman: str | None = None) -> str:
+    """Build the coach system prompt for a given target language. `roman` is
+    the romanization scheme for non-Latin scripts (None = no romanization)."""
+    if roman:
+        spec = lambda what: (f'"{what} transliterated into Latin letters using {roman} '
+                             f'(empty when {what} is empty)"')
+    else:
+        spec = lambda what: '"" (always an empty string for this language)'
     return (SYSTEM_TEMPLATE
             .replace("<<COACH_EN>>", config.coach_name_en)
             .replace("<<COACH_MN>>", config.coach_name_mn)
+            .replace("<<ROMAN_SPEC_REPLY>>", spec("reply_en"))
+            .replace("<<ROMAN_SPEC_CORRECTED>>", spec("corrected"))
+            .replace("<<ROMAN_SPEC_SUGGESTED>>", spec("suggested_en"))
             .replace("<<LANG>>", lang_name))
 
 
@@ -80,6 +92,8 @@ Return JSON:
 {{
   "opener": "the tutor's opening line in {lang}",
   "opener_mn": "Mongolian (Cyrillic) translation of the opener",
+  "opener_latin": "the opener transliterated into Latin letters using {roman}",
   "example": "the model learner answer in {lang}",
-  "example_mn": "Mongolian (Cyrillic) translation of the model answer"
+  "example_mn": "Mongolian (Cyrillic) translation of the model answer",
+  "example_latin": "the model answer transliterated into Latin letters using {roman}"
 }}"""
