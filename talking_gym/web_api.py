@@ -54,6 +54,7 @@ def _me_payload(user) -> dict:
         "rank_next_xp": nxt,
         "rank_cur_xp": cur,
         "reminder_hour": user["reminder_hour"],
+        "turns_per_session": config.turns_per_session,
         "trained_today": db.did_session_today(user["user_id"]),
         "voice_seconds_today": db.voice_seconds_today(user["user_id"]),
         "voice_seconds_cap": config.daily_voice_seconds_cap,

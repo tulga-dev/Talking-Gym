@@ -416,7 +416,7 @@
       errNet:"Сүлжээний алдаа — дахин оролдоорой",
       greetM:"Өглөөний мэнд", greetD:"Өдрийн мэнд", greetE:"Оройн мэнд",
       todayLbl:"Өнөөдрийн дасгал", start:"Эхлэх", doneToday:"Өнөөдөр хийсэн ✓ — нэмэлт дасгал уу?",
-      turnsMeta:"3 солилцоо · дуут эсвэл бичгээр",
+      turnsMeta:"{n} солилцоо · дуут эсвэл бичгээр",
       capT:"Өнөөдрийн дуут дасгал",
       refT:"Найзаа урь", refS:"Хамтдаа суралцвал бүр урамтай", refB:"Урих",
       exLbl:"Жишээ хариулт — уншаад хэлээрэй",
@@ -467,7 +467,7 @@
       errNet:"Network error — try again",
       greetM:"Good morning", greetD:"Good afternoon", greetE:"Good evening",
       todayLbl:"Today's workout", start:"Start", doneToday:"Done today ✓ — extra workout?",
-      turnsMeta:"3 turns · voice or text",
+      turnsMeta:"{n} turns · voice or text",
       capT:"Today's voice practice",
       refT:"Invite a friend", refS:"Learning together keeps you going", refB:"Invite",
       exLbl:"Example answer — read it aloud",
@@ -706,7 +706,7 @@
     $('p-streak').textContent = me.streak;
     $('p-streak2').textContent = me.streak;
     $('p-xp').textContent = me.xp;
-    $('today-sub').textContent = me.trained_today ? d().doneToday : d().turnsMeta;
+    $('today-sub').textContent = me.trained_today ? d().doneToday : d().turnsMeta.replace('{n}', me.turns_per_session || 5);
     $('cap-used').textContent = me.voice_seconds_today;
     $('cap-max').textContent = me.voice_seconds_cap;
     $('cap-fill').style.width = Math.min(100, me.voice_seconds_today * 100 / me.voice_seconds_cap) + '%';
