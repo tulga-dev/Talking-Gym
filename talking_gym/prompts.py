@@ -71,7 +71,7 @@ TURN_TEMPLATE = """SCENARIO: {title} — coach plays: see opener.
 Coach's opener was: "{opener}"
 Focus areas: {focus}
 Learner level: {level}
-Turn {turn} of {max_turns}. {finish_hint}
+{learner}Turn {turn} of {max_turns}. {finish_hint}
 
 Conversation so far:
 {history}
@@ -79,7 +79,33 @@ Conversation so far:
 Learner's new transcript: "{transcript}"
 """
 
-FINISH_HINT = "This is the final turn: wrap up the roleplay warmly in reply_en (no new question) and set done=true."
+# Injected when Sarah has a memory of this learner — the personalization core.
+LEARNER_BLOCK = """ABOUT THIS LEARNER (Sarah's memory — use it!): {profile}
+Weave their real life into the conversation naturally: reference their job, family,
+interests when relevant, and tailor examples to their world. Never recite this back as a list.
+"""
+
+FINISH_HINT = (
+    'This is the final turn: wrap up the roleplay warmly in reply_en (no new question) and set done=true. '
+    'ALSO include the JSON key "profile_update": the learner profile refreshed with any NEW personal facts '
+    'from this conversation (job, family, interests, goals, recurring mistakes) — 2-4 short factual sentences '
+    'in Mongolian Cyrillic. If nothing new was learned, omit the key.'
+)
+
+PLACEMENT_HINT = """THIS IS THE PLACEMENT SESSION (the learner's very first conversation).
+Goals: (1) get to know them — name, job, family, interests, WHY they are learning; (2) judge their real level.
+Start with the simplest possible language; if they answer confidently, ask each next question at a clearly
+harder level (longer answer required, past/future tenses, opinions). Stay warm — this must feel like a
+friendly chat, never an exam."""
+
+PLACEMENT_FINISH = (
+    'This is the FINAL placement turn: warmly wrap up in reply_en (no new question), tell them you now know '
+    'them and daily workouts start tomorrow, and set done=true. ALSO include JSON keys: '
+    '"placement_level": "beginner"|"intermediate"|"advanced" — judged from their grammar, vocabulary and '
+    'fluency across ALL their answers (when unsure, choose the lower level), and '
+    '"profile_update": 2-4 short factual sentences IN MONGOLIAN CYRILLIC about this learner '
+    '(name, job, family, interests, why they are learning, weak points you noticed).'
+)
 
 
 # ---- scenario localization: produce the opener + model answer in the target language ----

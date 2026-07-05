@@ -328,12 +328,7 @@
       <button type="button" data-tlang="zh">🇨🇳 中文</button>
       <button type="button" data-tlang="ja">🇯🇵 日本語</button>
     </div>
-    <label data-i18n="obLevel">Түвшин</label>
-    <div class="lvl-pick" id="ob-levels">
-      <button data-lvl="beginner" class="on" data-i18n="lvB">Анхан</button>
-      <button data-lvl="intermediate" data-i18n="lvI">Дунд</button>
-      <button data-lvl="advanced" data-i18n="lvA">Ахисан</button>
-    </div>
+    <div class="sub" style="margin:2px 0 10px" data-i18n="obPlace">Түвшинг тань Сара эхний ярианаас өөрөө тогтооно 😊</div>
   </div>
   <button class="start-btn" id="ob-go" style="margin-top:18px"><span id="ob-go-lbl">Бүртгүүлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
   <div class="err" id="ob-err"></div>
@@ -394,17 +389,6 @@
       <div class="sub" style="margin-top:5px;font-size:11px"><span data-i18n="capT">Өнөөдрийн дуут дасгал</span>: <span id="cap-used2">0</span>s / <span id="cap-max">300</span>s</div>
     </div>
 
-    <h3 class="sec-t" data-i18n="recT">Танд санал болгох</h3>
-    <div class="acard icon-lead" id="rec-card" style="cursor:pointer">
-      <div class="lead bk"><svg class="i"><use href="#i-msg"/></svg></div>
-      <div style="flex:1;min-width:0"><h4 style="margin:0" id="rec-title">…</h4><div class="sub" data-i18n="recSub">Дараагийн хичээл — Сараатай ярилцъя</div></div>
-      <button class="row-btn" id="rec-go" aria-label="Start"><svg class="i"><use href="#i-arrow"/></svg></button>
-    </div>
-    <div class="acard icon-lead">
-      <div class="lead fr"><svg class="i"><use href="#i-gift"/></svg></div>
-      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="refT">Найзаа урь</h4><div class="sub" data-i18n="refS">Хамтдаа суралцвал бүр урамтай</div></div>
-      <button class="row-btn" id="btn-invite"><span data-i18n="refB">Урих</span></button>
-    </div>
   </div>
 
   <!-- LESSON -->
@@ -438,31 +422,13 @@
   </div>
 
   <!-- PATH -->
-  <div class="scr" id="scr-path">
-    <div class="app-h"><div class="hi"><span data-i18n="pathT">Миний зам</span><span class="sub2" data-i18n="pathS">мэргэжилдээ тохируулж сур</span></div></div>
-    <div class="tracks" id="tracks">
-      <button data-track="business">Business</button><button data-track="sales">Sales</button><button data-track="logistics">Logistics</button>
-      <button data-track="travel">Travel</button><button data-track="movies" data-i18n="trMovies">Кино</button><button data-track="daily" data-i18n="trDaily">Өдөр тутам</button><button data-track="dating" data-i18n="trDating">Болзоо</button>
+  <!-- PROFILE (settings + progress + plan) -->
+  <div class="scr" id="scr-prof">
+    <div class="app-h"><div class="hi"><span id="prof-name"></span><span class="sub2" id="prof-sub"></span></div><span class="pill hot"><svg class="i"><use href="#i-flame"/></svg><span id="p-streak2">0</span></span></div>
+    <div class="acard" id="sarah-note" hidden>
+      <h4 class="h-ico"><svg class="i" style="color:var(--purple)"><use href="#i-msg"/></svg><span data-i18n="knowT">Сара таны тухай мэднэ</span></h4>
+      <div class="sub" id="sarah-note-txt" style="font-size:12.5px;line-height:1.55;margin-top:4px"></div>
     </div>
-    <div style="margin-bottom:8px">
-      <span class="lvl-chip"><svg class="i"><use href="#i-check"/></svg><span data-i18n="lvlLbl">Түвшин</span>:&nbsp;<b id="lvl-cur"></b></span>
-    </div>
-    <div class="lvl-pick" id="lvl-pick">
-      <button data-lvl="beginner" data-i18n="lvB">Анхан</button>
-      <button data-lvl="intermediate" data-i18n="lvI">Дунд</button>
-      <button data-lvl="advanced" data-i18n="lvA">Ахисан</button>
-    </div>
-    <div class="acard icon-lead">
-      <div class="lead bk"><svg class="i"><use href="#i-route"/></svg></div>
-      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="nextT">Дараагийн дасгал</h4><div class="sub" id="next-title">…</div></div>
-      <button class="row-btn" id="btn-start2"><span data-i18n="start">Эхлэх</span></button>
-    </div>
-    <div class="soon" data-i18n="soonTracks">Мэргэжлийн зам тус бүрийн хичээлүүд удахгүй нэмэгдэнэ</div>
-  </div>
-
-  <!-- PROGRESS -->
-  <div class="scr" id="scr-prog">
-    <div class="app-h"><div class="hi"><span data-i18n="prgT">Миний ахиц</span><span class="sub2"></span></div><span class="pill"><svg class="i" style="color:#8A97A8"><use href="#i-trophy"/></svg><span id="rank-name"></span></span></div>
     <div class="acard">
       <h4 class="h-ico"><svg class="i"><use href="#i-chart"/></svg><span data-i18n="statsT">Миний тоо баримт</span></h4>
       <div class="wk-grid">
@@ -475,12 +441,6 @@
       <div class="rankbar"><div id="rank-fill" style="width:0%"></div></div>
       <button class="start-btn" id="btn-share"><svg class="i" style="width:17px;height:17px"><use href="#i-share"/></svg><span data-i18n="shareB">Амжилтаа хуваалцах</span></button>
     </div>
-    <div class="soon" data-i18n="soonProg">Удахгүй: алдааны сан, долоо хоногийн лиг, дэлгэрэнгүй тайлан</div>
-  </div>
-
-  <!-- PROFILE -->
-  <div class="scr" id="scr-prof">
-    <div class="app-h"><div class="hi"><span id="prof-name"></span><span class="sub2" id="prof-sub"></span></div><span class="pill hot"><svg class="i"><use href="#i-flame"/></svg><span id="p-streak2">0</span></span></div>
     <div class="acard">
       <div class="setrow" id="row-tlang"><svg class="i"><use href="#i-msg"/></svg><span class="lbl2" data-i18n="sStudy">Судлах хэл</span><span class="val" id="tlang-val"></span></div>
       <div class="setrow" id="row-rem"><svg class="i"><use href="#i-clock"/></svg><span class="lbl2" data-i18n="sRem">Сануулга</span><span class="val" id="rem-val">—</span></div>
@@ -511,6 +471,11 @@
         <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pPr1">AI видео дуудлага + ярилцлагын симуляци</span></li>
         <li><svg class="i"><use href="#i-check"/></svg><span data-i18n="pPr2">IELTS Speaking оноо</span></li>
       </ul>
+    </div>
+    <div class="acard icon-lead">
+      <div class="lead fr"><svg class="i"><use href="#i-gift"/></svg></div>
+      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="refT">Найзаа урь</h4><div class="sub" data-i18n="refS">Хамтдаа суралцвал бүр урамтай</div></div>
+      <button class="row-btn" id="btn-invite"><span data-i18n="refB">Урих</span></button>
     </div>
     <div class="proto"><span data-i18n="proto">Beta — санал хүсэлт:</span> hello@talkinggym.mn</div>
   </div>
@@ -599,9 +564,7 @@
 <!-- TAB BAR -->
 <div class="tabbar" id="tabbar" hidden>
   <button data-scr="home" aria-pressed="true"><svg class="i"><use href="#i-home"/></svg><span data-i18n="tbHome">Нүүр</span></button>
-  <button data-scr="path" aria-pressed="false"><svg class="i"><use href="#i-route"/></svg><span data-i18n="tbPath">Зам</span></button>
   <button id="tab-train" aria-pressed="false" class="mic-tab"><span class="tw"><svg class="i"><use href="#i-mic"/></svg></span><span data-i18n="tbTrain">Дасгал</span></button>
-  <button data-scr="prog" aria-pressed="false"><svg class="i"><use href="#i-chart"/></svg><span data-i18n="tbProg">Ахиц</span></button>
   <button data-scr="prof" aria-pressed="false"><svg class="i"><use href="#i-user"/></svg><span data-i18n="tbMe">Би</span></button>
 </div>
 </div>
@@ -613,6 +576,8 @@
       obT:"Talking Gym-д тавтай морил", obS:"Өдөрт 5 минут — англиар ярьж сур",
       obTabReg:"Бүртгүүлэх", obTabLog:"Нэвтрэх", obOr:"эсвэл имэйлээр",
       obEmail:"Имэйл", obPass:"Нууц үг (6+ тэмдэгт)", obName:"Таны нэр", obLevel:"Түвшин", obLang:"Ямар хэл сурах вэ?",
+      obPlace:"Түвшинг тань Сара эхний ярианаас өөрөө тогтооно 😊",
+      knowT:"Сара таны тухай мэднэ", placedT:"Таны түвшин",
       lvB:"Анхан", lvI:"Дунд", lvA:"Ахисан",
       errEmail:"Имэйлээ зөв оруулаарай", errPass:"Нууц үг 6-аас дээш тэмдэгт", errName:"Нэрээ оруулаарай",
       errTaken:"Энэ имэйл бүртгэлтэй байна — Нэвтрэх дээр дараарай", errLogin:"Имэйл эсвэл нууц үг буруу",
@@ -672,6 +637,8 @@
       obT:"Welcome to Talking Gym", obS:"5 minutes a day — learn to speak English",
       obTabReg:"Sign up", obTabLog:"Log in", obOr:"or with email",
       obEmail:"Email", obPass:"Password (6+ characters)", obName:"Your name", obLevel:"Level", obLang:"Which language do you want to learn?",
+      obPlace:"Sarah will find your level in your first chat 😊",
+      knowT:"Sarah knows you", placedT:"Your level",
       lvB:"Beginner", lvI:"Intermediate", lvA:"Advanced",
       errEmail:"Please enter a valid email", errPass:"Password must be 6+ characters", errName:"Please enter your name",
       errTaken:"This email is already registered — tap Log in", errLogin:"Wrong email or password",
@@ -740,6 +707,8 @@
     obTabReg:"ᠪᠦᠷᠢᠳᠬᠡᠭᠦᠯᠬᠦ", obTabLog:"ᠨᠡᠪᠲᠡᠷᠡᠬᠦ", obOr:"ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠢᠮᠧᠯ ᠢᠶᠡᠷ",
     obEmail:"ᠢᠮᠧᠯ", obPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ (6+)", obName:"ᠲᠠᠨ ᠤ ᠨᠡᠷ᠎ᠡ",
     obLevel:"ᠲᠦᠪᠰᠢᠨ", obLang:"ᠶᠠᠮᠠᠷ ᠬᠡᠯᠡ ᠰᠤᠷᠬᠤ ᠪᠤᠢ?",
+    obPlace:"ᠲᠦᠪᠰᠢᠨ ᠢ ᠲᠠᠨᠢ ᠰᠠᠷᠠ ᠡᠬᠢᠨ ᠦ ᠶᠠᠷᠢᠶᠠᠨ ᠠᠴᠠ ᠥᠪᠡᠷ ᠢᠶᠡᠨ ᠲᠣᠭᠲᠠᠭᠠᠨ᠎ᠠ",
+    knowT:"ᠰᠠᠷᠠ ᠲᠠᠨ ᠤ ᠲᠤᠬᠠᠢ ᠮᠡᠳᠡᠨ᠎ᠡ", placedT:"ᠲᠠᠨ ᠤ ᠲᠦᠪᠰᠢᠨ",
     lvB:"ᠠᠩᠬ᠎ᠠ ᠱᠠᠲᠤ", lvI:"ᠳᠤᠮᠳᠠ", lvA:"ᠠᠬᠢᠭᠰᠠᠨ",
     errEmail:"ᠢᠮᠧᠯ ᠢᠶᠡᠨ ᠵᠥᠪ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ", errPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ 6 ᠡᠴᠡ ᠳᠡᠭᠡᠭᠰᠢ ᠲᠡᠮᠳᠡᠭᠲᠦ",
     errName:"ᠨᠡᠷ᠎ᠡ ᠪᠡᠨ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ",
@@ -1031,14 +1000,6 @@
     $('cap-used2').textContent = me.voice_seconds_today;
     $('cap-max').textContent = me.voice_seconds_cap;
     $('cap-fill').style.width = Math.min(100, me.voice_seconds_today * 100 / me.voice_seconds_cap) + '%';
-    document.querySelectorAll('#tracks [data-track]').forEach(function(b){
-      b.classList.toggle('on', b.getAttribute('data-track') === me.track);
-    });
-    document.querySelectorAll('#lvl-pick [data-lvl]').forEach(function(b){
-      b.classList.toggle('on', b.getAttribute('data-lvl') === me.level);
-    });
-    $('lvl-cur').textContent = lvlLabel(me.level);
-    $('rank-name').textContent = rankLabel(me.rank).replace(/^[^\s]+\s/, '');
     $('rank-name2').textContent = rankLabel(me.rank);
     $('st-streak').textContent = me.streak;
     $('st-best').textContent = me.best_streak;
@@ -1049,7 +1010,9 @@
     $('rank-fill').style.width = me.rank_next_xp ? Math.min(100, got * 100 / span) + '%' : '100%';
     $('rank-progress').textContent = me.rank_next_xp ? (me.xp + ' / ' + me.rank_next_xp + ' XP') : (me.xp + ' XP');
     $('prof-name').textContent = me.name;
-    $('prof-sub').textContent = trackLabel(me.track) + ' · ' + lvlLabel(me.level) + ' · ' + me.xp + ' XP';
+    $('prof-sub').textContent = lvlLabel(me.level) + ' · ' + me.xp + ' XP';
+    $('sarah-note').hidden = !me.profile_note;
+    $('sarah-note-txt').textContent = me.profile_note || '';
     $('rem-val').textContent = (me.reminder_hour === null || me.reminder_hour === undefined)
       ? d().remOff : (('0' + me.reminder_hour).slice(-2) + ':00');
     var tl = TLANGS[me.target_lang] || TLANGS.en;
@@ -1064,8 +1027,6 @@
   function refreshNext(){
     return req('/api/session').then(function(j){
       $('today-title').textContent = j.active ? j.active.scenario.title_mn : j.next_title_mn;
-      $('next-title').textContent = j.next_title_mn;
-      $('rec-title').textContent = j.next_title_mn;
       // Daily-goal progress: turns completed in the active session (a finished
       // day is set to full by renderMe via trained_today).
       if (!(me && me.trained_today)) {
@@ -1077,7 +1038,7 @@
     }).catch(function(){});
   }
 
-  var screens = ['home','lesson','path','prog','prof'];
+  var screens = ['home','lesson','prof'];
   function show(id){
     if (id !== 'lesson' && typeof releaseMic === 'function') releaseMic();
     screens.forEach(function(s){
@@ -1096,7 +1057,6 @@
 
   /* ---------- onboarding / auth ---------- */
   var authMode = 'reg';
-  var obLevel = 'beginner';
   var obTarget = 'en';
   var TLANGS = {en:{f:'🇬🇧',n:'English'}, ko:{f:'🇰🇷',n:'한국어'}, zh:{f:'🇨🇳',n:'中文'}, ja:{f:'🇯🇵',n:'日本語'}};
   var TLANG_ORDER = ['en','ko','zh','ja'];
@@ -1110,12 +1070,6 @@
   }
   $('tab-reg').addEventListener('click', function(){ setAuthMode('reg'); });
   $('tab-login').addEventListener('click', function(){ setAuthMode('login'); });
-  document.querySelectorAll('#ob-levels [data-lvl]').forEach(function(b){
-    b.addEventListener('click', function(){
-      obLevel = b.getAttribute('data-lvl');
-      document.querySelectorAll('#ob-levels [data-lvl]').forEach(function(x){ x.classList.toggle('on', x===b); });
-    });
-  });
   document.querySelectorAll('#ob-langs [data-tlang]').forEach(function(b){
     b.addEventListener('click', function(){
       obTarget = b.getAttribute('data-tlang');
@@ -1139,7 +1093,7 @@
       var name = $('ob-name').value.trim();
       if (!name) { err.textContent = d().errName; return; }
       path = '/api/auth/register';
-      body = {email:email, password:pass, name:name, level:obLevel, target_lang:obTarget,
+      body = {email:email, password:pass, name:name, target_lang:obTarget,
               native_lang: (lang === 'mnt' ? 'mnt' : 'mn')};
     } else {
       path = '/api/auth/login';
@@ -1225,8 +1179,6 @@
       .then(function(){ $('btn-start').disabled = false; window.__starting = false; });
   }
   $('btn-start').addEventListener('click', startSession);
-  $('btn-start2').addEventListener('click', startSession);
-  $('rec-card').addEventListener('click', startSession);
   $('home-tlang').addEventListener('click', function(){ show('prof'); });
   $('tab-train').addEventListener('click', function(){
     if (session) { show('lesson'); } else { startSession(); }
@@ -1401,6 +1353,7 @@
     if (j.done) {
       session = null;
       releaseMic();   // lesson over — turn the tab's recording indicator off
+      if (j.placed_level) toast(d().placedT + ': ' + lvlLabel(j.placed_level) + ' ✓');
       if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true, j.reply_latin);
       else if (j.tts_b64) playB64(j.tts_b64);
       $('mic-zone').hidden = true;
@@ -1419,24 +1372,6 @@
     }
   }
   $('done-home').addEventListener('click', function(){ show('home'); });
-
-  /* ---------- path: persisted track & level ---------- */
-  document.querySelectorAll('#tracks [data-track]').forEach(function(b){
-    b.addEventListener('click', function(){
-      var t = b.getAttribute('data-track');
-      req('/api/profile', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({track:t})})
-        .then(function(j){ me = j; renderMe(); toast(d().tstTrack + ' ' + trackLabel(t)); })
-        .catch(function(){ toast(d().tstErr); });
-    });
-  });
-  document.querySelectorAll('#lvl-pick [data-lvl]').forEach(function(b){
-    b.addEventListener('click', function(){
-      var lv = b.getAttribute('data-lvl');
-      req('/api/profile', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({level:lv})})
-        .then(function(j){ me = j; renderMe(); refreshNext(); toast(d().tstLvl); })
-        .catch(function(){ toast(d().tstErr); });
-    });
-  });
 
   /* ---------- profile actions ---------- */
   var remCycle = [19, 20, 21, 8, null];

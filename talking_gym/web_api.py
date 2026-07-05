@@ -105,6 +105,7 @@ def _me_payload(user) -> dict:
         "turns_per_session": config.turns_per_session,
         "target_lang": target_of(user),
         "native_lang": native_of(user),
+        "profile_note": (user["profile_note"] if "profile_note" in user.keys() else "") or "",
         "plan": _effective_plan(user),
         "plan_expires": user["plan_expires"] if "plan_expires" in user.keys() else None,
         "trained_today": db.did_session_today(user["user_id"]),
@@ -230,7 +231,12 @@ async def api_session_start(request: web.Request) -> web.Response:
             "resumed": True,
             "tts_b64": await _opener_tts(sc.id, payload["opener_en"], target, user["level"]),
         })
-    sc = pick_scenario(user["level"], user["sessions_done"])
+    if user["sessions_done"] == 0:
+        # Very first conversation = placement chat: Sarah gets to know the
+        # learner and sets their level — no self-assessment at signup.
+        sc = by_id("placement")
+    else:
+        sc = pick_scenario(user["level"], user["sessions_done"])
     db.start_session(user["user_id"], sc.id)
     payload = await _scenario_payload(sc, user)
     db.set_last_example(user["user_id"], payload["example_en"])
@@ -344,6 +350,7 @@ async def api_turn(request: web.Request) -> web.Response:
         "xp_earned": reply.xp_earned,
         "streak": reply.streak,
         "best_streak": reply.best_streak,
+        "placed_level": reply.placed_level,
     }
 
     if spoken and config.tts_enabled:

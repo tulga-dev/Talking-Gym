@@ -17,7 +17,8 @@ from . import db
 from .config import config
 from .langs import (lang_meta, native_of, native_prompt, pipeline_for,
                     roman_for, target_of)
-from .prompts import (FINISH_HINT, LOCALIZE_SYSTEM, LOCALIZE_TEMPLATE,
+from .prompts import (FINISH_HINT, LEARNER_BLOCK, LOCALIZE_SYSTEM,
+                      LOCALIZE_TEMPLATE, PLACEMENT_FINISH, PLACEMENT_HINT,
                       TURN_TEMPLATE, system_prompt)
 from .providers import ProviderError
 from .providers import llm
@@ -49,6 +50,7 @@ class CoachReply:
     xp_earned: int = 0
     streak: int | None = None       # set when the session completed
     best_streak: int | None = None
+    placed_level: str = ""          # set when the placement session completes
 
 
 # ---------- gamification (Duolingo-style) ----------
@@ -222,13 +224,25 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
     loc = await localize_scenario(scenario, target_lang, native)
     turn = session["turns"] + 1
     max_turns = config.turns_per_session
-    finish_hint = FINISH_HINT if turn >= max_turns else ""
+    is_placement = scenario.id == "placement"
+    if is_placement:
+        finish_hint = PLACEMENT_FINISH if turn >= max_turns else PLACEMENT_HINT
+    else:
+        finish_hint = FINISH_HINT if turn >= max_turns else ""
+
+    profile = ""
+    try:
+        profile = (user["profile_note"] or "") if "profile_note" in user.keys() else ""
+    except Exception:
+        pass
+    learner = LEARNER_BLOCK.format(profile=profile) if (profile and not is_placement) else ""
 
     prompt = TURN_TEMPLATE.format(
         title=scenario.title_mn,
         opener=loc["opener"],
         focus=scenario.focus,
         level=user["level"],
+        learner=learner,
         turn=turn,
         max_turns=max_turns,
         finish_hint=finish_hint,
@@ -271,6 +285,15 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
     db.add_xp(user_id, reply.xp_earned)
 
     if reply.done:
+        # Sarah's memory: persist refreshed learner profile when offered.
+        profile_update = str(data.get("profile_update", "")).strip()
+        if profile_update:
+            db.set_profile_note(user_id, profile_update)
+        if is_placement:
+            placed = str(data.get("placement_level", "")).strip().lower()
+            if placed in ("beginner", "intermediate", "advanced"):
+                db.set_level(user_id, placed)
+                reply.placed_level = placed
         streak, best = db.complete_session(user_id)
         reply.streak, reply.best_streak = streak, best
     return reply

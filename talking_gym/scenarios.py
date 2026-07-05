@@ -23,6 +23,18 @@ class Scenario:
 
 
 SCENARIOS: list[Scenario] = [
+    # ---------- onboarding placement (first session only; never in rotation) ----------
+    Scenario(
+        id="placement",
+        level="beginner",
+        title_mn="Танилцах яриа",
+        setup_mn="Сара таныг мэдэж авч, түвшинг тань тогтооно. Чөлөөтэй яриарай — энэ шалгалт биш!",
+        opener_en=f"Hi! I'm {config.coach_name_en}, your speaking coach. I'd love to get to know you! What's your name, and what do you do?",
+        opener_mn=f"Сайн уу! Би {config.coach_name_mn}, таны ярианы дасгалжуулагч. Тантай танилцмаар байна! Таныг хэн гэдэг вэ, юу хийдэг вэ?",
+        example_en="My name is Bat. I work in an office. I want to speak better.",
+        example_mn="Намайг Бат гэдэг. Би оффист ажилладаг. Илүү сайн ярьж сурмаар байна.",
+        focus="get-to-know-you: name, job, family, interests, why they are learning; assess level from their answers",
+    ),
     # ---------- beginner ----------
     Scenario(
         id="intro",
@@ -350,7 +362,7 @@ SCENARIOS: list[Scenario] = [
 
 def pick_scenario(level: str, sessions_done: int) -> Scenario:
     """Rotate deterministically through the user's level pool."""
-    pool = [s for s in SCENARIOS if s.level == level] or SCENARIOS
+    pool = [s for s in SCENARIOS if s.level == level and s.id != "placement"] or SCENARIOS
     return pool[sessions_done % len(pool)]
 
 

@@ -225,6 +225,7 @@ def _migrate() -> None:
         "ALTER TABLE users ADD COLUMN {} track TEXT DEFAULT 'business'",
         "ALTER TABLE users ADD COLUMN {} target_lang TEXT DEFAULT 'en'",
         "ALTER TABLE users ADD COLUMN {} native_lang TEXT DEFAULT 'mn'",
+        "ALTER TABLE users ADD COLUMN {} profile_note TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN {} plan TEXT DEFAULT 'free'",
         "ALTER TABLE users ADD COLUMN {} plan_expires TEXT",
         "ALTER TABLE active_sessions ADD COLUMN {} last_example TEXT DEFAULT ''",
@@ -289,6 +290,12 @@ def set_target_lang(user_id: int, target_lang: str) -> None:
 def set_native_lang(user_id: int, native_lang: str) -> None:
     with _conn() as con:
         con.execute("UPDATE users SET native_lang=? WHERE user_id=?", (native_lang, user_id))
+
+
+def set_profile_note(user_id: int, note: str) -> None:
+    """Sarah's memory of the learner (job, interests, goals, weak points)."""
+    with _conn() as con:
+        con.execute("UPDATE users SET profile_note=? WHERE user_id=?", (note[:1500], user_id))
 
 
 # ---------- generated-content cache (survives deploys) ----------
