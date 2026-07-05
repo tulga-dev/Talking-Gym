@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Talking Gym</title>
-<meta name="theme-color" content="#0063FF">
+<meta name="theme-color" content="#33A62C">
 <link rel="manifest" href="/app/manifest.webmanifest">
 <link rel="icon" href="/app/icon-192.png">
 <link rel="apple-touch-icon" href="/app/icon-192.png">
@@ -15,8 +15,8 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
-    --blue:#0063FF; --blue-2:#4094ED; --sky:#EBF6FD; --sky-2:#F5FAFF;
-    --yellow:#FFCB3D; --yellow-d:#E8AE1B; --orange:#FF9900; --green:#36B35D;
+    --blue:#33A62C; --blue-2:#5BBE3F; --sky:#EAF7E3; --sky-2:#F6FBF0;
+    --yellow:#8FD64A; --yellow-d:#67AF27; --orange:#FF9900; --green:#36B35D;
     --purple:#A142F5; --purple-t:#F1E2FD; --red:#ED5C3B;
     --ink:#1B2733; --mut:#5E6B7A; --line:#E5E7EB;
     --ease:cubic-bezier(.32,.72,0,1);
@@ -26,7 +26,7 @@
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important} }
   html,body{height:100%}
-  body{font-family:'Poppins','Century Gothic','Segoe UI',Roboto,sans-serif;background:#D7E3F0;color:var(--ink);line-height:1.5;font-size:15px}
+  body{font-family:'Poppins','Century Gothic','Segoe UI',Roboto,sans-serif;background:#D9EDCC;color:var(--ink);line-height:1.5;font-size:15px}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:8px}
   .i{width:20px;height:20px;flex:none;display:inline-block;vertical-align:-4px}
@@ -48,7 +48,7 @@
   .tabbar button .i{width:23px;height:23px;transition:transform .35s var(--ease)}
   .tabbar button[aria-pressed="true"]{color:var(--blue)}
   .tabbar button[aria-pressed="true"] .i{transform:translateY(-2px) scale(1.1)}
-  .tabbar .mic-tab .tw{width:54px;height:54px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-28px;box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 8px 18px rgba(0,99,255,.45);transition:transform .35s var(--ease)}
+  .tabbar .mic-tab .tw{width:54px;height:54px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-28px;box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 8px 18px rgba(51,166,44,.45);transition:transform .35s var(--ease)}
   .tabbar .mic-tab .tw .i{width:24px;height:24px}
   .tabbar .mic-tab:active .tw{transform:scale(.92)}
 
@@ -69,7 +69,7 @@
   .chip-lang{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;background:#fff;color:var(--ink);border-radius:60px;padding:6px 12px;margin-top:8px;box-shadow:var(--ring),0 2px 8px rgba(27,39,51,.06);transition:transform .35s var(--ease)}
   .chip-lang:active{transform:scale(.94)}
   .h-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
-  .avatar-me{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18),0 5px 12px -3px rgba(0,99,255,.4)}
+  .avatar-me{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18),0 5px 12px -3px rgba(51,166,44,.4)}
   .sec-t{font-size:14.5px;font-weight:800;margin:16px 2px 9px;letter-spacing:-.01em}
   .badge-new{flex:none;font-size:10px;font-weight:800;letter-spacing:.6px;color:var(--blue);background:#E6F1FB;padding:5px 9px;border-radius:60px}
   .plan-badge{flex:none;font-size:11px;font-weight:800;letter-spacing:.4px;padding:6px 13px;border-radius:60px;background:#EEF1F5;color:var(--mut);text-transform:uppercase}
@@ -96,8 +96,8 @@
   #call-overlay{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100dvh;z-index:60;background:#0C121D;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 18px);gap:12px}
   .call-video{position:relative;flex:1;min-height:0;border-radius:22px;overflow:hidden;background:#232F44;box-shadow:0 14px 40px rgba(0,0,0,.5)}
   .call-video svg{position:absolute;inset:0;width:100%;height:100%}
-  .call-feed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease}
-  .call-feed.on{opacity:1}
+  #k-arm{animation:kwave 2.8s ease-in-out infinite;transform-origin:230px 366px;transform-box:view-box}
+  @keyframes kwave{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-14deg)}}
   #av-body{animation:breathe 4.6s ease-in-out infinite;transform-origin:180px 480px}
   @keyframes breathe{50%{transform:translateY(3px)}}
   .call-topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 14px 26px;background:linear-gradient(180deg,rgba(6,10,18,.72),rgba(6,10,18,0))}
@@ -133,17 +133,17 @@
   .lead.bk{background:var(--sky);color:var(--blue)}
   .lead.fr{background:#FFF1D6;color:var(--orange)}
 
-  .today-card{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 42%),var(--blue);color:#fff;box-shadow:0 0 0 1px rgba(0,60,160,.35), inset 0 1px 0 rgba(255,255,255,.35), 0 18px 36px -12px rgba(0,99,255,.5)}
+  .today-card{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 42%),var(--blue);color:#fff;box-shadow:0 0 0 1px rgba(0,60,160,.35), inset 0 1px 0 rgba(255,255,255,.35), 0 18px 36px -12px rgba(51,166,44,.5)}
   .today-card .track{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--yellow)}
   .today-card .track .i{width:14px;height:14px}
   .today-card h4{color:#fff;font-size:17.5px;margin:7px 0 3px}
-  .today-card .sub{color:#BBD4FF}
+  .today-card .sub{color:#D8F2CE}
   .start-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--yellow);color:var(--ink);font-weight:800;font-size:15px;padding:13px;border-radius:60px;margin-top:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 4px 0 var(--yellow-d);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
   .start-btn:active{transform:translateY(3px) scale(.985);box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 1px 0 var(--yellow-d)}
   .start-btn:disabled{opacity:.6}
   .start-btn .go{width:28px;height:28px;border-radius:50%;background:rgba(27,39,51,.14);display:inline-flex;align-items:center;justify-content:center}
   .start-btn .go .i{width:15px;height:15px}
-  .row-btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#fff;background:var(--blue);padding:11px 16px;border-radius:60px;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 6px 14px -6px rgba(0,99,255,.5);transition:transform .35s var(--ease)}
+  .row-btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#fff;background:var(--blue);padding:11px 16px;border-radius:60px;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 6px 14px -6px rgba(51,166,44,.5);transition:transform .35s var(--ease)}
   .row-btn .i{width:14px;height:14px}
   .row-btn:active{transform:scale(.94)}
   .capbar{height:8px;background:#E5EDF6;border-radius:5px;overflow:hidden;margin-top:8px}
@@ -154,7 +154,7 @@
   .les-head .t span{display:block;font-size:11px;color:var(--mut);font-weight:600}
   .dots{font-size:13px;color:var(--blue);font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums}
   .bubble{display:flex;gap:10px;margin-bottom:12px}
-  .avatar{width:42px;height:42px;border-radius:50%;background:var(--yellow);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.08),0 2px 0 var(--yellow-d)}
+  .avatar{width:42px;height:42px;border-radius:50%;background:#E4F5D2;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06),0 2px 0 #BCDD9B;overflow:hidden}
   .msg.typing{display:flex;gap:5px;align-items:center;min-height:20px}
   .msg.typing b{width:7px;height:7px;border-radius:50%;background:#9db3c8;animation:tblink 1.1s infinite}
   .msg.typing b:nth-child(2){animation-delay:.18s}
@@ -174,8 +174,8 @@
   .holdbar .i{width:20px;height:20px;pointer-events:none}
   .holdbar span{pointer-events:none}
   .holdbar:active{transform:scale(.985)}
-  .holdbar.rec{background:var(--blue);border-color:#0047b8;color:#fff;box-shadow:0 2px 0 #0047b8,0 0 0 6px rgba(0,99,255,.14);animation:pulse 1.1s infinite}
-  @keyframes pulse{50%{box-shadow:0 2px 0 #0047b8,0 0 0 15px rgba(0,99,255,.06)}}
+  .holdbar.rec{background:var(--blue);border-color:#1E7A1B;color:#fff;box-shadow:0 2px 0 #1E7A1B,0 0 0 6px rgba(51,166,44,.14);animation:pulse 1.1s infinite}
+  @keyframes pulse{50%{box-shadow:0 2px 0 #1E7A1B,0 0 0 15px rgba(51,166,44,.06)}}
   .holdbar.busy{animation:none;background:#EEF3F9;color:#93A1B3;pointer-events:none}
   .spin{width:26px;height:26px;border:3.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
@@ -279,6 +279,23 @@
 <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 11.5 12 4l8.5 7.5M6 10.5V20h12v-9.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-route" viewBox="0 0 24 24"><path d="M6 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8.5 17.5H15a3.25 3.25 0 0 0 0-6.5H9A3.25 3.25 0 0 1 9 4.5h6.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="kitty-face" viewBox="0 0 64 64">
+  <path d="M12 26 L17 8 Q18.5 6 20.5 8 L28 20 Z" fill="#7CC434"/>
+  <path d="M52 26 L47 8 Q45.5 6 43.5 8 L36 20 Z" fill="#7CC434"/>
+  <path d="M16.5 21 L19.5 11 Q20.3 9.8 21.6 11.2 L26 19 Z" fill="#B7E576"/>
+  <path d="M47.5 21 L44.5 11 Q43.7 9.8 42.4 11.2 L38 19 Z" fill="#B7E576"/>
+  <ellipse cx="32" cy="38" rx="24" ry="25" fill="#7CC434"/>
+  <ellipse cx="24" cy="37" rx="6.2" ry="7" fill="#FFF"/>
+  <ellipse cx="40" cy="37" rx="6.2" ry="7" fill="#FFF"/>
+  <circle cx="25" cy="38" r="3.6" fill="#243B1B"/>
+  <circle cx="39" cy="38" r="3.6" fill="#243B1B"/>
+  <circle cx="26.4" cy="36.4" r="1.2" fill="#FFF"/>
+  <circle cx="40.4" cy="36.4" r="1.2" fill="#FFF"/>
+  <path d="M30 47 L34 47 L32 49.6 Z" fill="#2F4A20"/>
+  <path d="M27 53 Q32 57 37 53" stroke="#3E6B22" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M10 44 h8 M10.5 49 h7" stroke="#4E9A20" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M54 44 h-8 M53.5 49 h-7" stroke="#4E9A20" stroke-width="1.6" stroke-linecap="round"/>
+</symbol>
 <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></symbol>
 <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M6.5 16.5v-4M11 16.5V7M15.5 16.5v-6.5M20 16.5V4.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
 <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 11.5a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5zM5 20c1.2-3.4 3.9-5 7-5s5.8 1.6 7 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -328,7 +345,7 @@
       <button type="button" data-tlang="zh">🇨🇳 中文</button>
       <button type="button" data-tlang="ja">🇯🇵 日本語</button>
     </div>
-    <div class="sub" style="margin:2px 0 10px" data-i18n="obPlace">Түвшинг тань Сара эхний ярианаас өөрөө тогтооно 😊</div>
+    <div class="sub" style="margin:2px 0 10px" data-i18n="obPlace">Түвшинг тань Китти эхний ярианаас өөрөө тогтооно 😊</div>
   </div>
   <button class="start-btn" id="ob-go" style="margin-top:18px"><span id="ob-go-lbl">Бүртгүүлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
   <div class="err" id="ob-err"></div>
@@ -359,7 +376,7 @@
 
     <div class="acard icon-lead" id="call-card" style="cursor:pointer">
       <div class="lead" style="background:#E6F1FB;color:var(--blue)"><svg class="i"><use href="#i-video"/></svg></div>
-      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="callT">Сараатай видео дуудлага</h4><div class="sub" data-i18n="callS">Гар чөлөөтэй, жинхэнэ яриа шиг</div></div>
+      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="callT">Киттитэй видео дуудлага</h4><div class="sub" data-i18n="callS">Гар чөлөөтэй, жинхэнэ яриа шиг</div></div>
       <span class="badge-new" data-i18n="callNew">ШИНЭ</span>
     </div>
 
@@ -426,7 +443,7 @@
   <div class="scr" id="scr-prof">
     <div class="app-h"><div class="hi"><span id="prof-name"></span><span class="sub2" id="prof-sub"></span></div><span class="pill hot"><svg class="i"><use href="#i-flame"/></svg><span id="p-streak2">0</span></span></div>
     <div class="acard" id="sarah-note" hidden>
-      <h4 class="h-ico"><svg class="i" style="color:var(--purple)"><use href="#i-msg"/></svg><span data-i18n="knowT">Сара таны тухай мэднэ</span></h4>
+      <h4 class="h-ico"><svg class="i" style="color:var(--purple)"><use href="#i-msg"/></svg><span data-i18n="knowT">Китти таны тухай мэднэ</span></h4>
       <div class="sub" id="sarah-note-txt" style="font-size:12.5px;line-height:1.55;margin-top:4px"></div>
     </div>
     <div class="acard">
@@ -487,60 +504,65 @@
   <div class="call-video" id="sarah-av">
     <svg id="sarah-portrait" viewBox="0 0 360 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
-        <linearGradient id="cw" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#3A4A63"/><stop offset="1" stop-color="#232F44"/>
-        </linearGradient>
-        <linearGradient id="chair" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#4A3B55"/><stop offset="1" stop-color="#37293F"/>
+        <linearGradient id="kbg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#DFF5CC"/><stop offset="1" stop-color="#BCE39B"/>
         </linearGradient>
       </defs>
-      <rect width="360" height="480" fill="url(#cw)"/>
-      <circle cx="300" cy="90" r="60" fill="#F3D9A4" opacity=".14"/>
-      <circle cx="300" cy="90" r="34" fill="#F3D9A4" opacity=".16"/>
-      <rect x="18" y="150" width="70" height="200" rx="8" fill="#1B2433" opacity=".7"/>
-      <rect x="26" y="162" width="54" height="38" rx="4" fill="#2C3A52" opacity=".8"/>
-      <rect x="26" y="208" width="54" height="38" rx="4" fill="#2C3A52" opacity=".8"/>
-      <path d="M330 330c-16-40 8-58 2-86 22 18 22 60 10 88Z" fill="#2F5D48"/>
-      <path d="M342 332c-2-34-22-44-18-74 18 10 30 48 26 76Z" fill="#3B7258"/>
-      <rect x="318" y="326" width="38" height="30" rx="6" fill="#7A5B44"/>
+      <rect width="360" height="480" fill="url(#kbg)"/>
+      <circle cx="72" cy="84" r="34" fill="#FFF" opacity=".45"/>
+      <circle cx="104" cy="92" r="24" fill="#FFF" opacity=".35"/>
+      <circle cx="300" cy="150" r="40" fill="#FFF" opacity=".3"/>
+      <ellipse cx="180" cy="452" rx="150" ry="26" fill="#8FBF6A" opacity=".5"/>
       <g id="av-body">
-        <ellipse cx="180" cy="470" rx="118" ry="86" fill="url(#chair)"/>
-        <path d="M96 480c0-66 34-104 84-104s84 38 84 104Z" fill="#2AA7A0"/>
-        <path d="M150 384c8 14 22 22 30 22s22-8 30-22l-14-16h-32Z" fill="#F2C6A0"/>
-        <rect x="163" y="330" width="34" height="52" rx="16" fill="#E8B790"/>
-        <path d="M100 218c0-70 34-118 80-118s80 48 80 118c0 30-6 58-18 80l-62 30-62-30c-12-22-18-50-18-80Z" fill="#5A3A2B"/>
-        <ellipse cx="180" cy="238" rx="62" ry="72" fill="#F2C6A0"/>
-        <path d="M118 232c-8 0-14 8-12 18 2 9 8 14 14 13Z" fill="#F2C6A0"/>
-        <path d="M242 232c8 0 14 8 12 18-2 9-8 14-14 13Z" fill="#F2C6A0"/>
-        <circle cx="116" cy="268" r="4" fill="#E8B04B"/>
-        <circle cx="244" cy="268" r="4" fill="#E8B04B"/>
-        <path d="M112 226c-2-52 26-92 68-92s70 40 68 92c-4-10-10-16-20-18-6-22-24-34-48-34s-42 12-48 34c-10 2-16 8-20 18Z" fill="#6B4633"/>
-        <path d="M148 214c8-6 22-6 28 0" stroke="#4A3123" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <path d="M212 214c-8-6-22-6-28 0" stroke="#4A3123" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <g id="av-eyes">
-          <ellipse cx="156" cy="238" rx="10" ry="11" fill="#FFF"/>
-          <ellipse cx="204" cy="238" rx="10" ry="11" fill="#FFF"/>
-          <circle class="av-iris" cx="157" cy="240" r="5.6" fill="#4A2F23"/>
-          <circle class="av-iris" cx="205" cy="240" r="5.6" fill="#4A2F23"/>
-          <circle cx="159" cy="238" r="1.8" fill="#FFF"/>
-          <circle cx="207" cy="238" r="1.8" fill="#FFF"/>
-          <rect class="av-lid" x="144" y="224" width="24" height="26" rx="10" fill="#F2C6A0" opacity="0"/>
-          <rect class="av-lid" x="192" y="224" width="24" height="26" rx="10" fill="#F2C6A0" opacity="0"/>
+        <path d="M96 356c-26 26-44 18-58 40 24 12 46 4 62-10Z" fill="#6DB32E"/>
+        <path d="M62 384c-8 6-14 14-16 24 10-2 18-8 24-16Z" fill="#4E9A20"/>
+        <path d="M120 460c0-60 24-96 60-96s60 36 60 96Z" fill="#7CC434"/>
+        <ellipse cx="146" cy="458" rx="20" ry="12" fill="#7CC434"/>
+        <ellipse cx="214" cy="458" rx="20" ry="12" fill="#7CC434"/>
+        <g id="k-arm">
+          <path d="M226 372c22-14 40-42 44-70" stroke="#7CC434" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <circle cx="272" cy="296" r="20" fill="#7CC434"/>
+          <circle cx="272" cy="290" r="6.5" fill="#5FA826"/>
+          <circle cx="262" cy="300" r="4" fill="#5FA826"/>
+          <circle cx="282" cy="300" r="4" fill="#5FA826"/>
         </g>
-        <path d="M178 252c1 6 1 10-3 13" stroke="#D9A276" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="140" cy="266" r="8" fill="#F0A78E" opacity=".5"/>
-        <circle cx="220" cy="266" r="8" fill="#F0A78E" opacity=".5"/>
-        <g id="av-mouth-g">
-          <path id="av-smile" d="M162 282 Q180 294 198 282" stroke="#B5533E" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-          <ellipse id="av-mouth" cx="180" cy="286" rx="13" ry="1.5" fill="#8E3B2C" opacity="0"/>
-          <ellipse id="av-tongue" cx="180" cy="291" rx="7" ry="1" fill="#C96A57" opacity="0"/>
+        <path d="M134 372c-16 6-26 16-30 30" stroke="#7CC434" stroke-width="24" fill="none" stroke-linecap="round"/>
+        <path d="M132 366h96l14 26c-20 16-42 24-62 24s-42-8-62-24Z" fill="#2EA834"/>
+        <rect x="168" y="382" width="26" height="20" rx="5" fill="#FFF" transform="rotate(8 181 392)"/>
+        <g id="k-head">
+          <path d="M96 118 L120 44 Q126 36 134 44 L162 96 Z" fill="#7CC434"/>
+          <path d="M117 96 L128 60 Q131 56 136 61 L152 92 Z" fill="#B7E576"/>
+          <path d="M264 118 L240 44 Q234 36 226 44 L198 96 Z" fill="#7CC434"/>
+          <path d="M243 96 L232 60 Q229 56 224 61 L208 92 Z" fill="#B7E576"/>
+          <ellipse cx="180" cy="210" rx="102" ry="118" fill="#7CC434"/>
+          <path d="M150 96 q4 -18 10 0 z" fill="#5FA826"/>
+          <path d="M174 90 q4 -20 10 0 z" fill="#5FA826"/>
+          <path d="M198 96 q4 -18 10 0 z" fill="#5FA826"/>
+          <path d="M120 178c10-8 24-8 32 0" stroke="#4E9A20" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M240 178c-10-8-24-8-32 0" stroke="#4E9A20" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <g id="av-eyes">
+            <ellipse cx="142" cy="216" rx="26" ry="30" fill="#FFF"/>
+            <ellipse cx="218" cy="216" rx="26" ry="30" fill="#FFF"/>
+            <circle class="av-iris" cx="146" cy="220" r="15" fill="#243B1B"/>
+            <circle class="av-iris" cx="214" cy="220" r="15" fill="#243B1B"/>
+            <circle cx="152" cy="212" r="5" fill="#FFF"/>
+            <circle cx="220" cy="212" r="5" fill="#FFF"/>
+            <rect class="av-lid" x="114" y="184" width="56" height="62" rx="26" fill="#7CC434" opacity="0"/>
+            <rect class="av-lid" x="190" y="184" width="56" height="62" rx="26" fill="#7CC434" opacity="0"/>
+          </g>
+          <path d="M172 258 L188 258 L180 268 Z" fill="#2F4A20"/>
+          <g id="av-mouth-g">
+            <path id="av-smile" d="M160 284 Q180 300 200 284" stroke="#3E6B22" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <ellipse id="av-mouth" cx="180" cy="290" rx="16" ry="2" fill="#5E2B1F" opacity="0"/>
+            <ellipse id="av-tongue" cx="180" cy="296" rx="9" ry="1.5" fill="#F0868F" opacity="0"/>
+          </g>
+          <path d="M86 236h34 M88 258h32" stroke="#4E9A20" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M274 236h-34 M272 258h-32" stroke="#4E9A20" stroke-width="4.5" stroke-linecap="round"/>
         </g>
       </g>
     </svg>
-    <video id="vid-idle" class="call-feed" loop muted playsinline preload="none"></video>
-    <video id="vid-talk" class="call-feed" loop muted playsinline preload="none"></video>
     <div class="call-topbar">
-      <div class="ct-left"><span class="ct-name">Sarah</span><span class="ct-sub">Talking Gym</span></div>
+      <div class="ct-left"><span class="ct-name">Kitty</span><span class="ct-sub">Talking Gym</span></div>
       <div class="ct-right"><span class="ct-timer" id="call-timer">00:00</span>
         <button class="ct-x" id="call-min" aria-label="End call"><svg class="i"><use href="#i-x"/></svg></button>
       </div>
@@ -576,8 +598,8 @@
       obT:"Talking Gym-д тавтай морил", obS:"Өдөрт 5 минут — англиар ярьж сур",
       obTabReg:"Бүртгүүлэх", obTabLog:"Нэвтрэх", obOr:"эсвэл имэйлээр",
       obEmail:"Имэйл", obPass:"Нууц үг (6+ тэмдэгт)", obName:"Таны нэр", obLevel:"Түвшин", obLang:"Ямар хэл сурах вэ?",
-      obPlace:"Түвшинг тань Сара эхний ярианаас өөрөө тогтооно 😊",
-      knowT:"Сара таны тухай мэднэ", placedT:"Таны түвшин",
+      obPlace:"Түвшинг тань Китти эхний ярианаас өөрөө тогтооно 😊",
+      knowT:"Китти таны тухай мэднэ", placedT:"Таны түвшин",
       lvB:"Анхан", lvI:"Дунд", lvA:"Ахисан",
       errEmail:"Имэйлээ зөв оруулаарай", errPass:"Нууц үг 6-аас дээш тэмдэгт", errName:"Нэрээ оруулаарай",
       errTaken:"Энэ имэйл бүртгэлтэй байна — Нэвтрэх дээр дараарай", errLogin:"Имэйл эсвэл нууц үг буруу",
@@ -595,7 +617,7 @@
       micHintRec:"Гараа суллахад илгээгдэнэ",
       tapHintIdle:"Дарж эхлүүлээд, ярьж дуусаад дахин дар",
       tapHintRec:"Дуусгахдаа дахин дар — илгээгдэнэ",
-      micHintBusy:"Сараа сонсож байна...",
+      micHintBusy:"Китти сонсож байна...",
       micHintDenied:"Микрофоны зөвшөөрөл хэрэгтэй — эсвэл бичээрэй",
       typeLink:"…эсвэл бичих",
       doneT:"Өнөөдрийн дасгал дууслаа!", doneStreak:"стрик", doneScore:"оноо", doneBtn:"Нүүр рүү",
@@ -610,11 +632,11 @@
       soonProg:"Удахгүй: алдааны сан, долоо хоногийн лиг, дэлгэрэнгүй тайлан",
       sRem:"Сануулга", sStudy:"Судлах хэл", sLang:"Апп-ын хэл", sOut:"Гарах",
       goalLbl:"Өдрийн зорилго", progT2:"Таны ахиц", curLvl:"Одоогийн түвшин",
-      recT:"Танд санал болгох", recSub:"Дараагийн хичээл — Сараатай ярилцъя",
+      recT:"Танд санал болгох", recSub:"Дараагийн хичээл — Киттитэй ярилцъя",
       lbStreak:"Стрик", lbVoice:"Дуут дасгал",
-      callT:"Сараатай видео дуудлага", callS:"Гар чөлөөтэй, жинхэнэ яриа шиг", callNew:"ШИНЭ",
-      callConnecting:"Холбогдож байна…", callSpeaking:"Сараа ярьж байна…", callListening:"Таны ээлж — яриарай",
-      callThinking:"Сараа бодож байна…", callSend:"Илгээх",
+      callT:"Киттитэй видео дуудлага", callS:"Гар чөлөөтэй, жинхэнэ яриа шиг", callNew:"ШИНЭ",
+      callConnecting:"Холбогдож байна…", callSpeaking:"Китти ярьж байна…", callListening:"Таны ээлж — яриарай",
+      callThinking:"Китти бодож байна…", callSend:"Илгээх",
       planLbl:"Таны багц", redeemB:"Идэвхжүүлэх",
       tstPlanOn:"Багц идэвхжлээ:", tstBadCode:"Код буруу эсвэл дууссан байна",
       pBadge:"Удахгүй", perMo:"/сар",
@@ -637,8 +659,8 @@
       obT:"Welcome to Talking Gym", obS:"5 minutes a day — learn to speak English",
       obTabReg:"Sign up", obTabLog:"Log in", obOr:"or with email",
       obEmail:"Email", obPass:"Password (6+ characters)", obName:"Your name", obLevel:"Level", obLang:"Which language do you want to learn?",
-      obPlace:"Sarah will find your level in your first chat 😊",
-      knowT:"Sarah knows you", placedT:"Your level",
+      obPlace:"Kitty will find your level in your first chat 😊",
+      knowT:"Kitty knows you", placedT:"Your level",
       lvB:"Beginner", lvI:"Intermediate", lvA:"Advanced",
       errEmail:"Please enter a valid email", errPass:"Password must be 6+ characters", errName:"Please enter your name",
       errTaken:"This email is already registered — tap Log in", errLogin:"Wrong email or password",
@@ -656,7 +678,7 @@
       micHintRec:"Release to send",
       tapHintIdle:"Click to start, click again when you finish",
       tapHintRec:"Click again to finish — it will send",
-      micHintBusy:"Sarah is listening...",
+      micHintBusy:"Kitty is listening...",
       micHintDenied:"Microphone permission needed — or type instead",
       typeLink:"…or type",
       doneT:"Workout complete!", doneStreak:"streak", doneScore:"score", doneBtn:"Home",
@@ -671,11 +693,11 @@
       soonProg:"Coming soon: mistake bank, weekly league, detailed reports",
       sRem:"Reminder", sStudy:"Study language", sLang:"App language", sOut:"Log out",
       goalLbl:"Daily goal", progT2:"Your progress", curLvl:"Current level",
-      recT:"Recommended for you", recSub:"Next lesson — talk with Sarah",
+      recT:"Recommended for you", recSub:"Next lesson — talk with Kitty",
       lbStreak:"Streak", lbVoice:"Voice today",
-      callT:"Video call with Sarah", callS:"Hands-free, like a real conversation", callNew:"NEW",
-      callConnecting:"Connecting…", callSpeaking:"Sarah is speaking…", callListening:"Your turn — speak",
-      callThinking:"Sarah is thinking…", callSend:"Send",
+      callT:"Video call with Kitty", callS:"Hands-free, like a real conversation", callNew:"NEW",
+      callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
+      callThinking:"Kitty is thinking…", callSend:"Send",
       planLbl:"Your plan", redeemB:"Activate",
       tstPlanOn:"Plan activated:", tstBadCode:"Invalid or used code",
       pBadge:"Coming soon", perMo:"/mo",
@@ -707,8 +729,8 @@
     obTabReg:"ᠪᠦᠷᠢᠳᠬᠡᠭᠦᠯᠬᠦ", obTabLog:"ᠨᠡᠪᠲᠡᠷᠡᠬᠦ", obOr:"ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠢᠮᠧᠯ ᠢᠶᠡᠷ",
     obEmail:"ᠢᠮᠧᠯ", obPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ (6+)", obName:"ᠲᠠᠨ ᠤ ᠨᠡᠷ᠎ᠡ",
     obLevel:"ᠲᠦᠪᠰᠢᠨ", obLang:"ᠶᠠᠮᠠᠷ ᠬᠡᠯᠡ ᠰᠤᠷᠬᠤ ᠪᠤᠢ?",
-    obPlace:"ᠲᠦᠪᠰᠢᠨ ᠢ ᠲᠠᠨᠢ ᠰᠠᠷᠠ ᠡᠬᠢᠨ ᠦ ᠶᠠᠷᠢᠶᠠᠨ ᠠᠴᠠ ᠥᠪᠡᠷ ᠢᠶᠡᠨ ᠲᠣᠭᠲᠠᠭᠠᠨ᠎ᠠ",
-    knowT:"ᠰᠠᠷᠠ ᠲᠠᠨ ᠤ ᠲᠤᠬᠠᠢ ᠮᠡᠳᠡᠨ᠎ᠡ", placedT:"ᠲᠠᠨ ᠤ ᠲᠦᠪᠰᠢᠨ",
+    obPlace:"ᠲᠦᠪᠰᠢᠨ ᠢ ᠲᠠᠨᠢ Kitty ᠡᠬᠢᠨ ᠦ ᠶᠠᠷᠢᠶᠠᠨ ᠠᠴᠠ ᠥᠪᠡᠷ ᠢᠶᠡᠨ ᠲᠣᠭᠲᠠᠭᠠᠨ᠎ᠠ",
+    knowT:"Kitty ᠲᠠᠨ ᠤ ᠲᠤᠬᠠᠢ ᠮᠡᠳᠡᠨ᠎ᠡ", placedT:"ᠲᠠᠨ ᠤ ᠲᠦᠪᠰᠢᠨ",
     lvB:"ᠠᠩᠬ᠎ᠠ ᠱᠠᠲᠤ", lvI:"ᠳᠤᠮᠳᠠ", lvA:"ᠠᠬᠢᠭᠰᠠᠨ",
     errEmail:"ᠢᠮᠧᠯ ᠢᠶᠡᠨ ᠵᠥᠪ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ", errPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ 6 ᠡᠴᠡ ᠳᠡᠭᠡᠭᠰᠢ ᠲᠡᠮᠳᠡᠭᠲᠦ",
     errName:"ᠨᠡᠷ᠎ᠡ ᠪᠡᠨ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ",
@@ -725,7 +747,7 @@
     micHintRec:"ᠭᠠᠷ ᠢᠶᠠᠨ ᠲᠠᠯᠪᠢᠬᠤ ᠳᠤ ᠢᠯᠡᠭᠡᠭᠳᠡᠨ᠎ᠡ",
     tapHintIdle:"ᠳᠠᠷᠤᠵᠤ ᠡᠬᠢᠯᠡᠭᠦᠯᠦᠭᠡᠳ᠂ ᠳᠠᠭᠤᠰᠬᠤ ᠳᠤ ᠳᠠᠬᠢᠨ ᠳᠠᠷᠤ",
     tapHintRec:"ᠳᠠᠭᠤᠰᠬᠠᠬᠤ ᠳᠤ ᠳᠠᠬᠢᠨ ᠳᠠᠷᠤ — ᠢᠯᠡᠭᠡᠭᠳᠡᠨ᠎ᠡ",
-    micHintBusy:"ᠰᠠᠷᠠ ᠰᠣᠨᠣᠰᠴᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
+    micHintBusy:"Kitty ᠰᠣᠨᠣᠰᠴᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     micHintDenied:"ᠮᠢᠺᠷᠣᠹᠣᠨ ᠤ ᠵᠥᠪᠰᠢᠶᠡᠷᠡᠯ ᠬᠡᠷᠡᠭᠲᠡᠢ — ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠪᠢᠴᠢᠭᠡᠷᠡᠢ",
     typeLink:"…ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠪᠢᠴᠢᠬᠦ",
     doneT:"ᠥᠨᠥᠳᠥᠷ ᠦᠨ ᠳᠠᠰᠬᠠᠯ ᠳᠠᠭᠤᠰᠤᠯ᠎ᠠ!", doneStreak:"ᠰᠲ᠋ᠷᠢᠺ", doneScore:"ᠣᠨᠣᠭ᠎ᠠ", doneBtn:"ᠨᠢᠭᠤᠷ ᠲᠤ",
@@ -740,11 +762,11 @@
     soonProg:"ᠤᠳᠠᠬᠤ ᠦᠭᠡᠢ᠄ ᠠᠯᠳᠠᠭᠠᠨ ᠤ ᠰᠠᠩ᠂ ᠳᠣᠯᠣᠭᠠᠨ ᠬᠣᠨᠣᠭ ᠤᠨ ᠯᠢᠭ",
     sRem:"ᠰᠠᠨᠠᠭᠤᠯᠭ᠎ᠠ", sStudy:"ᠰᠤᠳᠤᠯᠬᠤ ᠬᠡᠯᠡ", sLang:"ᠠᠫᠫ ᠤᠨ ᠬᠡᠯᠡ", sOut:"ᠭᠠᠷᠬᠤ",
     goalLbl:"ᠡᠳᠦᠷ ᠦᠨ ᠵᠣᠷᠢᠯᠭ᠎ᠠ", progT2:"ᠲᠠᠨ ᠤ ᠠᠬᠢᠴᠠ", curLvl:"ᠣᠳᠣ ᠶᠢᠨ ᠲᠦᠪᠰᠢᠨ",
-    recT:"ᠲᠠᠨ ᠳᠤ ᠰᠠᠨᠠᠯ ᠪᠣᠯᠭᠠᠬᠤ", recSub:"ᠳᠠᠷᠠᠭ᠎ᠠ ᠶᠢᠨ ᠬᠢᠴᠢᠶᠡᠯ — ᠰᠠᠷᠠ ᠲᠠᠢ ᠶᠠᠷᠢᠯᠴᠠᠶ᠎ᠠ",
+    recT:"ᠲᠠᠨ ᠳᠤ ᠰᠠᠨᠠᠯ ᠪᠣᠯᠭᠠᠬᠤ", recSub:"ᠳᠠᠷᠠᠭ᠎ᠠ ᠶᠢᠨ ᠬᠢᠴᠢᠶᠡᠯ — Kitty ᠲᠠᠢ ᠶᠠᠷᠢᠯᠴᠠᠶ᠎ᠠ",
     lbStreak:"ᠰᠲ᠋ᠷᠢᠺ", lbVoice:"ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ",
-    callT:"ᠰᠠᠷᠠ ᠲᠠᠢ ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ", callS:"ᠭᠠᠷ ᠴᠢᠯᠦᠭᠡᠲᠡᠢ᠂ ᠵᠢᠩᠬᠢᠨᠢ ᠶᠠᠷᠢᠶ᠎ᠠ ᠰᠢᠭ", callNew:"ᠰᠢᠨ᠎ᠡ",
-    callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"ᠰᠠᠷᠠ ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
-    callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"ᠰᠠᠷᠠ ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
+    callT:"Kitty ᠲᠠᠢ ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ", callS:"ᠭᠠᠷ ᠴᠢᠯᠦᠭᠡᠲᠡᠢ᠂ ᠵᠢᠩᠬᠢᠨᠢ ᠶᠠᠷᠢᠶ᠎ᠠ ᠰᠢᠭ", callNew:"ᠰᠢᠨ᠎ᠡ",
+    callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"Kitty ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
+    callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"Kitty ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
     planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ",
     tstPlanOn:"ᠪᠠᠭᠴᠠ ᠢᠳᠡᠪᠬᠢᠵᠢᠯ᠎ᠡ᠄", tstBadCode:"ᠺᠣᠳ᠋ ᠪᠤᠷᠤᠭᠤ ᠡᠰᠡᠭᠦᠯ᠎ᠡ ᠳᠠᠭᠤᠰᠤᠭᠰᠠᠨ",
     pBadge:"ᠤᠳᠠᠬᠤ ᠦᠭᠡᠢ", perMo:"/ᠰᠠᠷ᠎ᠠ",
@@ -878,7 +900,7 @@
   }
   function addTeacher(en, mn, ttsB64, autoplay, latin){
     var b = document.createElement('div'); b.className = 'bubble';
-    var av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'S';
+    var av = document.createElement('div'); av.className = 'avatar'; av.innerHTML = '<svg viewBox="0 0 64 64" width="34" height="34"><use href="#kitty-face"/></svg>';
     var msg = document.createElement('div'); msg.className = 'msg';
     var enEl = document.createElement('span'); enEl.textContent = en; msg.appendChild(enEl);
     if (latin) { var lt = document.createElement('span'); lt.className = 'rom'; lt.textContent = latin; msg.appendChild(lt); }
@@ -896,14 +918,14 @@
   }
   function addTyping(){
     var b = document.createElement('div'); b.className = 'bubble';
-    var av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'S';
+    var av = document.createElement('div'); av.className = 'avatar'; av.innerHTML = '<svg viewBox="0 0 64 64" width="34" height="34"><use href="#kitty-face"/></svg>';
     var msg = document.createElement('div'); msg.className = 'msg typing';
     msg.innerHTML = '<b></b><b></b><b></b>';
     b.appendChild(av); b.appendChild(msg); chat.appendChild(b);
     scrollBottom();
     return b;
   }
-  // Sarah "types" while the reply is on the wire — shown during the real
+  // Kitty "types" while the reply is on the wire — shown during the real
   // network wait, removed the moment the response lands.
   var pendingTyping = null;
   function showTyping(){
@@ -1148,7 +1170,7 @@
     if (window.__starting) return;   // ignore double-taps while loading
     window.__starting = true;
     $('btn-start').disabled = true;
-    // Navigate instantly — Sarah "types" while the lesson loads, so the tap
+    // Navigate instantly — Kitty "types" while the lesson loads, so the tap
     // always responds immediately even when generation is slow.
     chat.innerHTML = '';
     $('les-title').textContent = '…';
@@ -1243,7 +1265,7 @@
   }
   function startRecording(hold){
     unlockVoice();
-    voiceEl.pause();   // don't record over Sarah's voice
+    voiceEl.pause();   // don't record over Kitty's voice
     if (!navigator.mediaDevices || !window.MediaRecorder) {
       $('mic-hint').textContent = d().micHintDenied; $('type-row').hidden = false; return;
     }
@@ -1425,7 +1447,7 @@
       callChunks = [], callSilenceStart = 0, callHeardSpeech = false, callRAF = 0, callRecStart = 0;
   var CALL_SILENCE_MS = 1400, CALL_RMS = 0.022, CALL_MAX_MS = 20000, CALL_MIN_MS = 500;
 
-  /* Sarah's face: blink loop + mouth movement while her audio is playing. */
+  /* Kitty's face: blink loop + mouth movement while her audio is playing. */
   var blinkTimer = 0, mouthRAF = 0, mouthTarget = 0, mouthCur = 0, mouthFlip = 0;
   function startFaceLoops(){
     stopFaceLoops();
@@ -1491,36 +1513,11 @@
     var v = $('call-self'); v.srcObject = null; v.hidden = true;
   }
 
-  /* Real video feed: two stock loops of Sarah (listening / talking) that
-     crossfade with the call state. The illustrated SVG stays underneath as
-     the fallback if the videos fail to load. */
-  var vidReady = false, vidFailed = false;
-  function initCallVideo(){
-    if (vidReady || vidFailed) return;
-    var vi = $('vid-idle'), vt = $('vid-talk'), pending = 2;
-    function ok(){ if (--pending <= 0 && !vidFailed) { vidReady = true; syncFeed(); } }
-    function fail(){ vidFailed = true; vi.classList.remove('on'); vt.classList.remove('on'); }
-    vi.addEventListener('canplay', ok, {once:true});
-    vt.addEventListener('canplay', ok, {once:true});
-    vi.addEventListener('error', fail, {once:true});
-    vt.addEventListener('error', fail, {once:true});
-    vi.src = '/app/sarah-idle.mp4?v=2';
-    vt.src = '/app/sarah-talk.mp4?v=2';
-    vi.play().catch(function(){});
-    vt.play().catch(function(){});
-  }
-  function syncFeed(){
-    if (!vidReady || vidFailed) return;
-    var speaking = $('sarah-av').classList.contains('speaking');
-    $('vid-talk').classList.toggle('on', speaking);
-    $('vid-idle').classList.toggle('on', !speaking);
-  }
   function callState(cls, text){
     var av = $('sarah-av'); av.classList.remove('speaking','listening');
     if (cls) av.classList.add(cls);
     $('call-state').textContent = text;
     $('call-send').disabled = (cls !== 'listening');
-    syncFeed();
   }
   function callCaption(en, rom, mn){
     $('cap-en').textContent = en || '';
@@ -1545,11 +1542,8 @@
     callState('', d().callConnecting);
     callCaption('', '', '');
     startCallTimer();
-    initCallVideo();
     startFaceLoops();
     startSelfCam();
-    var vi = $('vid-idle'), vt = $('vid-talk');
-    vi.play().catch(function(){}); vt.play().catch(function(){});
     getMicStream().then(function(stream){
       try {
         callAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1647,7 +1641,6 @@
     if (callAudioCtx) { try { callAudioCtx.close(); } catch(e){} callAudioCtx = null; }
     callAnalyser = null;
     releaseMic();
-    try { $('vid-idle').pause(); $('vid-talk').pause(); } catch(e){}
     $('call-overlay').hidden = true;
     refreshMe();
   }

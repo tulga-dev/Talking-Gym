@@ -194,7 +194,7 @@ async def _opener_tts(sc_id: str, opener_text: str, target_lang: str, level: str
     if key in _opener_cache:
         return _opener_cache[key]
     # Second layer: DB cache — opener audio survives deploys.
-    dbkey = f"tts:{sc_id}:{target_lang}:{speed}"
+    dbkey = f"tts:v2:{sc_id}:{target_lang}:{speed}"   # v2: openers re-voiced as Kitty
     try:
         stored = db.cache_get(dbkey)
         if stored:

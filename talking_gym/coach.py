@@ -159,7 +159,7 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     key = (scenario.id, target_lang, native)
     if key in _loc_cache:
         return _loc_cache[key]
-    dbkey = f"loc:v2:{scenario.id}:{target_lang}:{native}"   # v2: zh-pivot for mnt
+    dbkey = f"loc:v3:{scenario.id}:{target_lang}:{native}"   # v3: coach renamed to Kitty
     try:
         stored = db.cache_get(dbkey)
         if stored:

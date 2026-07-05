@@ -390,9 +390,6 @@ async def start_web_server() -> web.AppRunner:
     app.router.add_get("/app/sw.js", _file_route("sw.js", "text/javascript"))
     app.router.add_get("/app/icon-192.png", _file_route("icon-192.png"))
     app.router.add_get("/app/icon-512.png", _file_route("icon-512.png"))
-    # Sarah call-video loops (Pexels stock, free license) — cache aggressively
-    app.router.add_get("/app/sarah-idle.mp4", _media_route("sarah-idle.mp4"))
-    app.router.add_get("/app/sarah-talk.mp4", _media_route("sarah-talk.mp4"))
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", config.web_port)

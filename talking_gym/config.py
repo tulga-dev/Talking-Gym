@@ -66,8 +66,8 @@ class Config:
     admin_chat_id: int | None = field(default_factory=_admin_chat_id)
 
     # Coach persona name (English + Mongolian Cyrillic rendering).
-    coach_name_en: str = os.getenv("COACH_NAME_EN", "Sarah")
-    coach_name_mn: str = os.getenv("COACH_NAME_MN", "Сараа")
+    coach_name_en: str = os.getenv("COACH_NAME_EN", "Kitty")
+    coach_name_mn: str = os.getenv("COACH_NAME_MN", "Китти")
 
     # --- Facebook Messenger channel (optional; enabled when page token is set) ---
     messenger_page_token: str = os.getenv("MESSENGER_PAGE_TOKEN", "")
