@@ -241,7 +241,10 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         title=scenario.title_mn,
         opener=loc["opener"],
         focus=scenario.focus,
-        level=user["level"],
+        # During placement the level is exactly what's being measured — don't
+        # anchor the judge with the signup default.
+        level=("UNKNOWN — this placement chat determines it; judge only from their answers"
+               if is_placement else user["level"]),
         learner=learner,
         turn=turn,
         max_turns=max_turns,

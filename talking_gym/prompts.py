@@ -102,7 +102,10 @@ PLACEMENT_FINISH = (
     'This is the FINAL placement turn: warmly wrap up in reply_en (no new question), tell them you now know '
     'them and daily workouts start tomorrow, and set done=true. ALSO include JSON keys: '
     '"placement_level": "beginner"|"intermediate"|"advanced" — judged from their grammar, vocabulary and '
-    'fluency across ALL their answers (when unsure, choose the lower level), and '
+    'fluency across ALL their answers. Guide: beginner = short simple sentences, frequent basic errors; '
+    'intermediate = connected sentences, correct common tenses, minor errors (e.g. "I have been working '
+    'there for three years" is at least intermediate); advanced = natural, complex, near-fluent. '
+    'Only when genuinely torn between two levels choose the lower. Also include '
     '"profile_update": 2-4 short factual sentences IN MONGOLIAN CYRILLIC about this learner '
     '(name, job, family, interests, why they are learning, weak points you noticed).'
 )
