@@ -29,6 +29,10 @@ jobs:
           npm ci || npm install
           npx cap sync ios
 
+      - name: Bump build number (unique per run — App Store requires it)
+        working-directory: mobile/ios/App
+        run: agvtool new-version -all ${{ github.run_number }}
+
       - name: App Store Connect API key
         working-directory: mobile
         run: |

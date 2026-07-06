@@ -8,7 +8,11 @@
   },
   "dependencies": {
     "@capacitor/core": "^6.1.2",
-    "@capacitor/ios": "^6.1.2"
+    "@capacitor/haptics": "^6.0.3",
+    "@capacitor/ios": "^6.1.2",
+    "@capacitor/keyboard": "^6.0.4",
+    "@capacitor/splash-screen": "^6.0.4",
+    "@capacitor/status-bar": "^6.0.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2"

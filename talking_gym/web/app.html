@@ -13,6 +13,28 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+/* Native shell integration (Capacitor iOS). No-ops on the web. The plugin
+   bridge is reachable via Capacitor.Plugins even when loading a remote URL. */
+(function(){
+  var C = window.Capacitor;
+  if (!C || !(C.isNativePlatform && C.isNativePlatform())) return;
+  document.documentElement.classList.add('native');
+  var P = C.Plugins || {};
+  function hideSplash(){ try { P.SplashScreen && P.SplashScreen.hide(); } catch(e){} }
+  try { P.StatusBar && P.StatusBar.setStyle({ style: 'LIGHT' }); } catch(e){}  // dark text on light bg
+  // Hide the launch splash once the UI is up (with a safety fallback).
+  if (document.readyState === 'complete') setTimeout(hideSplash, 300);
+  else window.addEventListener('load', function(){ setTimeout(hideSplash, 300); });
+  setTimeout(hideSplash, 4000);
+  // Light haptic tap on interactive elements — the biggest "feels native" win.
+  document.addEventListener('click', function(e){
+    if (e.target.closest('button, .pill, .setrow, [data-scr], .lang-pick button')) {
+      try { P.Haptics && P.Haptics.impact({ style: 'Light' }); } catch(err){}
+    }
+  }, true);
+})();
+</script>
 <style>
   :root{
     --blue:#33A62C; --blue-2:#5BBE3F; --sky:#EAF7E3; --sky-2:#F6FBF0;
@@ -25,8 +47,11 @@
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important} }
-  html,body{height:100%}
+  html,body{height:100%;overscroll-behavior:none}
   body{font-family:'Poppins','Century Gothic','Segoe UI',Roboto,sans-serif;background:#D9EDCC;color:var(--ink);line-height:1.5;font-size:15px}
+  /* Native shell: no rubber-band bounce, no text selection / callouts. */
+  html.native, html.native body{overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
+  html.native input, html.native textarea{-webkit-user-select:text;user-select:text}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:8px}
   .i{width:20px;height:20px;flex:none;display:inline-block;vertical-align:-4px}

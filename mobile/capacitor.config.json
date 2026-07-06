@@ -11,7 +11,19 @@
     ]
   },
   "ios": {
-    "contentInset": "always",
-    "backgroundColor": "#F6FBF0"
+    "contentInset": "never",
+    "backgroundColor": "#F6FBF0",
+    "scrollEnabled": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#33A62C",
+      "showSpinner": false,
+      "iosSpinnerStyle": "large"
+    },
+    "Keyboard": {
+      "resize": "native"
+    }
   }
 }
