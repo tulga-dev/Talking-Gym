@@ -1,0 +1,17 @@
+{
+  "appId": "mn.talkinggym.app",
+  "appName": "Talking Gym",
+  "webDir": "www",
+  "server": {
+    "url": "https://talking-gym-mn.fly.dev/app",
+    "allowNavigation": [
+      "talking-gym-mn.fly.dev",
+      "accounts.google.com",
+      "*.googleusercontent.com"
+    ]
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#F6FBF0"
+  }
+}
