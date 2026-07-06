@@ -505,6 +505,29 @@ async def api_admin_set_password(request: web.Request) -> web.Response:
                               "name": target["name"], "email": email})
 
 
+async def api_admin_set_email(request: web.Request) -> web.Response:
+    """Founder-only: change an account's login email (must be free)."""
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "bad_json")
+    old_email = str(body.get("old_email", "")).strip().lower()
+    new_email = str(body.get("new_email", "")).strip().lower()
+    if "@" not in new_email:
+        return _err(400, "bad_email")
+    if db.user_by_email(new_email):
+        return _err(409, "email_taken")
+    target = db.user_by_email(old_email)
+    if target is None:
+        return _err(404, "no_such_account")
+    db.set_auth(target["user_id"], email=new_email)
+    return web.json_response({"ok": True, "user_id": str(target["user_id"]),
+                             "name": target["name"], "email": new_email})
+
+
 def add_api_routes(app: web.Application) -> None:
     from .web_auth import add_auth_routes
     add_auth_routes(app)
@@ -520,3 +543,4 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_get("/api/admin/warm", api_admin_warm)
     app.router.add_get("/api/admin/accounts", api_admin_accounts)
     app.router.add_post("/api/admin/set-password", api_admin_set_password)
+    app.router.add_post("/api/admin/set-email", api_admin_set_email)
