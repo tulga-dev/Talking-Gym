@@ -362,6 +362,17 @@ def set_auth(user_id: int, email: str | None = None, password_hash: str | None =
             con.execute("UPDATE users SET google_sub=? WHERE user_id=?", (google_sub, user_id))
 
 
+def recent_email_accounts(limit: int = 40):
+    """Founder support: recent email/password accounts (newest first)."""
+    with _conn() as con:
+        rows = con.execute(
+            "SELECT user_id, name, email, password_hash, google_sub, created_at "
+            "FROM users WHERE email IS NOT NULL AND email != '' "
+            "ORDER BY created_at DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
 def user_by_email(email: str):
     with _conn() as con:
         return con.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()

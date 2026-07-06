@@ -469,6 +469,42 @@ async def api_admin_warm(request: web.Request) -> web.Response:
     return web.json_response(_warm_state)
 
 
+async def api_admin_accounts(request: web.Request) -> web.Response:
+    """Founder-only: recent email accounts (for support / password resets)."""
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    accounts = db.recent_email_accounts()
+    return web.json_response({"accounts": [
+        {"user_id": str(a["user_id"]), "name": a["name"], "email": a["email"],
+         "has_password": bool(a.get("password_hash")),
+         "has_google": bool(a.get("google_sub"))}
+        for a in accounts
+    ]})
+
+
+async def api_admin_set_password(request: web.Request) -> web.Response:
+    """Founder-only: set (or create) a password for an account by email."""
+    from .web_auth import hash_password
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "bad_json")
+    email = str(body.get("email", "")).strip().lower()
+    new_password = str(body.get("new_password", ""))
+    if len(new_password) < 6:
+        return _err(400, "weak_password")
+    target = db.user_by_email(email)
+    if target is None:
+        return _err(404, "no_such_account")
+    db.set_auth(target["user_id"], email=email, password_hash=hash_password(new_password))
+    return web.json_response({"ok": True, "user_id": str(target["user_id"]),
+                              "name": target["name"], "email": email})
+
+
 def add_api_routes(app: web.Application) -> None:
     from .web_auth import add_auth_routes
     add_auth_routes(app)
@@ -482,3 +518,5 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_post("/api/plan/grant", api_plan_grant)
     app.router.add_post("/api/admin/warm", api_admin_warm)
     app.router.add_get("/api/admin/warm", api_admin_warm)
+    app.router.add_get("/api/admin/accounts", api_admin_accounts)
+    app.router.add_post("/api/admin/set-password", api_admin_set_password)
