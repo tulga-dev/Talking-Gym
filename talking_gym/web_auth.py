@@ -12,11 +12,13 @@ import logging
 import os
 import re
 import secrets
+from datetime import datetime, timedelta
 
 import httpx
 from aiohttp import web
 
 from . import db
+from .providers import email as email_provider
 
 log = logging.getLogger(__name__)
 
@@ -151,8 +153,52 @@ async def api_auth_logout(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def api_auth_forgot(request: web.Request) -> web.Response:
+    """Start password recovery. Always returns ok (never leaks which emails
+    exist). Emails a reset link when the address has an account and the email
+    provider is configured; otherwise returns a hint so the UI can guide the
+    user to Google sign-in or support."""
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "bad_json")
+    email = str(body.get("email", "")).strip().lower()
+    if not _EMAIL_RE.match(email):
+        return _err(400, "bad_email")
+    user = db.user_by_email(email)
+    if not email_provider.enabled():
+        return web.json_response({"ok": True, "email_configured": False,
+                                  "has_google": bool(user and user["google_sub"])})
+    if user is not None:
+        token = secrets.token_urlsafe(32)
+        expires = (datetime.utcnow() + timedelta(hours=1)).isoformat()
+        db.create_reset(token, user["user_id"], expires)
+        origin = str(request.url.origin())
+        await email_provider.send_reset(email, f"{origin}/app?reset={token}")
+    return web.json_response({"ok": True, "email_configured": True})
+
+
+async def api_auth_reset(request: web.Request) -> web.Response:
+    """Complete recovery: set a new password from a valid reset token."""
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "bad_json")
+    token = str(body.get("token", "")).strip()
+    new_password = str(body.get("password", ""))
+    if len(new_password) < 6:
+        return _err(400, "weak_password")
+    user = db.user_by_reset(token)
+    if user is None:
+        return _err(400, "bad_token")
+    db.set_auth(user["user_id"], password_hash=hash_password(new_password))
+    db.delete_reset(token)
+    return web.json_response({"token": issue_token(user["user_id"])})
+
+
 async def api_config(request: web.Request) -> web.Response:
-    return web.json_response({"google_client_id": GOOGLE_CLIENT_ID})
+    return web.json_response({"google_client_id": GOOGLE_CLIENT_ID,
+                              "email_recovery": email_provider.enabled()})
 
 
 def add_auth_routes(app: web.Application) -> None:
@@ -160,4 +206,6 @@ def add_auth_routes(app: web.Application) -> None:
     app.router.add_post("/api/auth/register", api_auth_register)
     app.router.add_post("/api/auth/login", api_auth_login)
     app.router.add_post("/api/auth/google", api_auth_google)
+    app.router.add_post("/api/auth/forgot", api_auth_forgot)
+    app.router.add_post("/api/auth/reset", api_auth_reset)
     app.router.add_post("/api/auth/logout", api_auth_logout)

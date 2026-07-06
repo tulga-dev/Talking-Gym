@@ -77,6 +77,11 @@ _SQLITE_SCHEMA = [
         v          TEXT,
         created_at TEXT
     )""",
+    """CREATE TABLE IF NOT EXISTS password_resets (
+        token      TEXT PRIMARY KEY,
+        user_id    INTEGER,
+        expires_at TEXT
+    )""",
 ]
 
 # Telegram user/chat ids exceed 32-bit — BIGINT is required on Postgres.
@@ -138,6 +143,11 @@ _PG_SCHEMA = [
         k          TEXT PRIMARY KEY,
         v          TEXT,
         created_at TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS password_resets (
+        token      TEXT PRIMARY KEY,
+        user_id    BIGINT,
+        expires_at TEXT
     )""",
 ]
 
@@ -360,6 +370,29 @@ def set_auth(user_id: int, email: str | None = None, password_hash: str | None =
             con.execute("UPDATE users SET password_hash=? WHERE user_id=?", (password_hash, user_id))
         if google_sub is not None:
             con.execute("UPDATE users SET google_sub=? WHERE user_id=?", (google_sub, user_id))
+
+
+def create_reset(token: str, user_id: int, expires_at: str) -> None:
+    with _conn() as con:
+        con.execute("INSERT INTO password_resets (token, user_id, expires_at) VALUES (?,?,?)",
+                    (token, user_id, expires_at))
+
+
+def user_by_reset(token: str):
+    """Return the user for a valid, unexpired reset token, else None."""
+    with _conn() as con:
+        row = con.execute("SELECT user_id, expires_at FROM password_resets WHERE token=?",
+                          (token,)).fetchone()
+        if not row:
+            return None
+        if row["expires_at"] and row["expires_at"] < datetime.utcnow().isoformat():
+            return None
+        return get_user(row["user_id"])
+
+
+def delete_reset(token: str) -> None:
+    with _conn() as con:
+        con.execute("DELETE FROM password_resets WHERE token=?", (token,))
 
 
 def recent_email_accounts(limit: int = 40):

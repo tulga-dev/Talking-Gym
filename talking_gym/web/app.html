@@ -348,7 +348,27 @@
     <div class="sub" style="margin:2px 0 10px" data-i18n="obPlace">Түвшинг тань Китти эхний ярианаас өөрөө тогтооно 😊</div>
   </div>
   <button class="start-btn" id="ob-go" style="margin-top:18px"><span id="ob-go-lbl">Бүртгүүлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
+  <button class="type-link" id="forgot-link" hidden style="margin-top:12px" data-i18n="forgotQ">Нууц үгээ мартсан уу?</button>
   <div class="err" id="ob-err"></div>
+
+  <!-- forgot-password panel -->
+  <div id="forgot-panel" hidden style="margin-top:14px;text-align:left">
+    <div class="divider"><span data-i18n="forgotT">Нууц үг сэргээх</span></div>
+    <label data-i18n="obEmail">Имэйл</label>
+    <input id="fp-email" type="email" maxlength="80" autocomplete="email" inputmode="email">
+    <button class="start-btn" id="fp-go" style="margin-top:12px"><span data-i18n="forgotSend">Сэргээх холбоос авах</span></button>
+    <div class="sub" id="fp-msg" style="margin-top:10px"></div>
+    <button class="type-link" id="fp-back" style="margin-top:8px" data-i18n="forgotBack">← Буцах</button>
+  </div>
+
+  <!-- set-new-password panel (opened from reset link) -->
+  <div id="reset-panel" hidden style="text-align:left">
+    <h2 data-i18n="resetT">Шинэ нууц үг</h2>
+    <label data-i18n="obPass">Нууц үг (6+ тэмдэгт)</label>
+    <input id="rp-pass" type="password" maxlength="80" autocomplete="new-password">
+    <button class="start-btn" id="rp-go" style="margin-top:14px"><span data-i18n="resetSave">Хадгалах</span></button>
+    <div class="err" id="rp-err"></div>
+  </div>
 </div>
 
 <main id="main" hidden>
@@ -600,6 +620,11 @@
       obEmail:"Имэйл", obPass:"Нууц үг (6+ тэмдэгт)", obName:"Таны нэр", obLevel:"Түвшин", obLang:"Ямар хэл сурах вэ?",
       obPlace:"Түвшинг тань Китти эхний ярианаас өөрөө тогтооно 😊",
       knowT:"Китти таны тухай мэднэ", placedT:"Таны түвшин",
+      forgotQ:"Нууц үгээ мартсан уу?", forgotT:"Нууц үг сэргээх", forgotSend:"Сэргээх холбоос авах", forgotBack:"← Буцах",
+      forgotSent:"Имэйл рүү тань сэргээх холбоос илгээлээ. Шуудангаа шалгаарай 📩",
+      forgotGoogle:"Та Google-ээр нэвтэрч болно — дээрх «Google-р нэвтрэх» товчийг дарна уу.",
+      forgotManual:"Имэйл сэргээлт одоохондоо идэвхжээгүй. hello@talkinggym.mn руу бичээрэй, эсвэл Google-ээр нэвтэрнэ үү.",
+      resetT:"Шинэ нууц үг", resetSave:"Хадгалах", resetBad:"Холбоос хүчингүй эсвэл хугацаа дууссан байна",
       lvB:"Анхан", lvI:"Дунд", lvA:"Ахисан",
       errEmail:"Имэйлээ зөв оруулаарай", errPass:"Нууц үг 6-аас дээш тэмдэгт", errName:"Нэрээ оруулаарай",
       errTaken:"Энэ имэйл бүртгэлтэй байна — Нэвтрэх дээр дараарай", errLogin:"Имэйл эсвэл нууц үг буруу",
@@ -661,6 +686,11 @@
       obEmail:"Email", obPass:"Password (6+ characters)", obName:"Your name", obLevel:"Level", obLang:"Which language do you want to learn?",
       obPlace:"Kitty will find your level in your first chat 😊",
       knowT:"Kitty knows you", placedT:"Your level",
+      forgotQ:"Forgot your password?", forgotT:"Reset password", forgotSend:"Send reset link", forgotBack:"← Back",
+      forgotSent:"We've sent a reset link to your email. Check your inbox 📩",
+      forgotGoogle:"You can sign in with Google — tap the “Sign in with Google” button above.",
+      forgotManual:"Email recovery isn't set up yet. Email hello@talkinggym.mn, or sign in with Google.",
+      resetT:"New password", resetSave:"Save", resetBad:"This link is invalid or has expired",
       lvB:"Beginner", lvI:"Intermediate", lvA:"Advanced",
       errEmail:"Please enter a valid email", errPass:"Password must be 6+ characters", errName:"Please enter your name",
       errTaken:"This email is already registered — tap Log in", errLogin:"Wrong email or password",
@@ -731,6 +761,11 @@
     obLevel:"ᠲᠦᠪᠰᠢᠨ", obLang:"ᠶᠠᠮᠠᠷ ᠬᠡᠯᠡ ᠰᠤᠷᠬᠤ ᠪᠤᠢ?",
     obPlace:"ᠲᠦᠪᠰᠢᠨ ᠢ ᠲᠠᠨᠢ Kitty ᠡᠬᠢᠨ ᠦ ᠶᠠᠷᠢᠶᠠᠨ ᠠᠴᠠ ᠥᠪᠡᠷ ᠢᠶᠡᠨ ᠲᠣᠭᠲᠠᠭᠠᠨ᠎ᠠ",
     knowT:"Kitty ᠲᠠᠨ ᠤ ᠲᠤᠬᠠᠢ ᠮᠡᠳᠡᠨ᠎ᠡ", placedT:"ᠲᠠᠨ ᠤ ᠲᠦᠪᠰᠢᠨ",
+    forgotQ:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ ᠪᠡᠨ ᠮᠠᠷᠲᠠᠭᠰᠠᠨ ᠤᠤ?", forgotT:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ ᠰᠡᠷᠭᠡᠭᠡᠬᠦ", forgotSend:"ᠰᠡᠷᠭᠡᠭᠡᠬᠦ ᠬᠣᠯᠪᠣᠭᠠᠰᠤ ᠠᠪᠬᠤ", forgotBack:"← ᠪᠤᠴᠠᠬᠤ",
+    forgotSent:"ᠢᠮᠧᠯ ᠳ᠋ᠤ ᠲᠠᠨᠢ ᠰᠡᠷᠭᠡᠭᠡᠬᠦ ᠬᠣᠯᠪᠣᠭᠠᠰᠤ ᠢᠯᠡᠭᠡᠯ᠎ᠡ 📩",
+    forgotGoogle:"Та Google ᠪᠡᠷ ᠨᠡᠪᠲᠡᠷᠡᠵᠦ ᠪᠣᠯᠤᠨ᠎ᠠ᠃",
+    forgotManual:"ᠢᠮᠧᠯ ᠰᠡᠷᠭᠡᠭᠡᠯᠲᠡ ᠣᠳᠣ ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠡᠳᠦᠢ᠃ hello@talkinggym.mn ᠷᠤ᠋ ᠪᠢᠴᠢᠭᠡᠷᠡᠢ᠃",
+    resetT:"ᠰᠢᠨ᠎ᠡ ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ", resetSave:"ᠬᠠᠳᠠᠭᠠᠯᠠᠬᠤ", resetBad:"ᠬᠣᠯᠪᠣᠭᠠᠰᠤ ᠬᠦᠴᠦᠨ ᠦᠭᠡᠢ ᠪᠣᠯᠤᠭᠰᠠᠨ",
     lvB:"ᠠᠩᠬ᠎ᠠ ᠱᠠᠲᠤ", lvI:"ᠳᠤᠮᠳᠠ", lvA:"ᠠᠬᠢᠭᠰᠠᠨ",
     errEmail:"ᠢᠮᠧᠯ ᠢᠶᠡᠨ ᠵᠥᠪ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ", errPass:"ᠨᠢᠭᠤᠴᠠ ᠦᠭᠡ 6 ᠡᠴᠡ ᠳᠡᠭᠡᠭᠰᠢ ᠲᠡᠮᠳᠡᠭᠲᠦ",
     errName:"ᠨᠡᠷ᠎ᠡ ᠪᠡᠨ ᠣᠷᠣᠭᠤᠯᠤᠭᠠᠷᠠᠢ",
@@ -1089,9 +1124,58 @@
     $('reg-extra').hidden = (m !== 'reg');
     $('ob-go-lbl').textContent = m === 'reg' ? d().obTabReg : d().obTabLog;
     $('ob-err').textContent = '';
+    $('forgot-link').hidden = (m !== 'login');   // recovery only makes sense when logging in
   }
   $('tab-reg').addEventListener('click', function(){ setAuthMode('reg'); });
   $('tab-login').addEventListener('click', function(){ setAuthMode('login'); });
+
+  /* ---------- password recovery ---------- */
+  function showForgot(on){
+    $('forgot-panel').hidden = !on;
+    if (on) {
+      $('fp-email').value = $('ob-email').value.trim();
+      $('fp-msg').textContent = '';
+    }
+  }
+  $('forgot-link').addEventListener('click', function(){ showForgot(true); });
+  $('fp-back').addEventListener('click', function(){ showForgot(false); });
+  $('fp-go').addEventListener('click', function(){
+    var email = $('fp-email').value.trim().toLowerCase();
+    var msg = $('fp-msg');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) { msg.textContent = d().errEmail; return; }
+    $('fp-go').disabled = true;
+    fetch(API + '/api/auth/forgot', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:email})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if (j.email_configured) msg.textContent = d().forgotSent;
+        else msg.textContent = j.has_google ? d().forgotGoogle : d().forgotManual;
+      })
+      .catch(function(){ msg.textContent = d().errNet; })
+      .then(function(){ $('fp-go').disabled = false; });
+  });
+  // Reset-from-link: /app?reset=TOKEN opens the set-new-password panel.
+  (function(){
+    var rt = new URLSearchParams(location.search).get('reset');
+    if (!rt) return;
+    ['gbtn','gdiv','forgot-panel','forgot-link'].forEach(function(id){ var e=$(id); if(e) e.hidden=true; });
+    $('reset-panel').hidden = false;
+    $('ob-go').style.display = 'none';
+    document.querySelector('.auth-tabs').style.display = 'none';
+    ['ob-email','ob-pass','reg-extra'].forEach(function(id){ var e=$(id); if(e) e.style.display='none'; });
+    document.querySelectorAll('#onb > label').forEach(function(l){ l.style.display='none'; });
+    $('rp-go').addEventListener('click', function(){
+      var pass = $('rp-pass').value; var err = $('rp-err');
+      if (pass.length < 6) { err.textContent = d().errPass; return; }
+      $('rp-go').disabled = true;
+      fetch(API + '/api/auth/reset', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token:rt, password:pass})})
+        .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+        .then(function(res){
+          if (res.ok && res.j.token) { history.replaceState({}, '', '/app'); finishAuth(res.j.token); }
+          else { err.textContent = d().resetBad; $('rp-go').disabled = false; }
+        })
+        .catch(function(){ err.textContent = d().errNet; $('rp-go').disabled = false; });
+    });
+  })();
   document.querySelectorAll('#ob-langs [data-tlang]').forEach(function(b){
     b.addEventListener('click', function(){
       obTarget = b.getAttribute('data-tlang');
