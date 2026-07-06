@@ -427,6 +427,13 @@ def set_last_example(user_id: int, example: str) -> None:
                     (example or "", user_id))
 
 
+def record_note(user_id: int, history_line: str) -> None:
+    """Append to conversation history WITHOUT consuming a turn (mic tests etc.)."""
+    with _conn() as con:
+        con.execute("UPDATE active_sessions SET history = history || ? WHERE user_id=?",
+                    (history_line + "\n", user_id))
+
+
 def record_turn(user_id: int, history_line: str) -> int:
     """Increment turn counter, append to history; returns new turn count."""
     with _conn() as con:

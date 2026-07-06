@@ -51,6 +51,7 @@ class CoachReply:
     streak: int | None = None       # set when the session completed
     best_streak: int | None = None
     placed_level: str = ""          # set when the placement session completes
+    not_an_answer: bool = False     # mic test / meta comment — turn not consumed
 
 
 # ---------- gamification (Duolingo-style) ----------
@@ -275,7 +276,19 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
         suggested_latin=str(data.get("suggested_latin", "")).strip(),
         turn_no=turn,
         max_turns=max_turns,
+        not_an_answer=bool(data.get("not_an_answer", False)),
     )
+
+    if reply.not_an_answer:
+        # Mic test / meta comment: acknowledge and re-ask, but don't grade it,
+        # don't award XP, and don't consume one of the session's turns.
+        reply.done = False
+        reply.score = 0
+        reply.corrected = ""
+        reply.feedback_mn = ""
+        reply.corrected_latin = ""
+        db.record_note(user_id, f'Learner (not an answer): "{transcript}" / Coach: "{reply.reply_en}"')
+        return reply
 
     line = f'Learner: "{transcript}" / Coach: "{reply.reply_en}"'
     if reply.suggested_en:

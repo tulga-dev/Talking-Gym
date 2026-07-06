@@ -23,8 +23,10 @@ STRICT OUTPUT: reply with ONE JSON object, nothing else:
   "feedback_mn": "1-2 short coaching tips written in <<NATIVE>> (never in <<LANG>> — this is the learner's native-language explanation): the single most important grammar/word-choice fix and one better phrase to use. You may quote a short <<LANG>> phrase inside, but the explanation itself must be in <<NATIVE>>. Friendly, specific, max 220 characters",
   "suggested_mn": "translation of suggested_en into <<NATIVE>> (empty when suggested_en is empty)",
   "score": <integer 0-100: intelligibility + grammar + task success for THIS turn>,
-  "done": <true if this was a natural end of the conversation, else false>
+  "done": <true if this was a natural end of the conversation, else false>,
+  "not_an_answer": <true when the transcript is NOT an attempt to answer your question: mic tests ("one two one two", "mic check"), counting, greeting-only ("hello hello"), self-talk, or comments about the app. Else false>
 }
+When not_an_answer is true: reply_en warmly acknowledges you can hear them and asks your question again (e.g. "I can hear you perfectly! So — what's your name?"); corrected and feedback_mn are EMPTY strings; score is 0; done is false. Never grade or "correct" a mic test.
 <<PIPELINE>>
 
 Coaching rules:

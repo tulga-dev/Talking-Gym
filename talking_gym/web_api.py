@@ -351,6 +351,7 @@ async def api_turn(request: web.Request) -> web.Response:
         "streak": reply.streak,
         "best_streak": reply.best_streak,
         "placed_level": reply.placed_level,
+        "not_an_answer": reply.not_an_answer,
     }
 
     if spoken and config.tts_enabled:

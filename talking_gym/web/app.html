@@ -1371,6 +1371,12 @@
     var j = res.j;
     sessionXp += j.xp_earned;
     addUser(j.transcript);
+    if (j.not_an_answer) {
+      // Mic test — Kitty just answers back; no score, no turn consumed.
+      addTeacher(j.reply_en, '', j.tts_b64, true, j.reply_latin);
+      micState('idle');
+      return;
+    }
     addFeedback(j);
     if (j.done) {
       session = null;
