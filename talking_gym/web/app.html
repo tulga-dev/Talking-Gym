@@ -1137,24 +1137,34 @@
   });
 
   /* Google Sign-In (renders only when GOOGLE_CLIENT_ID is configured) */
+  function renderGoogle(clientId){
+    // The GIS script loads async — poll until google.accounts is ready
+    // (up to ~10s) instead of checking once and giving up.
+    var tries = 0;
+    (function waitGis(){
+      if (window.google && google.accounts && google.accounts.id) {
+        $('gbtn').hidden = false; $('gdiv').hidden = false;
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: function(resp){
+            fetch(API + '/api/auth/google', {method:'POST', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({id_token: resp.credential})})
+              .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+              .then(function(res){ if (res.ok) finishAuth(res.j.token); else $('ob-err').textContent = d().errNet; });
+          }
+        });
+        google.accounts.id.renderButton($('gbtn'), {theme:'outline', size:'large', shape:'pill', width:280});
+        return;
+      }
+      if (++tries < 50) setTimeout(waitGis, 200);   // retry for ~10s
+    })();
+  }
   function initGoogle(){
     fetch(API + '/api/config').then(function(r){ return r.json(); }).then(function(cfg){
-      if (!cfg.google_client_id || !window.google || !google.accounts) return;
-      $('gbtn').hidden = false; $('gdiv').hidden = false;
-      google.accounts.id.initialize({
-        client_id: cfg.google_client_id,
-        callback: function(resp){
-          fetch(API + '/api/auth/google', {method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({id_token: resp.credential})})
-            .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
-            .then(function(res){ if (res.ok) finishAuth(res.j.token); else $('ob-err').textContent = d().errNet; });
-        }
-      });
-      google.accounts.id.renderButton($('gbtn'), {theme:'outline', size:'large', shape:'pill', width:280});
+      if (cfg.google_client_id) renderGoogle(cfg.google_client_id);
     }).catch(function(){});
   }
-  if (document.readyState === 'complete') initGoogle();
-  else window.addEventListener('load', initGoogle);
+  initGoogle();
 
   function enterApp(){
     $('onb').hidden = true;
