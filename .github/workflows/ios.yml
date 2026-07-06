@@ -29,28 +29,29 @@ jobs:
           echo "${{ secrets.ASC_KEY_P8 }}" | base64 --decode \
             > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.ASC_KEY_ID }}.p8
 
-      - name: Build signed archive (cloud-managed signing)
+      - name: Archive (unsigned — signing happens at export)
         working-directory: mobile/ios/App
         run: |
+          # Archive without signing so no development profile / registered
+          # device is needed; the App Store distribution profile is created
+          # and applied during export instead.
           xcodebuild -workspace App.xcworkspace -scheme App \
             -configuration Release -destination 'generic/platform=iOS' \
             -archivePath build/App.xcarchive archive \
-            -allowProvisioningUpdates \
-            -authenticationKeyID "${{ secrets.ASC_KEY_ID }}" \
-            -authenticationKeyIssuerID "${{ secrets.ASC_ISSUER_ID }}" \
-            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.ASC_KEY_ID }}.p8 \
-            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
-            CODE_SIGN_STYLE=Automatic
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}"
 
-      - name: Export IPA
+      - name: Export signed IPA (App Store distribution, auto-provisioned)
         working-directory: mobile/ios/App
         run: |
-          cat > ExportOptions.plist <<'PLIST'
+          cat > ExportOptions.plist <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
             <key>method</key><string>app-store-connect</string>
             <key>destination</key><string>export</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>${{ secrets.APPLE_TEAM_ID }}</string>
           </dict></plist>
           PLIST
           xcodebuild -exportArchive -archivePath build/App.xcarchive \
