@@ -7,6 +7,7 @@ import httpx
 
 from ..config import config
 from . import ProviderError
+from . import gemini
 
 log = logging.getLogger(__name__)
 
@@ -15,12 +16,18 @@ _TIMEOUT = httpx.Timeout(60.0, connect=10.0)
 _client = httpx.AsyncClient(timeout=_TIMEOUT)
 
 
-async def chat(system: str, user: str, effort: str | None = None) -> str:
+async def chat(system: str, user: str, effort: str | None = None,
+               model: str | None = None) -> str:
     """Return the assistant's raw text for a system+user prompt pair.
 
     `effort` overrides the reasoning effort per call: live turns stay at the
     fast config default ("none"), while cached one-time generations (scenario
-    localization) can afford real reasoning for better output quality."""
+    localization) can afford real reasoning for better output quality.
+
+    `model` selects the backend: "gemini" routes to Google Gemini (falling back
+    to Grok if Gemini isn't configured); anything else uses xAI Grok."""
+    if model == "gemini" and gemini.enabled():
+        return await gemini.chat(system, user, effort=effort)
     payload = {
         "model": config.llm_model,
         "messages": [

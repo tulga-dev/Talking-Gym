@@ -43,6 +43,12 @@ class Config:
     # "none" skips grok-4.3's thinking phase — coaching JSON doesn't need it.
     llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "none")
 
+    # Google Gemini — alternate LLM backend learners can switch to mid-session.
+    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
+    gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+    gemini_base_url: str = os.getenv(
+        "GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")
+
     tts_enabled: bool = field(default_factory=lambda: _bool("TTS_ENABLED", True))
     tts_url: str = os.getenv("TTS_URL", "https://api.x.ai/v1/tts")
     tts_voice: str = os.getenv("TTS_VOICE", "ara")
@@ -79,6 +85,10 @@ class Config:
     @property
     def messenger_enabled(self) -> bool:
         return bool(self.messenger_page_token)
+
+    @property
+    def gemini_enabled(self) -> bool:
+        return bool(self.gemini_api_key)
 
     @property
     def tz(self) -> ZoneInfo:

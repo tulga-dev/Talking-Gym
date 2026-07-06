@@ -18,6 +18,7 @@ import httpx
 from aiohttp import web
 
 from . import db
+from .config import config
 from .providers import email as email_provider
 
 log = logging.getLogger(__name__)
@@ -198,7 +199,8 @@ async def api_auth_reset(request: web.Request) -> web.Response:
 
 async def api_config(request: web.Request) -> web.Response:
     return web.json_response({"google_client_id": GOOGLE_CLIENT_ID,
-                              "email_recovery": email_provider.enabled()})
+                              "email_recovery": email_provider.enabled(),
+                              "gemini": config.gemini_enabled})
 
 
 def add_auth_routes(app: web.Application) -> None:

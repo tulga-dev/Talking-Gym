@@ -278,6 +278,12 @@ async def api_turn(request: web.Request) -> web.Response:
     uid = user["user_id"]
     target = target_of(user)
 
+    # Learner's LLM pick rides in the query string so it works uniformly for the
+    # multipart (voice) and JSON (text) bodies. Allowlisted to known backends.
+    model = request.query.get("model", "grok").strip().lower()
+    if model not in ("grok", "gemini"):
+        model = "grok"
+
     transcript = ""
     spoken = False
     ctype = request.content_type or ""
@@ -329,7 +335,7 @@ async def api_turn(request: web.Request) -> web.Response:
             return _err(400, "text_required")
 
     try:
-        reply = await coach.handle_turn(uid, transcript)
+        reply = await coach.handle_turn(uid, transcript, model=model)
     except ProviderError:
         return _err(502, "coach_failed")
 

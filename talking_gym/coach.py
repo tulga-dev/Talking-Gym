@@ -208,8 +208,11 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     return loc
 
 
-async def handle_turn(user_id: int, transcript: str) -> CoachReply:
-    """Run one learner turn through the LLM coach; manage session lifecycle."""
+async def handle_turn(user_id: int, transcript: str,
+                      model: str | None = None) -> CoachReply:
+    """Run one learner turn through the LLM coach; manage session lifecycle.
+
+    `model` picks the LLM backend for this turn ("grok" default, or "gemini")."""
     session = db.get_active_session(user_id)
     if session is None:
         # Auto-start: makes "just send a voice note" work with zero ceremony.
@@ -256,7 +259,8 @@ async def handle_turn(user_id: int, transcript: str) -> CoachReply:
 
     raw = await llm.chat(system_prompt(lang_name, roman_for(target_lang, native),
                                        native_prompt(native),
-                                       pipeline_for(target_lang, native)), prompt)
+                                       pipeline_for(target_lang, native)), prompt,
+                         model=model)
     try:
         data = llm.parse_json_block(raw)
     except ProviderError:

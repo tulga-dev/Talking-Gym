@@ -118,37 +118,10 @@
   .pc-stats .vl .i{width:16px;height:16px;flex:none}
   .pc-stats .vl.hot .i{color:var(--orange)}
   .pc-stats .vl.xp .i{color:var(--blue)}
-  #call-overlay{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100dvh;z-index:60;background:#0C121D;display:flex;flex-direction:column;color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 18px);gap:12px}
-  .call-video{position:relative;flex:1;min-height:0;border-radius:22px;overflow:hidden;background:#232F44;box-shadow:0 14px 40px rgba(0,0,0,.5)}
-  .call-video svg{position:absolute;inset:0;width:100%;height:100%}
-  #k-arm{animation:kwave 2.8s ease-in-out infinite;transform-origin:230px 366px;transform-box:view-box}
-  @keyframes kwave{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-14deg)}}
-  #av-body{animation:breathe 4.6s ease-in-out infinite;transform-origin:180px 480px}
-  @keyframes breathe{50%{transform:translateY(3px)}}
-  .call-topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 14px 26px;background:linear-gradient(180deg,rgba(6,10,18,.72),rgba(6,10,18,0))}
-  .ct-left{display:flex;flex-direction:column;line-height:1.25}
-  .ct-name{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
-  .ct-sub{font-size:11px;color:#ABC0DE;font-weight:600}
-  .ct-right{display:flex;align-items:center;gap:10px}
-  .ct-timer{font-size:13px;font-weight:700;color:#D9E5F6;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:60px}
-  .ct-x{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center}
-  .ct-x .i{width:16px;height:16px}
-  #call-self{position:absolute;top:64px;right:12px;width:92px;height:124px;object-fit:cover;border-radius:14px;border:2px solid rgba(255,255,255,.55);box-shadow:0 6px 18px rgba(0,0,0,.4);transform:scaleX(-1);background:#101826}
-  .call-state-chip{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:12.5px;font-weight:700;padding:8px 16px;border-radius:60px;background:rgba(10,16,26,.62);color:#D9E5F6;backdrop-filter:blur(6px);white-space:nowrap;transition:background .3s,color .3s}
-  #sarah-av.listening .call-state-chip{background:rgba(240,73,42,.82);color:#FFE2D3}
-  #sarah-av.listening{box-shadow:0 0 0 3px rgba(255,106,77,.6),0 14px 40px rgba(0,0,0,.5)}
-  .call-cap{width:100%;min-height:88px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:13px 16px;text-align:center;backdrop-filter:blur(6px)}
-  .call-cap .cap-en{font-size:15.5px;font-weight:700;line-height:1.45}
-  .call-cap .cap-rom{font-size:12.5px;color:#C4D6F0;margin-top:4px;font-weight:600}
-  .call-cap .cap-mn{font-size:12px;color:#93A9C9;margin-top:4px;font-style:italic}
-  .call-controls{display:flex;gap:14px;align-items:center}
-  .call-btn{height:54px;border-radius:60px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:800;font-size:14.5px;transition:transform .2s var(--ease)}
-  .call-btn:active{transform:scale(.94)}
-  .call-btn.send{flex:1;padding:0 22px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);color:#fff}
-  .call-btn.send .i{width:18px;height:18px}
-  .call-btn.send:disabled{opacity:.4}
-  .call-btn.end{width:64px;height:64px;border-radius:50%;background:#E5443B;color:#fff;box-shadow:0 8px 22px rgba(229,68,59,.45)}
-  .call-btn.end .i{width:24px;height:24px}
+  .model-seg{display:none;align-items:center;gap:0;background:var(--sky-2);border:1px solid var(--line);border-radius:60px;padding:3px;margin:0 auto 12px;width:max-content}
+  .model-seg.on{display:flex}
+  .model-seg button{font-family:inherit;font-weight:800;font-size:12px;letter-spacing:-.01em;color:var(--mut);padding:6px 16px;border-radius:60px;border:0;background:transparent;transition:background .18s,color .18s}
+  .model-seg button.sel{background:#fff;color:var(--blue);box-shadow:0 2px 8px -2px rgba(240,73,42,.35)}
   .acard{background:#fff;border-radius:22px;padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow-card)}
   .acard h4{font-size:14.5px;font-weight:800;margin-bottom:4px;letter-spacing:-.01em}
   .acard .sub{font-size:12px;color:var(--mut)}
@@ -433,12 +406,6 @@
       <div class="goal-prog"><div class="gp-bar"><div id="goal-fill" style="width:0%"></div></div><span id="goal-count">0/5</span></div>
     </div>
 
-    <div class="acard icon-lead" id="call-card" style="cursor:pointer">
-      <div class="lead" style="background:#E6F1FB;color:var(--blue)"><svg class="i"><use href="#i-video"/></svg></div>
-      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="callT">Киттитэй видео дуудлага</h4><div class="sub" data-i18n="callS">Гар чөлөөтэй, жинхэнэ яриа шиг</div></div>
-      <span class="badge-new" data-i18n="callNew">ШИНЭ</span>
-    </div>
-
     <h3 class="sec-t" data-i18n="progT2">Таны ахиц</h3>
     <div class="acard">
       <div class="pc-top">
@@ -472,6 +439,10 @@
     <div class="les-head">
       <div class="t"><span id="les-title">…</span><span id="les-sub"></span></div>
       <div class="dots" id="les-dots"></div>
+    </div>
+    <div class="model-seg" id="model-seg" role="group" aria-label="Coach model">
+      <button type="button" data-model="grok" class="sel">Grok</button>
+      <button type="button" data-model="gemini">Gemini</button>
     </div>
     <div class="acard" style="background:var(--sky);box-shadow:none" id="les-setup"></div>
     <div id="chat"></div>
@@ -563,88 +534,6 @@
 
 </main>
 
-<!-- AI VIDEO CALL -->
-<div id="call-overlay" hidden>
-  <div class="call-video" id="sarah-av">
-    <svg id="sarah-portrait" viewBox="0 0 360 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="kbg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#FBEFDF"/><stop offset="1" stop-color="#F0DCC6"/>
-        </linearGradient>
-      </defs>
-      <rect width="360" height="480" fill="url(#kbg)"/>
-      <circle cx="72" cy="84" r="34" fill="#FFF" opacity=".45"/>
-      <circle cx="104" cy="92" r="24" fill="#FFF" opacity=".35"/>
-      <circle cx="300" cy="150" r="40" fill="#FFF" opacity=".3"/>
-      <ellipse cx="180" cy="452" rx="150" ry="26" fill="#E6C79A" opacity=".5"/>
-      <g id="av-body">
-        <path d="M96 356c-26 26-44 18-58 40 24 12 46 4 62-10Z" fill="#D89B54"/>
-        <path d="M62 384c-8 6-14 14-16 24 10-2 18-8 24-16Z" fill="#B5824A"/>
-        <path d="M120 460c0-60 24-96 60-96s60 36 60 96Z" fill="#E7B980"/>
-        <ellipse cx="146" cy="458" rx="20" ry="12" fill="#E7B980"/>
-        <ellipse cx="214" cy="458" rx="20" ry="12" fill="#E7B980"/>
-        <g id="k-arm">
-          <path d="M226 372c22-14 40-42 44-70" stroke="#E7B980" stroke-width="26" fill="none" stroke-linecap="round"/>
-          <circle cx="272" cy="296" r="20" fill="#E7B980"/>
-          <circle cx="272" cy="290" r="6.5" fill="#D89B54"/>
-          <circle cx="262" cy="300" r="4" fill="#D89B54"/>
-          <circle cx="282" cy="300" r="4" fill="#D89B54"/>
-        </g>
-        <path d="M134 372c-16 6-26 16-30 30" stroke="#E7B980" stroke-width="24" fill="none" stroke-linecap="round"/>
-        <path d="M132 366h96l14 26c-20 16-42 24-62 24s-42-8-62-24Z" fill="#FF6A4D"/>
-        <rect x="168" y="382" width="26" height="20" rx="5" fill="#FFF" transform="rotate(8 181 392)"/>
-        <g id="k-head">
-          <path d="M96 118 L120 44 Q126 36 134 44 L162 96 Z" fill="#E7B980"/>
-          <path d="M117 96 L128 60 Q131 56 136 61 L152 92 Z" fill="#FF8A6E"/>
-          <path d="M264 118 L240 44 Q234 36 226 44 L198 96 Z" fill="#E7B980"/>
-          <path d="M243 96 L232 60 Q229 56 224 61 L208 92 Z" fill="#FF8A6E"/>
-          <ellipse cx="180" cy="210" rx="102" ry="118" fill="#E7B980"/>
-          <path d="M150 96 q4 -18 10 0 z" fill="#D89B54"/>
-          <path d="M174 90 q4 -20 10 0 z" fill="#D89B54"/>
-          <path d="M198 96 q4 -18 10 0 z" fill="#D89B54"/>
-          <path d="M120 178c10-8 24-8 32 0" stroke="#B5824A" stroke-width="5" fill="none" stroke-linecap="round"/>
-          <path d="M240 178c-10-8-24-8-32 0" stroke="#B5824A" stroke-width="5" fill="none" stroke-linecap="round"/>
-          <g id="av-eyes">
-            <ellipse cx="142" cy="216" rx="26" ry="30" fill="#FFF"/>
-            <ellipse cx="218" cy="216" rx="26" ry="30" fill="#FFF"/>
-            <circle class="av-iris" cx="146" cy="220" r="15" fill="#243B1B"/>
-            <circle class="av-iris" cx="214" cy="220" r="15" fill="#243B1B"/>
-            <circle cx="152" cy="212" r="5" fill="#FFF"/>
-            <circle cx="220" cy="212" r="5" fill="#FFF"/>
-            <rect class="av-lid" x="114" y="184" width="56" height="62" rx="26" fill="#E7B980" opacity="0"/>
-            <rect class="av-lid" x="190" y="184" width="56" height="62" rx="26" fill="#E7B980" opacity="0"/>
-          </g>
-          <path d="M172 258 L188 258 L180 268 Z" fill="#FF6A4D"/>
-          <g id="av-mouth-g">
-            <path id="av-smile" d="M160 284 Q180 300 200 284" stroke="#B5734A" stroke-width="5" fill="none" stroke-linecap="round"/>
-            <ellipse id="av-mouth" cx="180" cy="290" rx="16" ry="2" fill="#5E2B1F" opacity="0"/>
-            <ellipse id="av-tongue" cx="180" cy="296" rx="9" ry="1.5" fill="#F0868F" opacity="0"/>
-          </g>
-          <path d="M86 236h34 M88 258h32" stroke="#B5824A" stroke-width="4.5" stroke-linecap="round"/>
-          <path d="M274 236h-34 M272 258h-32" stroke="#B5824A" stroke-width="4.5" stroke-linecap="round"/>
-        </g>
-      </g>
-    </svg>
-    <div class="call-topbar">
-      <div class="ct-left"><span class="ct-name">Kitty</span><span class="ct-sub">Talking Gym</span></div>
-      <div class="ct-right"><span class="ct-timer" id="call-timer">00:00</span>
-        <button class="ct-x" id="call-min" aria-label="End call"><svg class="i"><use href="#i-x"/></svg></button>
-      </div>
-    </div>
-    <video id="call-self" autoplay muted playsinline hidden></video>
-    <div class="call-state-chip" id="call-state"></div>
-  </div>
-  <div class="call-cap" id="call-cap">
-    <div class="cap-en" id="cap-en"></div>
-    <div class="cap-rom" id="cap-rom"></div>
-    <div class="cap-mn" id="cap-mn"></div>
-  </div>
-  <div class="call-controls">
-    <button class="call-btn send" id="call-send" aria-label="Send now"><svg class="i"><use href="#i-arrow"/></svg><span id="call-send-lbl"></span></button>
-    <button class="call-btn end" id="call-end" aria-label="End call"><svg class="i"><use href="#i-x"/></svg></button>
-  </div>
-</div>
-
 <div class="toast" id="toast" role="status"></div>
 
 <!-- TAB BAR -->
@@ -705,6 +594,7 @@
       recT:"Танд санал болгох", recSub:"Дараагийн хичээл — Киттитэй ярилцъя",
       lbStreak:"Стрик", lbVoice:"Дуут дасгал",
       callT:"Киттитэй видео дуудлага", callS:"Гар чөлөөтэй, жинхэнэ яриа шиг", callNew:"ШИНЭ",
+      modelNow:"Багш: ",
       callConnecting:"Холбогдож байна…", callSpeaking:"Китти ярьж байна…", callListening:"Таны ээлж — яриарай",
       callThinking:"Китти бодож байна…", callSend:"Илгээх",
       planLbl:"Таны багц", redeemB:"Идэвхжүүлэх",
@@ -772,6 +662,7 @@
       recT:"Recommended for you", recSub:"Next lesson — talk with Kitty",
       lbStreak:"Streak", lbVoice:"Voice today",
       callT:"Video call with Kitty", callS:"Hands-free, like a real conversation", callNew:"NEW",
+      modelNow:"Coach: ",
       callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
       callThinking:"Kitty is thinking…", callSend:"Send",
       planLbl:"Your plan", redeemB:"Activate",
@@ -847,6 +738,7 @@
     recT:"ᠲᠠᠨ ᠳᠤ ᠰᠠᠨᠠᠯ ᠪᠣᠯᠭᠠᠬᠤ", recSub:"ᠳᠠᠷᠠᠭ᠎ᠠ ᠶᠢᠨ ᠬᠢᠴᠢᠶᠡᠯ — Kitty ᠲᠠᠢ ᠶᠠᠷᠢᠯᠴᠠᠶ᠎ᠠ",
     lbStreak:"ᠰᠲ᠋ᠷᠢᠺ", lbVoice:"ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ",
     callT:"Kitty ᠲᠠᠢ ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ", callS:"ᠭᠠᠷ ᠴᠢᠯᠦᠭᠡᠲᠡᠢ᠂ ᠵᠢᠩᠬᠢᠨᠢ ᠶᠠᠷᠢᠶ᠎ᠠ ᠰᠢᠭ", callNew:"ᠰᠢᠨ᠎ᠡ",
+    modelNow:"ᠪᠠᠭᠰᠢ: ",
     callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"Kitty ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"Kitty ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
     planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ",
@@ -1293,6 +1185,8 @@
   function initGoogle(){
     fetch(API + '/api/config').then(function(r){ return r.json(); }).then(function(cfg){
       if (cfg.google_client_id) renderGoogle(cfg.google_client_id);
+      if (cfg.gemini) enableModelSwitch();
+      else { curModel = 'grok'; }
     }).catch(function(){});
   }
   initGoogle();
@@ -1481,7 +1375,7 @@
     var ext = type.indexOf('mp4') >= 0 ? 'm4a' : 'webm';
     var fd = new FormData();
     fd.append('audio', blob, 'voice.' + ext);
-    fetch(API + '/api/turn', {method:'POST', headers: authHeaders({}), body: fd})
+    fetch(API + '/api/turn' + modelQ(), {method:'POST', headers: authHeaders({}), body: fd})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(handleTurnResult)
       .catch(function(){ clearTyping(); toast(d().tstErr); micState('idle'); });
@@ -1497,13 +1391,33 @@
     $('type-input').value = '';
     micState('busy');
     showTyping();
-    fetch(API + '/api/turn', {method:'POST', headers: authHeaders({'Content-Type':'application/json'}), body: JSON.stringify({text:t})})
+    fetch(API + '/api/turn' + modelQ(), {method:'POST', headers: authHeaders({'Content-Type':'application/json'}), body: JSON.stringify({text:t})})
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(handleTurnResult)
       .catch(function(){ clearTyping(); toast(d().tstErr); micState('idle'); });
   }
   $('type-send').addEventListener('click', sendText);
   $('type-input').addEventListener('keydown', function(e){ if (e.key === 'Enter') sendText(); });
+
+  /* ---------- coach model switch (Grok / Gemini) ---------- */
+  var curModel = localStorage.getItem('tg-model') || 'grok';
+  function modelQ(){ return curModel === 'grok' ? '' : '?model=' + curModel; }
+  function reflectModel(){
+    Array.prototype.forEach.call($('model-seg').children, function(b){
+      b.classList.toggle('sel', b.getAttribute('data-model') === curModel);
+    });
+  }
+  function enableModelSwitch(){ $('model-seg').classList.add('on'); reflectModel(); }
+  Array.prototype.forEach.call($('model-seg').children, function(b){
+    b.addEventListener('click', function(){
+      var m = b.getAttribute('data-model');
+      if (m === curModel) return;
+      curModel = m; localStorage.setItem('tg-model', m);
+      reflectModel();
+      toast((d().modelNow || 'Coach: ') + (m === 'gemini' ? 'Gemini' : 'Grok'));
+    });
+  });
+  reflectModel();
 
   /* ---------- turn result: extend the conversation ---------- */
   function handleTurnResult(res){
@@ -1582,7 +1496,7 @@
   });
   $('btn-invite').addEventListener('click', function(){ shareOrCopy(d().inviteTxt); });
   $('plan-gym').addEventListener('click', function(){ toast(d().tstPlan); });
-  $('plan-prem').addEventListener('click', function(){ openCall(); });
+  $('plan-prem').addEventListener('click', function(){ toast(d().tstPlan); });
 
   /* ---------- plan redeem ---------- */
   function doRedeem(){
@@ -1596,213 +1510,6 @@
   }
   $('redeem-go').addEventListener('click', doRedeem);
   $('redeem-input').addEventListener('keydown', function(e){ if (e.key === 'Enter') doRedeem(); });
-
-  /* ---------- AI video call (hands-free) ---------- */
-  var callOn = false, callAudioCtx = null, callAnalyser = null, callRec = null,
-      callChunks = [], callSilenceStart = 0, callHeardSpeech = false, callRAF = 0, callRecStart = 0;
-  var CALL_SILENCE_MS = 1400, CALL_RMS = 0.022, CALL_MAX_MS = 20000, CALL_MIN_MS = 500;
-
-  /* Kitty's face: blink loop + mouth movement while her audio is playing. */
-  var blinkTimer = 0, mouthRAF = 0, mouthTarget = 0, mouthCur = 0, mouthFlip = 0;
-  function startFaceLoops(){
-    stopFaceLoops();
-    (function blink(){
-      blinkTimer = setTimeout(function(){
-        document.querySelectorAll('.av-lid').forEach(function(l){ l.setAttribute('opacity','1'); });
-        setTimeout(function(){
-          document.querySelectorAll('.av-lid').forEach(function(l){ l.setAttribute('opacity','0'); });
-        }, 130);
-        blink();
-      }, 2400 + Math.random() * 2800);
-    })();
-    (function mouth(){
-      mouthRAF = requestAnimationFrame(mouth);
-      var speaking = callOn && !voiceEl.paused && !voiceEl.ended;
-      if (speaking) {
-        // Pseudo lip-sync: retarget openness every ~90ms while audio plays.
-        if (!mouthFlip || Date.now() - mouthFlip > 90) {
-          mouthFlip = Date.now();
-          mouthTarget = 0.25 + Math.random() * 0.75;
-        }
-      } else { mouthTarget = 0; }
-      mouthCur += (mouthTarget - mouthCur) * 0.35;
-      var m = document.getElementById('av-mouth'), s = document.getElementById('av-smile'),
-          t = document.getElementById('av-tongue');
-      if (m) {
-        var open = mouthCur > 0.08;
-        m.setAttribute('opacity', open ? '1' : '0');
-        m.setAttribute('ry', (1.5 + mouthCur * 8.5).toFixed(1));
-        if (t) { t.setAttribute('opacity', open ? '0.9' : '0'); t.setAttribute('ry', (mouthCur * 3).toFixed(1)); t.setAttribute('cy', (288 + mouthCur * 5).toFixed(1)); }
-        if (s) s.setAttribute('opacity', open ? '0' : '1');
-      }
-    })();
-  }
-  function stopFaceLoops(){
-    if (blinkTimer) { clearTimeout(blinkTimer); blinkTimer = 0; }
-    if (mouthRAF) { cancelAnimationFrame(mouthRAF); mouthRAF = 0; }
-    mouthCur = mouthTarget = 0;
-  }
-
-  /* Call timer + self camera preview (local only — never uploaded). */
-  var callTimerInt = 0, callT0 = 0, selfStream = null;
-  function startCallTimer(){
-    callT0 = Date.now();
-    $('call-timer').textContent = '00:00';
-    callTimerInt = setInterval(function(){
-      var s = Math.floor((Date.now() - callT0) / 1000);
-      $('call-timer').textContent = ('0' + Math.floor(s / 60)).slice(-2) + ':' + ('0' + (s % 60)).slice(-2);
-    }, 1000);
-  }
-  function startSelfCam(){
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
-    navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: {ideal: 320}}, audio: false})
-      .then(function(s){
-        if (!callOn) { s.getTracks().forEach(function(t){ t.stop(); }); return; }
-        selfStream = s;
-        var v = $('call-self'); v.srcObject = s; v.hidden = false;
-      })
-      .catch(function(){ $('call-self').hidden = true; });
-  }
-  function stopSelfCam(){
-    if (selfStream) { try { selfStream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){} selfStream = null; }
-    var v = $('call-self'); v.srcObject = null; v.hidden = true;
-  }
-
-  function callState(cls, text){
-    var av = $('sarah-av'); av.classList.remove('speaking','listening');
-    if (cls) av.classList.add(cls);
-    $('call-state').textContent = text;
-    $('call-send').disabled = (cls !== 'listening');
-  }
-  function callCaption(en, rom, mn){
-    $('cap-en').textContent = en || '';
-    $('cap-rom').textContent = rom || ''; $('cap-rom').style.display = rom ? '' : 'none';
-    $('cap-mn').textContent = mn || ''; $('cap-mn').style.display = mn ? '' : 'none';
-  }
-  function callPlay(b64, onEnd){
-    if (!b64) { if (onEnd) onEnd(); return; }
-    try {
-      voiceEl.onended = function(){ voiceEl.onended = null; if (onEnd) onEnd(); };
-      voiceEl.pause(); voiceEl.src = 'data:audio/mpeg;base64,' + b64; voiceEl.currentTime = 0;
-      voiceEl.play().catch(function(){ voiceEl.onended = null; if (onEnd) onEnd(); });
-    } catch(e){ if (onEnd) onEnd(); }
-  }
-
-  function openCall(){
-    if (callOn) return;
-    unlockVoice();
-    $('call-send-lbl').textContent = d().callSend;
-    $('call-overlay').hidden = false;
-    callOn = true;
-    callState('', d().callConnecting);
-    callCaption('', '', '');
-    startCallTimer();
-    startFaceLoops();
-    startSelfCam();
-    getMicStream().then(function(stream){
-      try {
-        callAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var src = callAudioCtx.createMediaStreamSource(stream);
-        callAnalyser = callAudioCtx.createAnalyser();
-        callAnalyser.fftSize = 1024;
-        src.connect(callAnalyser);
-      } catch(e){ callAnalyser = null; }
-      callNextTopic(true);
-    }).catch(function(){ toast(d().micHintDenied); closeCall(); });
-  }
-
-  function callNextTopic(first){
-    if (!callOn) return;
-    callState('speaking', d().callSpeaking);
-    req('/api/session/start', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
-      .then(function(j){
-        if (!callOn) return;
-        var sc = j.scenario;
-        callCaption(sc.opener_en, sc.opener_latin, sc.opener_mn);
-        callPlay(j.tts_b64, callListen);
-      }).catch(function(){ if (callOn) callListen(); });
-  }
-
-  function callListen(){
-    if (!callOn) return;
-    callState('listening', d().callListening);
-    var stream = micStream;
-    if (!stream) { closeCall(); return; }
-    callChunks = []; callHeardSpeech = false; callSilenceStart = 0; callRecStart = Date.now();
-    var mime = pickMime();
-    try { callRec = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream); }
-    catch(e){ closeCall(); return; }
-    callRec.ondataavailable = function(e){ if (e.data && e.data.size) callChunks.push(e.data); };
-    callRec.onstop = function(){
-      var type = (callRec.mimeType || 'audio/webm').split(';')[0];
-      var blob = new Blob(callChunks, {type:type});
-      if (!callOn) return;
-      if (!callHeardSpeech || blob.size < 1200 || Date.now() - callRecStart < CALL_MIN_MS) { callListen(); return; }
-      callSend(blob, type);
-    };
-    callRec.start();
-    callMonitor();
-  }
-
-  function callMonitor(){
-    if (!callOn || !callRec || callRec.state !== 'recording') return;
-    if (callAnalyser) {
-      var buf = new Float32Array(callAnalyser.fftSize);
-      callAnalyser.getFloatTimeDomainData(buf);
-      var sum = 0; for (var i=0;i<buf.length;i++) sum += buf[i]*buf[i];
-      var rms = Math.sqrt(sum / buf.length);
-      var now = Date.now();
-      if (rms > CALL_RMS) { callHeardSpeech = true; callSilenceStart = 0; }
-      else if (callHeardSpeech) {
-        if (!callSilenceStart) callSilenceStart = now;
-        else if (now - callSilenceStart > CALL_SILENCE_MS) { callStopListening(); return; }
-      }
-      if (now - callRecStart > CALL_MAX_MS) { callStopListening(); return; }
-    }
-    callRAF = requestAnimationFrame(callMonitor);
-  }
-  function callStopListening(){
-    if (callRAF) cancelAnimationFrame(callRAF), callRAF = 0;
-    if (callRec && callRec.state === 'recording') { try { callRec.stop(); } catch(e){} }
-  }
-
-  function callSend(blob, type){
-    callState('speaking', d().callThinking);
-    var ext = type.indexOf('mp4') >= 0 ? 'm4a' : 'webm';
-    var fd = new FormData(); fd.append('audio', blob, 'voice.' + ext);
-    fetch(API + '/api/turn', {method:'POST', headers: authHeaders({}), body: fd})
-      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
-      .then(function(res){
-        if (!callOn) return;
-        if (!res.ok) { callListen(); return; }
-        var j = res.j;
-        callCaption(j.reply_en, j.reply_latin, '');
-        if (j.done) { callPlay(j.tts_b64, function(){ callNextTopic(false); }); }
-        else { callPlay(j.tts_b64, callListen); }
-        refreshMe();
-      })
-      .catch(function(){ if (callOn) callListen(); });
-  }
-
-  function closeCall(){
-    callOn = false;
-    if (callRAF) cancelAnimationFrame(callRAF), callRAF = 0;
-    if (callTimerInt) { clearInterval(callTimerInt); callTimerInt = 0; }
-    stopFaceLoops();
-    stopSelfCam();
-    if (callRec && callRec.state === 'recording') { try { callRec.stop(); } catch(e){} }
-    callRec = null;
-    voiceEl.onended = null; try { voiceEl.pause(); } catch(e){}
-    if (callAudioCtx) { try { callAudioCtx.close(); } catch(e){} callAudioCtx = null; }
-    callAnalyser = null;
-    releaseMic();
-    $('call-overlay').hidden = true;
-    refreshMe();
-  }
-  $('call-card').addEventListener('click', openCall);
-  $('call-end').addEventListener('click', closeCall);
-  $('call-min').addEventListener('click', closeCall);
-  $('call-send').addEventListener('click', function(){ if (callOn) callStopListening(); });
 
   /* ---------- boot ---------- */
   applyLang();
