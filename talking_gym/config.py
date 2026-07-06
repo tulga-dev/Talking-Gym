@@ -55,7 +55,7 @@ class Config:
     # Base speech speed; per-level speeds in web_api scale learners down further.
     tts_speed: float = float(os.getenv("TTS_SPEED", "1.0"))
 
-    daily_voice_seconds_cap: int = int(os.getenv("DAILY_VOICE_SECONDS_CAP", "300"))
+    daily_voice_seconds_cap: int = int(os.getenv("DAILY_VOICE_SECONDS_CAP", "1500"))
     # Comma-separated user ids exempt from the voice cap (founder/test accounts).
     founder_ids: frozenset = field(default_factory=lambda: frozenset(
         int(x) for x in os.getenv("FOUNDER_IDS", "").split(",") if x.strip().isdigit()
