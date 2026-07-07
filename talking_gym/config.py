@@ -48,6 +48,9 @@ class Config:
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
     gemini_base_url: str = os.getenv(
         "GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")
+    # Gemini flash "thinks" by default (~700 tokens/turn, ~4s slower). Live
+    # coaching turns don't need it — 0 disables, matching Grok's effort="none".
+    gemini_thinking_budget: int = int(os.getenv("GEMINI_THINKING_BUDGET", "0"))
 
     tts_enabled: bool = field(default_factory=lambda: _bool("TTS_ENABLED", True))
     tts_url: str = os.getenv("TTS_URL", "https://api.x.ai/v1/tts")

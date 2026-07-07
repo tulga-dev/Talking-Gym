@@ -30,7 +30,12 @@ async def chat(system: str, user: str, effort: str | None = None) -> str:
     payload = {
         "system_instruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": user}]}],
-        "generationConfig": {"temperature": 0.4},
+        "generationConfig": {
+            "temperature": 0.4,
+            # Disable the flash "thinking" phase for fast live coaching turns —
+            # it otherwise adds ~700 tokens and ~4s of latency per turn.
+            "thinkingConfig": {"thinkingBudget": config.gemini_thinking_budget},
+        },
     }
     headers = {
         "x-goog-api-key": config.gemini_api_key,
