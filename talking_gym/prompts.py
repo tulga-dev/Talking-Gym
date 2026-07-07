@@ -81,8 +81,8 @@ Conversation so far:
 Learner's new transcript: "{transcript}"
 """
 
-# Injected when Sarah has a memory of this learner — the personalization core.
-LEARNER_BLOCK = """ABOUT THIS LEARNER (Sarah's memory — use it!): {profile}
+# Injected when the coach has a memory of this learner — the personalization core.
+LEARNER_BLOCK = """ABOUT THIS LEARNER (your memory of them — use it!): {profile}
 Weave their real life into the conversation naturally: reference their job, family,
 interests when relevant, and tailor examples to their world. Never recite this back as a list.
 """
