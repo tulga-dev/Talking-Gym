@@ -1571,6 +1571,7 @@
     $('vs-ipa').textContent = w.ipa || w.latin || '';
     spkMicState(false);
     setSpkState('idle');
+    playVocAudio(w);   // hear the correct pronunciation once when the word appears
   }
   function setSpkState(st, heard){
     var stat = $('vs-stat');
