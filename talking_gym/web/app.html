@@ -142,9 +142,6 @@
   .voc-img img{width:100%;height:100%;object-fit:cover}
   .voc-img .ph{font-size:58px;font-weight:800;color:#FF8A5C;opacity:.55}
   .voc-img .ph-ic{width:66px;height:66px;color:#FF8A5C;opacity:.6}
-  .wl-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-  .wl-chips .wchip{font-size:13px;font-weight:700;color:var(--ink);background:var(--sky);border:1px solid var(--line);padding:5px 12px;border-radius:20px}
-  .wl-chips .wmore{font-size:12px;font-weight:700;color:var(--mut);align-self:center;padding:5px 4px}
   .voc-wordrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
   .voc-word{font-size:29px;font-weight:800;color:var(--ink);letter-spacing:-.01em;word-break:break-word}
   .voc-say{width:46px;height:46px;flex:none;border-radius:50%;background:#FF6A4D;border:none;color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--ease)}
@@ -211,6 +208,22 @@
   .today-card .track .i{width:14px;height:14px}
   .today-card h4{color:#fff;font-size:17.5px;margin:7px 0 3px}
   .today-card .sub{color:#FFDBCF}
+  /* two equal daily-practice cards (words first, then conversation) */
+  .pcard{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--sky);border:1px solid #F6DFD3;border-radius:20px;padding:15px 16px;margin-bottom:11px;font-family:inherit;transition:transform .15s var(--ease)}
+  .pcard:active{transform:scale(.985)}
+  .pcard:disabled{opacity:.55}
+  .pcard-ic{position:relative;width:46px;height:46px;flex:none;border-radius:15px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px -4px rgba(240,73,42,.4)}
+  .pcard-ic .i{width:23px;height:23px;color:var(--blue)}
+  .pstep{position:absolute;top:-6px;left:-6px;width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(240,73,42,.5)}
+  .pcard-body{flex:1;min-width:0}
+  .pcard-t{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pcard-s{font-size:12.5px;color:var(--mut);margin-top:2px}
+  .pcard-s b{color:var(--blue);font-weight:800}
+  .pcard-go{width:18px;height:18px;flex:none;color:var(--blue)}
+  .goal-prog2{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .goal-prog2 .gp-bar{flex:1;height:6px;background:rgba(240,73,42,.14);border-radius:5px;overflow:hidden}
+  .goal-prog2 .gp-bar>div{height:100%;background:var(--blue);border-radius:5px;transition:width .5s var(--ease)}
+  .goal-prog2>span{font-size:11px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
   .start-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--yellow);color:var(--ink);font-weight:800;font-size:15px;padding:13px;border-radius:60px;margin-top:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 4px 0 var(--yellow-d);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
   .start-btn:active{transform:translateY(3px) scale(.985);box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 1px 0 var(--yellow-d)}
   .start-btn:disabled{opacity:.6}
@@ -473,19 +486,26 @@
         <div class="avatar-me" id="home-avatar">Т</div>
       </div>
     </div>
-    <div class="acard today-card">
-      <div class="track"><svg class="i"><use href="#i-route"/></svg><span data-i18n="goalLbl">Өдрийн зорилго</span></div>
-      <h4 id="today-title">…</h4>
-      <div class="sub" id="today-sub"></div>
-      <button class="start-btn" id="btn-start"><svg class="i" style="width:18px;height:18px"><use href="#i-mic"/></svg><span data-i18n="start">Эхлэх</span><span class="go"><svg class="i"><use href="#i-arrow"/></svg></span></button>
-      <div class="goal-prog"><div class="gp-bar"><div id="goal-fill" style="width:0%"></div></div><span id="goal-count">0/5</span></div>
-    </div>
+    <h3 class="sec-t" style="margin-top:2px" data-i18n="todayT">Өнөөдрийн дасгал</h3>
 
-    <div class="acard icon-lead vocab-card" id="vocab-card" style="cursor:pointer">
-      <div class="lead" style="background:#FFEDE6;color:var(--blue)"><svg class="i"><use href="#i-book"/></svg></div>
-      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="vocT">Өнөөдрийн үгс</h4><div class="sub" data-i18n="vocS">Ярианыхаа гол үгсийг сур</div></div>
-      <span id="vocab-count" style="font-size:11px;font-weight:800;color:var(--yellow-d);background:#FFF0D6;padding:3px 9px;border-radius:20px" hidden></span>
-    </div>
+    <button class="pcard" id="vocab-card">
+      <div class="pcard-ic"><span class="pstep">1</span><svg class="i"><use href="#i-book"/></svg></div>
+      <div class="pcard-body">
+        <div class="pcard-t" data-i18n="vocT">Өнөөдрийн үгс</div>
+        <div class="pcard-s"><b id="vocab-count">0</b> <span data-i18n="vocNew">шинэ үг</span></div>
+      </div>
+      <svg class="i pcard-go"><use href="#i-arrow"/></svg>
+    </button>
+
+    <button class="pcard" id="btn-start">
+      <div class="pcard-ic"><span class="pstep">2</span><svg class="i"><use href="#i-mic"/></svg></div>
+      <div class="pcard-body">
+        <div class="pcard-t" id="today-title">…</div>
+        <div class="pcard-s" id="today-sub"></div>
+        <div class="goal-prog2"><div class="gp-bar"><div id="goal-fill" style="width:0%"></div></div><span id="goal-count">0/5</span></div>
+      </div>
+      <svg class="i pcard-go"><use href="#i-arrow"/></svg>
+    </button>
 
     <h3 class="sec-t" data-i18n="progT2">Таны ахиц</h3>
     <div class="acard">
@@ -508,17 +528,10 @@
         <div><span class="lb">XP</span><span class="vl xp"><svg class="i"><use href="#i-bolt"/></svg><b id="p-xp">0</b></span></div>
         <div><span class="lb" data-i18n="lbStreak">Стрик</span><span class="vl hot"><svg class="i"><use href="#i-flame"/></svg><b id="p-streak">0</b></span></div>
         <div><span class="lb" data-i18n="lbVoice">Дуут дасгал</span><span class="vl"><svg class="i" style="color:var(--green)"><use href="#i-mic"/></svg><b><span id="cap-used">0</span>с</b></span></div>
+        <div><span class="lb" data-i18n="lbWords">Үг</span><span class="vl"><svg class="i" style="color:var(--blue)"><use href="#i-book"/></svg><b id="p-words">0</b></span></div>
       </div>
       <div class="capbar" style="margin-top:10px"><div id="cap-fill" style="width:0%"></div></div>
       <div class="sub" style="margin-top:5px;font-size:11px"><span data-i18n="capT">Өнөөдрийн дуут дасгал</span>: <span id="cap-used2">0</span>s / <span id="cap-max">300</span>s</div>
-    </div>
-
-    <div class="acard" id="learned-card" hidden>
-      <div class="pc-top">
-        <div style="min-width:0"><div class="sub" data-i18n="wlT">Сурсан үгс</div><h4 id="wl-count" style="font-size:20px;margin:2px 0">0</h4></div>
-        <div class="lead" style="background:#FFEDE6;color:var(--blue);width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none"><svg class="i" style="width:21px;height:21px"><use href="#i-book"/></svg></div>
-      </div>
-      <div class="wl-chips" id="wl-chips"></div>
     </div>
 
   </div>
@@ -742,6 +755,7 @@
       vocDoneT:"Бэлэн боллоо!", vocDoneS:"Одоо эдгээр үгсээ яриандаа хэрэглэцгээе",
       vocStart:"Яриаг эхлүүлэх", vocLater:"Дараа", vocEmpty:"Өнөөдрийн үг бэлдэж байна…",
       wlT:"Сурсан үгс", mWords:"сурсан үг", wlMore:"+{n} бусад", vocQ:"Сорил — зөв үгийг сонго",
+      todayT:"Өнөөдрийн дасгал", vocNew:"шинэ үг", lbWords:"Үг",
       vocSpk:"Дуудлагын сорил — үгээ хэлээрэй", vocSkip:"Алгасах", vocSListen:"Сонсож байна…",
       vocSGood:"Сайн байна!", vocSBad:"Дахин оролдоорой",
       callConnecting:"Холбогдож байна…", callSpeaking:"Китти ярьж байна…", callListening:"Таны ээлж — яриарай",
@@ -816,6 +830,7 @@
       vocDoneT:"All set!", vocDoneS:"Now let's use these words in your conversation",
       vocStart:"Start conversation", vocLater:"Later", vocEmpty:"Preparing today's words…",
       wlT:"Words learned", mWords:"words learned", wlMore:"+{n} more", vocQ:"Quiz — pick the right word",
+      todayT:"Today's workout", vocNew:"new words", lbWords:"Words",
       vocSpk:"Speaking test — say the word", vocSkip:"Skip", vocSListen:"Listening…",
       vocSGood:"Nice!", vocSBad:"Try again",
       callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
@@ -898,6 +913,7 @@
     vocDoneT:"ᠪᠡᠯᠡᠨ ᠪᠣᠯᠣᠯ᠎ᠠ", vocDoneS:"ᠣᠳᠣ ᠡᠳᠡᠭᠡᠷ ᠦᠭᠡᠰ ᠢ ᠶᠠᠷᠢᠶᠠᠨ ᠳᠤ ᠪᠠᠨ ᠬᠡᠷᠡᠭᠯᠡᠶ᠎ᠡ",
     vocStart:"ᠶᠠᠷᠢᠶ᠎ᠠ ᠡᠬᠢᠯᠡᠭᠦᠯᠬᠦ", vocLater:"ᠳᠠᠷᠠᠭ᠎ᠠ", vocEmpty:"ᠡᠳᠦᠷ ᠦᠨ ᠦᠭᠡᠰ ᠢ ᠪᠡᠯᠡᠳᠬᠡᠵᠦ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     wlT:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡᠰ", mWords:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡ", wlMore:"+{n}", vocQ:"ᠰᠣᠷᠢᠯ — ᠵᠥᠪ ᠦᠭᠡ ᠶᠢ ᠰᠣᠩᠭᠣ",
+    todayT:"ᠡᠳᠦᠷ ᠦᠨ ᠳᠠᠰᠬᠠᠯ", vocNew:"ᠰᠢᠨ᠎ᠡ ᠦᠭᠡ", lbWords:"ᠦᠭᠡ",
     vocSpk:"ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ ᠶᠢᠨ ᠰᠣᠷᠢᠯ — ᠦᠭᠡ ᠪᠡᠨ ᠬᠡᠯᠡᠭᠡᠷᠡᠢ", vocSkip:"ᠠᠯᠠᠭᠠᠰᠠᠬᠤ", vocSListen:"ᠰᠣᠨᠣᠰᠴᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     vocSGood:"ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ!", vocSBad:"ᠳᠠᠬᠢᠨ ᠣᠷᠣᠯᠳᠣᠭᠠᠷᠠᠢ",
     callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"Kitty ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
@@ -1163,6 +1179,7 @@
     $('st-sessions').textContent = me.sessions_done;
     $('st-voice').textContent = me.voice_seconds_today + 's';
     $('st-words').textContent = me.words_learned || 0;
+    $('p-words').textContent = me.words_learned || 0;
     var span = (me.rank_next_xp || (me.xp + 1)) - me.rank_cur_xp;
     var got = me.xp - me.rank_cur_xp;
     $('rank-fill').style.width = me.rank_next_xp ? Math.min(100, got * 100 / span) + '%' : '100%';
@@ -1360,7 +1377,6 @@
     renderMe();
     refreshNext();
     refreshVocabCard();
-    refreshLearned();
     show('home');
   }
 
@@ -1409,25 +1425,9 @@
   function mediaUrl(u){ return API + u + (token ? '&t=' + encodeURIComponent(token) : ''); }
   function refreshVocabCard(){
     req('/api/vocab/today').then(function(j){
-      var n = (j.words || []).length, c = $('vocab-count');
+      var n = (j.words || []).length;
       $('vocab-card').style.display = n > 0 ? '' : 'none';
-      if (n > 0){ c.textContent = n; c.hidden = false; }
-    }).catch(function(){});
-  }
-  function refreshLearned(){
-    req('/api/vocab/learned').then(function(j){
-      var words = j.words || [], n = j.count != null ? j.count : words.length;
-      $('learned-card').hidden = n === 0;
-      $('wl-count').textContent = n;
-      var chips = $('wl-chips'); chips.innerHTML = '';
-      var show = words.slice(0, 12);
-      show.forEach(function(w){
-        var s = document.createElement('span'); s.className = 'wchip'; s.textContent = w; chips.appendChild(s);
-      });
-      if (n > show.length){
-        var m = document.createElement('span'); m.className = 'wmore';
-        m.textContent = (d().wlMore || '+{n}').replace('{n}', n - show.length); chips.appendChild(m);
-      }
+      $('vocab-count').textContent = n;
     }).catch(function(){});
   }
   function openVocab(){
@@ -1442,7 +1442,7 @@
       vocIdx = 0; renderVoc();
     }).catch(function(){ toast(d().tstErr); closeVocab(); });
   }
-  function closeVocab(){ spkStop(); releaseMic(); $('vocab-overlay').hidden = true; try { voiceEl.pause(); } catch(e){} refreshLearned(); }
+  function closeVocab(){ spkStop(); releaseMic(); $('vocab-overlay').hidden = true; try { voiceEl.pause(); } catch(e){} refreshMe(); }
   function renderVoc(){
     var w = vocList[vocIdx]; if (!w) return finishVoc();
     var total = vocList.length;
