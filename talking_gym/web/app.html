@@ -163,6 +163,18 @@
   .voc-btn .i{width:18px;height:18px}
   .voc-btn.again{background:#fff;border:1px solid var(--line);color:var(--mut)}
   .voc-btn.got{background:#FF6A4D;color:#fff}
+  .voc-quiz{flex:1;display:flex;flex-direction:column;min-height:0}
+  .voc-qhead{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--mut);text-align:center;margin-bottom:10px}
+  .voc-qimg{height:150px;border-radius:18px;background:#FFEDE6;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .voc-qimg img{width:100%;height:100%;object-fit:cover}
+  .voc-qimg .ph-ic{width:56px;height:56px;color:#FF8A5C;opacity:.6}
+  .voc-qmn{font-size:20px;font-weight:800;color:var(--ink);text-align:center;margin:14px 0 2px}
+  .voc-opts{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+  .voc-opt{height:52px;border-radius:16px;background:#fff;border:1.5px solid var(--line);color:var(--ink);font-family:inherit;font-weight:700;font-size:16px;transition:transform .12s var(--ease)}
+  .voc-opt:active{transform:scale(.98)}
+  .voc-opt.correct{background:#E9F8EE;border-color:var(--green);color:#1E7A3D}
+  .voc-opt.wrong{background:#FDEBE7;border-color:var(--red);color:#B23325}
+  .voc-score{font-size:16px;font-weight:800;color:var(--blue)}
   .voc-done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px}
   .voc-done h3{font-size:22px;color:var(--ink);margin-top:8px}
   .voc-done-sub{font-size:14px;color:var(--mut);max-width:260px;margin-bottom:14px;line-height:1.5}
@@ -622,9 +634,17 @@
     </div>
   </div>
 
+  <div class="voc-quiz" id="voc-quiz" hidden>
+    <div class="voc-qhead" data-i18n="vocQ">Сорил</div>
+    <div class="voc-qimg" id="vq-img"></div>
+    <div class="voc-qmn" id="vq-mn"></div>
+    <div class="voc-opts" id="vq-opts"></div>
+  </div>
+
   <div class="voc-done" id="voc-done" hidden>
     <svg viewBox="0 0 64 64" width="76" height="76"><use href="#kitty-face"/></svg>
     <h3 data-i18n="vocDoneT">Бэлэн боллоо!</h3>
+    <div class="voc-score" id="voc-score" hidden></div>
     <div class="voc-done-sub" data-i18n="vocDoneS">Одоо эдгээр үгсээ яриандаа хэрэглэцгээе</div>
     <button class="voc-start" id="voc-start"><svg class="i"><use href="#i-mic"/></svg><span data-i18n="vocStart">Яриаг эхлүүлэх</span></button>
     <button class="voc-later" id="voc-later" data-i18n="vocLater">Дараа</button>
@@ -695,7 +715,7 @@
       vocT:"Өнөөдрийн үгс", vocS:"Ярианыхаа гол үгсийг сур", vocAgain:"Дахин", vocGot:"Мэдсэн",
       vocDoneT:"Бэлэн боллоо!", vocDoneS:"Одоо эдгээр үгсээ яриандаа хэрэглэцгээе",
       vocStart:"Яриаг эхлүүлэх", vocLater:"Дараа", vocEmpty:"Өнөөдрийн үг бэлдэж байна…",
-      wlT:"Сурсан үгс", mWords:"сурсан үг", wlMore:"+{n} бусад",
+      wlT:"Сурсан үгс", mWords:"сурсан үг", wlMore:"+{n} бусад", vocQ:"Сорил — зөв үгийг сонго",
       callConnecting:"Холбогдож байна…", callSpeaking:"Китти ярьж байна…", callListening:"Таны ээлж — яриарай",
       callThinking:"Китти бодож байна…", callSend:"Илгээх",
       planLbl:"Таны багц", redeemB:"Идэвхжүүлэх",
@@ -767,7 +787,7 @@
       vocT:"Today's words", vocS:"Learn the key words for your chat", vocAgain:"Again", vocGot:"Got it",
       vocDoneT:"All set!", vocDoneS:"Now let's use these words in your conversation",
       vocStart:"Start conversation", vocLater:"Later", vocEmpty:"Preparing today's words…",
-      wlT:"Words learned", mWords:"words learned", wlMore:"+{n} more",
+      wlT:"Words learned", mWords:"words learned", wlMore:"+{n} more", vocQ:"Quiz — pick the right word",
       callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
       callThinking:"Kitty is thinking…", callSend:"Send",
       planLbl:"Your plan", redeemB:"Activate",
@@ -847,7 +867,7 @@
     vocT:"ᠡᠳᠦᠷ ᠦᠨ ᠦᠭᠡᠰ", vocS:"ᠶᠠᠷᠢᠶᠠᠨ ᠤ ᠭᠣᠣᠯ ᠦᠭᠡᠰ ᠢ ᠰᠤᠷ", vocAgain:"ᠳᠠᠬᠢᠨ", vocGot:"ᠣᠶᠢᠯᠭᠠᠯ᠎ᠠ",
     vocDoneT:"ᠪᠡᠯᠡᠨ ᠪᠣᠯᠣᠯ᠎ᠠ", vocDoneS:"ᠣᠳᠣ ᠡᠳᠡᠭᠡᠷ ᠦᠭᠡᠰ ᠢ ᠶᠠᠷᠢᠶᠠᠨ ᠳᠤ ᠪᠠᠨ ᠬᠡᠷᠡᠭᠯᠡᠶ᠎ᠡ",
     vocStart:"ᠶᠠᠷᠢᠶ᠎ᠠ ᠡᠬᠢᠯᠡᠭᠦᠯᠬᠦ", vocLater:"ᠳᠠᠷᠠᠭ᠎ᠠ", vocEmpty:"ᠡᠳᠦᠷ ᠦᠨ ᠦᠭᠡᠰ ᠢ ᠪᠡᠯᠡᠳᠬᠡᠵᠦ ᠪᠠᠶᠢᠨ᠎ᠠ…",
-    wlT:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡᠰ", mWords:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡ", wlMore:"+{n}",
+    wlT:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡᠰ", mWords:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡ", wlMore:"+{n}", vocQ:"ᠰᠣᠷᠢᠯ — ᠵᠥᠪ ᠦᠭᠡ ᠶᠢ ᠰᠣᠩᠭᠣ",
     callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"Kitty ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"Kitty ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
     planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ",
@@ -1351,7 +1371,8 @@
   $('home-tlang').addEventListener('click', function(){ show('prof'); });
 
   /* ---------- daily vocabulary (words for today's conversation) ---------- */
-  var vocList = [], vocIdx = 0, vocAgainQ = [];
+  var vocList = [], vocIdx = 0, vocAgainQ = [], vocAll = [];
+  var quizIdx = 0, quizScore = 0;
   function mediaUrl(u){ return API + u + (token ? '&t=' + encodeURIComponent(token) : ''); }
   function refreshVocabCard(){
     req('/api/vocab/today').then(function(j){
@@ -1378,12 +1399,12 @@
   }
   function openVocab(){
     unlockVoice();
-    vocList = []; vocIdx = 0; vocAgainQ = [];
-    $('voc-done').hidden = true; $('voc-stage').hidden = false;
+    vocList = []; vocIdx = 0; vocAgainQ = []; vocAll = [];
+    $('voc-done').hidden = true; $('voc-quiz').hidden = true; $('voc-stage').hidden = false;
     $('voc-word').textContent = '…'; $('voc-img').innerHTML = ''; $('voc-fill').style.width = '0%';
     $('vocab-overlay').hidden = false;
     req('/api/vocab/today').then(function(j){
-      vocList = j.words || [];
+      vocList = (j.words || []).slice(); vocAll = (j.words || []).slice();
       if (!vocList.length){ toast(d().vocEmpty); closeVocab(); return; }
       vocIdx = 0; renderVoc();
     }).catch(function(){ toast(d().tstErr); closeVocab(); });
@@ -1423,9 +1444,65 @@
       else finishVoc();
     } else renderVoc();
   }
-  function finishVoc(){
-    $('voc-fill').style.width = '100%';
-    $('voc-stage').hidden = true; $('voc-done').hidden = false;
+  function finishVoc(){ startQuiz(); }   // learn phase done -> quick test
+
+  /* ---------- vocab quiz: see the picture + meaning, pick the word ---------- */
+  function shuffleArr(a){
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function startQuiz(){
+    if (vocAll.length < 2){ showDone(0, 0); return; }   // need distractors
+    quizIdx = 0; quizScore = 0;
+    $('voc-stage').hidden = true; $('voc-done').hidden = true; $('voc-quiz').hidden = false;
+    renderQuiz();
+  }
+  function renderQuiz(){
+    var w = vocAll[quizIdx]; if (!w) return finishQuiz();
+    var total = vocAll.length;
+    $('voc-count').textContent = (quizIdx + 1) + ' / ' + total;
+    $('voc-fill').style.width = Math.round(quizIdx / total * 100) + '%';
+    var img = $('vq-img'); img.innerHTML = '';
+    var el = new Image(); el.alt = '';
+    el.onerror = function(){ img.innerHTML = '<svg class="ph-ic"><use href="#i-book"/></svg>'; };
+    el.src = mediaUrl(w.image_url); img.appendChild(el);
+    $('vq-mn').textContent = w.mn || '';
+    var others = vocAll.filter(function(x){ return x.word !== w.word; }).map(function(x){ return x.word; });
+    shuffleArr(others);
+    var opts = shuffleArr([w.word].concat(others.slice(0, 3)));
+    var box = $('vq-opts'); box.innerHTML = '';
+    opts.forEach(function(optw){
+      var b = document.createElement('button'); b.className = 'voc-opt'; b.type = 'button'; b.textContent = optw;
+      b.addEventListener('click', function(){ answerQuiz(optw, b, w); });
+      box.appendChild(b);
+    });
+  }
+  function answerQuiz(chosen, btn, w){
+    var correct = chosen === w.word;
+    Array.prototype.forEach.call($('vq-opts').children, function(b){
+      b.disabled = true;
+      if (b.textContent === w.word) b.classList.add('correct');
+      else if (b === btn) b.classList.add('wrong');
+    });
+    if (correct) quizScore++;
+    req('/api/vocab/progress', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({word: w.word, status: correct ? 'known' : 'again'})}).catch(function(){});
+    setTimeout(function(){
+      quizIdx++;
+      if (quizIdx >= vocAll.length) finishQuiz(); else renderQuiz();
+    }, correct ? 650 : 1350);
+  }
+  function finishQuiz(){
+    $('voc-fill').style.width = '100%'; $('voc-quiz').hidden = true;
+    showDone(quizScore, vocAll.length);
+  }
+  function showDone(score, total){
+    $('voc-stage').hidden = true; $('voc-quiz').hidden = true; $('voc-done').hidden = false;
+    var sc = $('voc-score');
+    if (total > 0){ sc.hidden = false; sc.textContent = score + ' / ' + total; }
+    else sc.hidden = true;
   }
   $('vocab-card').addEventListener('click', openVocab);
   $('voc-close').addEventListener('click', closeVocab);
