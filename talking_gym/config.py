@@ -46,6 +46,7 @@ class Config:
     # Google Gemini — alternate LLM backend learners can switch to mid-session.
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+    gemini_image_model: str = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     gemini_base_url: str = os.getenv(
         "GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")
     # Gemini flash "thinks" by default (~700 tokens/turn, ~4s slower). Live

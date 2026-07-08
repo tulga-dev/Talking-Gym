@@ -19,7 +19,7 @@ from .langs import (lang_meta, native_of, native_prompt, pipeline_for,
                     roman_for, target_of)
 from .prompts import (FINISH_HINT, LEARNER_BLOCK, LOCALIZE_SYSTEM,
                       LOCALIZE_TEMPLATE, PLACEMENT_FINISH, PLACEMENT_HINT,
-                      TURN_TEMPLATE, system_prompt)
+                      TURN_TEMPLATE, VOCAB_BLOCK, system_prompt)
 from .providers import ProviderError
 from .providers import llm
 from .scenarios import Scenario, by_id, pick_scenario
@@ -140,6 +140,30 @@ def start_daily_session(user_id: int) -> SessionIntro:
 _loc_cache: dict[tuple, dict] = {}
 
 
+def _clean_vocab(raw) -> list[dict]:
+    """Sanitize the LLM's vocab array: keep known keys, cap sizes, drop junk."""
+    out: list[dict] = []
+    if not isinstance(raw, list):
+        return out
+    for item in raw[:8]:
+        if not isinstance(item, dict):
+            continue
+        word = str(item.get("word", "")).strip()[:40]
+        if not word:
+            continue
+        out.append({
+            "word": word,
+            "latin": str(item.get("latin", "")).strip()[:60],
+            "mn": str(item.get("mn", "")).strip()[:80],
+            "ipa": str(item.get("ipa", "")).strip()[:40],
+            "pos": str(item.get("pos", "")).strip()[:30],
+            "example": str(item.get("example", "")).strip()[:160],
+            "example_mn": str(item.get("example_mn", "")).strip()[:160],
+            "concrete": bool(item.get("concrete", True)),
+        })
+    return out
+
+
 async def localize_scenario(scenario: Scenario, target_lang: str, native: str = "mn",
                             cached_only: bool = False) -> dict:
     """The scenario's opener + model answer in the target language, with
@@ -160,7 +184,7 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     key = (scenario.id, target_lang, native)
     if key in _loc_cache:
         return _loc_cache[key]
-    dbkey = f"loc:v3:{scenario.id}:{target_lang}:{native}"   # v3: coach renamed to Kitty
+    dbkey = f"loc:v4:{scenario.id}:{target_lang}:{native}"   # v4: added vocab list
     try:
         stored = db.cache_get(dbkey)
         if stored:
@@ -196,6 +220,7 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
             "example": str(data.get("example", "")).strip() or authored["example"],
             "example_mn": str(data.get("example_mn", "")).strip() or authored["example_mn"],
             "example_latin": str(data.get("example_latin", "")).strip(),
+            "vocab": _clean_vocab(data.get("vocab")),
         }
     except Exception:
         log.warning("Scenario localization failed for %s/%s; using English", scenario.id, target_lang)
@@ -241,6 +266,9 @@ async def handle_turn(user_id: int, transcript: str,
         pass
     learner = LEARNER_BLOCK.format(profile=profile) if (profile and not is_placement) else ""
 
+    words = [w["word"] for w in (loc.get("vocab") or []) if w.get("word")]
+    vocab = VOCAB_BLOCK.format(words=", ".join(words)) if (words and not is_placement) else ""
+
     prompt = TURN_TEMPLATE.format(
         title=scenario.title_mn,
         opener=loc["opener"],
@@ -249,6 +277,7 @@ async def handle_turn(user_id: int, transcript: str,
         # anchor the judge with the signup default.
         level=("UNKNOWN — this placement chat determines it; judge only from their answers"
                if is_placement else user["level"]),
+        vocab=vocab,
         learner=learner,
         turn=turn,
         max_turns=max_turns,

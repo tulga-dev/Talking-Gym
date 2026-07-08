@@ -82,6 +82,24 @@ _SQLITE_SCHEMA = [
         user_id    INTEGER,
         expires_at TEXT
     )""",
+    """CREATE TABLE IF NOT EXISTS vocab_assets (
+        lang       TEXT,
+        word       TEXT,
+        mime       TEXT,
+        data       BLOB,
+        tts_b64    TEXT,
+        created_at TEXT,
+        PRIMARY KEY (lang, word)
+    )""",
+    """CREATE TABLE IF NOT EXISTS vocab_progress (
+        user_id     INTEGER,
+        lang        TEXT,
+        word        TEXT,
+        status      TEXT DEFAULT 'new',
+        reps        INTEGER DEFAULT 0,
+        updated_at  TEXT,
+        PRIMARY KEY (user_id, lang, word)
+    )""",
 ]
 
 # Telegram user/chat ids exceed 32-bit — BIGINT is required on Postgres.
@@ -148,6 +166,24 @@ _PG_SCHEMA = [
         token      TEXT PRIMARY KEY,
         user_id    BIGINT,
         expires_at TEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS vocab_assets (
+        lang       TEXT,
+        word       TEXT,
+        mime       TEXT,
+        data       BYTEA,
+        tts_b64    TEXT,
+        created_at TEXT,
+        PRIMARY KEY (lang, word)
+    )""",
+    """CREATE TABLE IF NOT EXISTS vocab_progress (
+        user_id     BIGINT,
+        lang        TEXT,
+        word        TEXT,
+        status      TEXT DEFAULT 'new',
+        reps        INTEGER DEFAULT 0,
+        updated_at  TEXT,
+        PRIMARY KEY (user_id, lang, word)
     )""",
 ]
 
@@ -322,6 +358,57 @@ def cache_set(key: str, value: str) -> None:
             "INSERT INTO cache_kv (k, v, created_at) VALUES (?,?,?) "
             "ON CONFLICT (k) DO UPDATE SET v=excluded.v, created_at=excluded.created_at",
             (key, value, datetime.utcnow().isoformat()),
+        )
+
+
+# ---------- vocabulary assets (image + audio) and per-learner progress ----------
+
+def vocab_asset_get(lang: str, word: str):
+    """Row with mime, data (bytes), tts_b64 for a word, or None if not generated."""
+    with _conn() as con:
+        row = con.execute(
+            "SELECT mime, data, tts_b64 FROM vocab_assets WHERE lang=? AND word=?",
+            (lang, word),
+        ).fetchone()
+        return row
+
+
+def vocab_asset_set_image(lang: str, word: str, mime: str, data: bytes) -> None:
+    with _conn() as con:
+        con.execute(
+            "INSERT INTO vocab_assets (lang, word, mime, data, created_at) VALUES (?,?,?,?,?) "
+            "ON CONFLICT (lang, word) DO UPDATE SET mime=excluded.mime, data=excluded.data",
+            (lang, word, mime, data, datetime.utcnow().isoformat()),
+        )
+
+
+def vocab_asset_set_tts(lang: str, word: str, tts_b64: str) -> None:
+    with _conn() as con:
+        con.execute(
+            "INSERT INTO vocab_assets (lang, word, tts_b64, created_at) VALUES (?,?,?,?) "
+            "ON CONFLICT (lang, word) DO UPDATE SET tts_b64=excluded.tts_b64",
+            (lang, word, tts_b64, datetime.utcnow().isoformat()),
+        )
+
+
+def vocab_progress_map(user_id: int, lang: str) -> dict:
+    """word -> status for everything this learner has interacted with."""
+    with _conn() as con:
+        rows = con.execute(
+            "SELECT word, status FROM vocab_progress WHERE user_id=? AND lang=?",
+            (user_id, lang),
+        ).fetchall()
+        return {r["word"]: r["status"] for r in rows}
+
+
+def vocab_progress_set(user_id: int, lang: str, word: str, status: str) -> None:
+    with _conn() as con:
+        con.execute(
+            "INSERT INTO vocab_progress (user_id, lang, word, status, reps, updated_at) "
+            "VALUES (?,?,?,?,1,?) "
+            "ON CONFLICT (user_id, lang, word) DO UPDATE SET "
+            "status=excluded.status, reps=vocab_progress.reps+1, updated_at=excluded.updated_at",
+            (user_id, lang, word, status, datetime.utcnow().isoformat()),
         )
 
 

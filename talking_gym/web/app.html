@@ -127,6 +127,44 @@
   .model-seg.on{display:flex}
   .model-seg button{font-family:inherit;font-weight:800;font-size:12px;letter-spacing:-.01em;color:var(--mut);padding:6px 16px;border-radius:60px;border:0;background:transparent;transition:background .18s,color .18s}
   .model-seg button.sel{background:#fff;color:var(--blue);box-shadow:0 2px 8px -2px rgba(240,73,42,.35)}
+  /* daily vocabulary */
+  #vocab-overlay{position:fixed;inset:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:70;background:#F0E6DC;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 16px)}
+  .voc-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .voc-x{width:38px;height:38px;flex:none;border-radius:50%;background:#fff;border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center}
+  .voc-x .i{width:16px;height:16px}
+  .voc-prog{flex:1;display:flex;align-items:center;gap:9px}
+  .voc-bar{flex:1;height:7px;background:#E4D6C7;border-radius:6px;overflow:hidden}
+  .voc-bar>div{height:100%;background:#FF6A4D;border-radius:6px;transition:width .3s var(--ease)}
+  #voc-count{font-size:12px;font-weight:800;color:var(--mut);font-variant-numeric:tabular-nums}
+  .voc-stage{flex:1;display:flex;flex-direction:column;min-height:0}
+  .voc-card{flex:1;background:#fff;border-radius:24px;padding:14px;border:1px solid var(--line);box-shadow:var(--shadow-card);overflow-y:auto}
+  .voc-img{height:196px;border-radius:18px;background:#FFEDE6;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .voc-img img{width:100%;height:100%;object-fit:cover}
+  .voc-img .ph{font-size:58px;font-weight:800;color:#FF8A5C;opacity:.55}
+  .voc-wordrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+  .voc-word{font-size:29px;font-weight:800;color:var(--ink);letter-spacing:-.01em;word-break:break-word}
+  .voc-say{width:46px;height:46px;flex:none;border-radius:50%;background:#FF6A4D;border:none;color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--ease)}
+  .voc-say .i{width:22px;height:22px}
+  .voc-say:active{transform:scale(.9)}
+  .voc-meta{display:flex;align-items:center;gap:9px;margin-top:5px;flex-wrap:wrap}
+  .voc-meta>span{font-size:13px;color:var(--mut)}
+  .voc-pos{font-size:11px!important;color:#993C1D!important;background:#FAECE7;padding:2px 9px;border-radius:6px}
+  .voc-line{border-top:1px solid var(--line);margin:13px 0}
+  .voc-mn{font-size:21px;font-weight:800;color:var(--blue)}
+  .voc-ex{font-size:14.5px;color:var(--ink);margin-top:10px}
+  .voc-exmn{font-size:12.5px;color:var(--mut);font-style:italic;margin-top:3px}
+  .voc-actions{display:flex;gap:11px;margin-top:13px}
+  .voc-btn{flex:1;height:52px;border-radius:26px;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;font-weight:800;font-size:15px;border:none;transition:transform .15s var(--ease)}
+  .voc-btn:active{transform:scale(.96)}
+  .voc-btn .i{width:18px;height:18px}
+  .voc-btn.again{background:#fff;border:1px solid var(--line);color:var(--mut)}
+  .voc-btn.got{background:#FF6A4D;color:#fff}
+  .voc-done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px}
+  .voc-done h3{font-size:22px;color:var(--ink);margin-top:8px}
+  .voc-done-sub{font-size:14px;color:var(--mut);max-width:260px;margin-bottom:14px;line-height:1.5}
+  .voc-start{height:54px;padding:0 30px;border-radius:28px;background:#FF6A4D;border:none;color:#fff;font-family:inherit;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .voc-start .i{width:20px;height:20px}
+  .voc-later{margin-top:4px;background:none;border:none;color:var(--mut);font-family:inherit;font-size:13px;font-weight:700;padding:8px}
   .acard{background:#fff;border-radius:22px;padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow-card)}
   .acard h4{font-size:14.5px;font-weight:800;margin-bottom:4px;letter-spacing:-.01em}
   .acard .sub{font-size:12px;color:var(--mut)}
@@ -411,6 +449,12 @@
       <div class="goal-prog"><div class="gp-bar"><div id="goal-fill" style="width:0%"></div></div><span id="goal-count">0/5</span></div>
     </div>
 
+    <div class="acard icon-lead vocab-card" id="vocab-card" style="cursor:pointer">
+      <div class="lead" style="background:#FFEDE6;color:var(--blue)"><svg class="i"><use href="#i-book"/></svg></div>
+      <div style="flex:1;min-width:0"><h4 style="margin:0" data-i18n="vocT">Өнөөдрийн үгс</h4><div class="sub" data-i18n="vocS">Ярианыхаа гол үгсийг сур</div></div>
+      <span id="vocab-count" style="font-size:11px;font-weight:800;color:var(--yellow-d);background:#FFF0D6;padding:3px 9px;border-radius:20px" hidden></span>
+    </div>
+
     <h3 class="sec-t" data-i18n="progT2">Таны ахиц</h3>
     <div class="acard">
       <div class="pc-top">
@@ -539,6 +583,41 @@
 
 </main>
 
+<!-- DAILY VOCABULARY -->
+<div id="vocab-overlay" hidden>
+  <div class="voc-top">
+    <button class="voc-x" id="voc-close" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    <div class="voc-prog"><div class="voc-bar"><div id="voc-fill" style="width:0%"></div></div><span id="voc-count">0 / 0</span></div>
+  </div>
+
+  <div class="voc-stage" id="voc-stage">
+    <div class="voc-card">
+      <div class="voc-img" id="voc-img"></div>
+      <div class="voc-wordrow">
+        <div class="voc-word" id="voc-word"></div>
+        <button class="voc-say" id="voc-say" aria-label="Play pronunciation"><svg class="i"><use href="#i-sound"/></svg></button>
+      </div>
+      <div class="voc-meta"><span id="voc-ipa"></span><span class="voc-pos" id="voc-pos"></span></div>
+      <div class="voc-line"></div>
+      <div class="voc-mn" id="voc-mn"></div>
+      <div class="voc-ex" id="voc-ex"></div>
+      <div class="voc-exmn" id="voc-exmn"></div>
+    </div>
+    <div class="voc-actions">
+      <button class="voc-btn again" id="voc-again"><svg class="i"><use href="#i-x"/></svg><span data-i18n="vocAgain">Дахин</span></button>
+      <button class="voc-btn got" id="voc-got"><svg class="i"><use href="#i-check"/></svg><span data-i18n="vocGot">Мэдсэн</span></button>
+    </div>
+  </div>
+
+  <div class="voc-done" id="voc-done" hidden>
+    <svg viewBox="0 0 64 64" width="76" height="76"><use href="#kitty-face"/></svg>
+    <h3 data-i18n="vocDoneT">Бэлэн боллоо!</h3>
+    <div class="voc-done-sub" data-i18n="vocDoneS">Одоо эдгээр үгсээ яриандаа хэрэглэцгээе</div>
+    <button class="voc-start" id="voc-start"><svg class="i"><use href="#i-mic"/></svg><span data-i18n="vocStart">Яриаг эхлүүлэх</span></button>
+    <button class="voc-later" id="voc-later" data-i18n="vocLater">Дараа</button>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status"></div>
 
 <!-- TAB BAR -->
@@ -600,6 +679,9 @@
       lbStreak:"Стрик", lbVoice:"Дуут дасгал",
       callT:"Киттитэй видео дуудлага", callS:"Гар чөлөөтэй, жинхэнэ яриа шиг", callNew:"ШИНЭ",
       modelNow:"Багш: ",
+      vocT:"Өнөөдрийн үгс", vocS:"Ярианыхаа гол үгсийг сур", vocAgain:"Дахин", vocGot:"Мэдсэн",
+      vocDoneT:"Бэлэн боллоо!", vocDoneS:"Одоо эдгээр үгсээ яриандаа хэрэглэцгээе",
+      vocStart:"Яриаг эхлүүлэх", vocLater:"Дараа", vocEmpty:"Өнөөдрийн үг бэлдэж байна…",
       callConnecting:"Холбогдож байна…", callSpeaking:"Китти ярьж байна…", callListening:"Таны ээлж — яриарай",
       callThinking:"Китти бодож байна…", callSend:"Илгээх",
       planLbl:"Таны багц", redeemB:"Идэвхжүүлэх",
@@ -668,6 +750,9 @@
       lbStreak:"Streak", lbVoice:"Voice today",
       callT:"Video call with Kitty", callS:"Hands-free, like a real conversation", callNew:"NEW",
       modelNow:"Coach: ",
+      vocT:"Today's words", vocS:"Learn the key words for your chat", vocAgain:"Again", vocGot:"Got it",
+      vocDoneT:"All set!", vocDoneS:"Now let's use these words in your conversation",
+      vocStart:"Start conversation", vocLater:"Later", vocEmpty:"Preparing today's words…",
       callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
       callThinking:"Kitty is thinking…", callSend:"Send",
       planLbl:"Your plan", redeemB:"Activate",
@@ -744,6 +829,9 @@
     lbStreak:"ᠰᠲ᠋ᠷᠢᠺ", lbVoice:"ᠳᠠᠭᠤᠲᠤ ᠳᠠᠰᠬᠠᠯ",
     callT:"Kitty ᠲᠠᠢ ᠸᠢᠳᠧᠣ᠋ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ", callS:"ᠭᠠᠷ ᠴᠢᠯᠦᠭᠡᠲᠡᠢ᠂ ᠵᠢᠩᠬᠢᠨᠢ ᠶᠠᠷᠢᠶ᠎ᠠ ᠰᠢᠭ", callNew:"ᠰᠢᠨ᠎ᠡ",
     modelNow:"ᠪᠠᠭᠰᠢ: ",
+    vocT:"ᠡᠳᠦᠷ ᠦᠨ ᠦᠭᠡᠰ", vocS:"ᠶᠠᠷᠢᠶᠠᠨ ᠤ ᠭᠣᠣᠯ ᠦᠭᠡᠰ ᠢ ᠰᠤᠷ", vocAgain:"ᠳᠠᠬᠢᠨ", vocGot:"ᠣᠶᠢᠯᠭᠠᠯ᠎ᠠ",
+    vocDoneT:"ᠪᠡᠯᠡᠨ ᠪᠣᠯᠣᠯ᠎ᠠ", vocDoneS:"ᠣᠳᠣ ᠡᠳᠡᠭᠡᠷ ᠦᠭᠡᠰ ᠢ ᠶᠠᠷᠢᠶᠠᠨ ᠳᠤ ᠪᠠᠨ ᠬᠡᠷᠡᠭᠯᠡᠶ᠎ᠡ",
+    vocStart:"ᠶᠠᠷᠢᠶ᠎ᠠ ᠡᠬᠢᠯᠡᠭᠦᠯᠬᠦ", vocLater:"ᠳᠠᠷᠠᠭ᠎ᠠ", vocEmpty:"ᠡᠳᠦᠷ ᠦᠨ ᠦᠭᠡᠰ ᠢ ᠪᠡᠯᠡᠳᠬᠡᠵᠦ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"Kitty ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"Kitty ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
     planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ",
@@ -1202,6 +1290,7 @@
     $('tabbar').hidden = false;
     renderMe();
     refreshNext();
+    refreshVocabCard();
     show('home');
   }
 
@@ -1242,6 +1331,77 @@
   }
   $('btn-start').addEventListener('click', startSession);
   $('home-tlang').addEventListener('click', function(){ show('prof'); });
+
+  /* ---------- daily vocabulary (words for today's conversation) ---------- */
+  var vocList = [], vocIdx = 0, vocAgainQ = [];
+  function mediaUrl(u){ return API + u + (token ? '&t=' + encodeURIComponent(token) : ''); }
+  function refreshVocabCard(){
+    req('/api/vocab/today').then(function(j){
+      var n = (j.words || []).length, c = $('vocab-count');
+      $('vocab-card').style.display = n > 0 ? '' : 'none';
+      if (n > 0){ c.textContent = n; c.hidden = false; }
+    }).catch(function(){});
+  }
+  function openVocab(){
+    unlockVoice();
+    vocList = []; vocIdx = 0; vocAgainQ = [];
+    $('voc-done').hidden = true; $('voc-stage').hidden = false;
+    $('voc-word').textContent = '…'; $('voc-img').innerHTML = ''; $('voc-fill').style.width = '0%';
+    $('vocab-overlay').hidden = false;
+    req('/api/vocab/today').then(function(j){
+      vocList = j.words || [];
+      if (!vocList.length){ toast(d().vocEmpty); closeVocab(); return; }
+      vocIdx = 0; renderVoc();
+    }).catch(function(){ toast(d().tstErr); closeVocab(); });
+  }
+  function closeVocab(){ $('vocab-overlay').hidden = true; try { voiceEl.pause(); } catch(e){} }
+  function renderVoc(){
+    var w = vocList[vocIdx]; if (!w) return finishVoc();
+    var total = vocList.length;
+    $('voc-count').textContent = (vocIdx + 1) + ' / ' + total;
+    $('voc-fill').style.width = Math.round(vocIdx / total * 100) + '%';
+    var img = $('voc-img'), initial = (w.word[0] || '?').toUpperCase();
+    if (w.concrete){
+      img.innerHTML = '';
+      var el = new Image(); el.alt = w.word;
+      el.onerror = function(){ img.innerHTML = '<span class="ph">' + initial + '</span>'; };
+      el.src = mediaUrl(w.image_url);
+      img.appendChild(el);
+    } else { img.innerHTML = '<span class="ph">' + initial + '</span>'; }
+    $('voc-word').textContent = w.word;
+    $('voc-ipa').textContent = w.ipa || w.latin || '';
+    $('voc-pos').textContent = w.pos || ''; $('voc-pos').style.display = w.pos ? '' : 'none';
+    $('voc-mn').textContent = w.mn || '';
+    $('voc-ex').textContent = w.example || '';
+    $('voc-exmn').textContent = w.example_mn || '';
+    playVocAudio(w);
+  }
+  function playVocAudio(w){
+    if (!w || !w.audio_url) return;
+    try { voiceEl.pause(); voiceEl.src = mediaUrl(w.audio_url); voiceEl.currentTime = 0; voiceEl.play().catch(function(){}); } catch(e){}
+  }
+  function markVoc(status){
+    var w = vocList[vocIdx]; if (!w) return;
+    req('/api/vocab/progress', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({word: w.word, status: status})}).catch(function(){});
+    if (status === 'again') vocAgainQ.push(w);
+    vocIdx++;
+    if (vocIdx >= vocList.length){
+      if (vocAgainQ.length){ vocList = vocAgainQ.slice(); vocAgainQ = []; vocIdx = 0; renderVoc(); }
+      else finishVoc();
+    } else renderVoc();
+  }
+  function finishVoc(){
+    $('voc-fill').style.width = '100%';
+    $('voc-stage').hidden = true; $('voc-done').hidden = false;
+  }
+  $('vocab-card').addEventListener('click', openVocab);
+  $('voc-close').addEventListener('click', closeVocab);
+  $('voc-later').addEventListener('click', closeVocab);
+  $('voc-say').addEventListener('click', function(){ playVocAudio(vocList[vocIdx]); });
+  $('voc-got').addEventListener('click', function(){ markVoc('known'); });
+  $('voc-again').addEventListener('click', function(){ markVoc('again'); });
+  $('voc-start').addEventListener('click', function(){ closeVocab(); startSession(); });
   $('tab-train').addEventListener('click', function(){
     if (session) { show('lesson'); } else { startSession(); }
   });

@@ -73,7 +73,7 @@ TURN_TEMPLATE = """SCENARIO: {title} — coach plays: see opener.
 Coach's opener was: "{opener}"
 Focus areas: {focus}
 Learner level: {level}
-{learner}Turn {turn} of {max_turns}. {finish_hint}
+{vocab}{learner}Turn {turn} of {max_turns}. {finish_hint}
 
 Conversation so far:
 {history}
@@ -85,6 +85,13 @@ Learner's new transcript: "{transcript}"
 LEARNER_BLOCK = """ABOUT THIS LEARNER (your memory of them — use it!): {profile}
 Weave their real life into the conversation naturally: reference their job, family,
 interests when relevant, and tailor examples to their world. Never recite this back as a list.
+"""
+
+# Injected when the learner just studied today's word set — the vocabulary loop.
+# The conversation should draw these exact words out of them.
+VOCAB_BLOCK = """TODAY'S WORDS (the learner just studied these before this chat): {words}
+Naturally steer the conversation so they get to USE these words — ask questions whose
+answers call for them. Don't list or quiz the words; just create openings to say them.
 """
 
 FINISH_HINT = (
@@ -132,6 +139,11 @@ Rewrite BOTH the opener and the model answer in natural, simple {lang}, suitable
 for a {level} learner. Keep the tutor's name {coach}. The opener greets the learner
 and asks one question.
 
+Also pick the 6 most useful vocabulary words a {level} learner needs for THIS
+conversation (drawn from the situation, opener and model answer) — high-frequency
+words they will actually say or hear here. Prefer concrete words that can be drawn
+as a simple picture; include an abstract one only if it is essential to the scenario.
+
 {pipeline}
 
 Return JSON:
@@ -143,5 +155,17 @@ Return JSON:
   "example_latin": "the model answer rendered as {roman}",
   "example_mn": "translation of the model answer into {native}",
   "title": "a short scenario title in {native}",
-  "setup": "the situation description in {native} (one sentence, addressed to the learner)"
+  "setup": "the situation description in {native} (one sentence, addressed to the learner)",
+  "vocab": [
+    {{
+      "word": "the word/short phrase in {lang}",
+      "latin": "the word rendered as {roman}",
+      "mn": "its meaning in {native}",
+      "ipa": "IPA pronunciation if {lang} is English, else an empty string",
+      "pos": "part of speech in {native}",
+      "example": "a short natural {lang} sentence using the word, fitting this scenario",
+      "example_mn": "translation of that sentence into {native}",
+      "concrete": true if the word can be shown as one simple picture, else false
+    }}
+  ]
 }}"""

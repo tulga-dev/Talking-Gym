@@ -9,6 +9,7 @@ import base64
 import difflib
 import logging
 import secrets
+from urllib.parse import quote
 
 from aiohttp import web
 
@@ -16,7 +17,7 @@ from . import coach, db
 from .config import config
 from .langs import lang_meta, native_of, target_of
 from .providers import ProviderError
-from .providers import stt, tts
+from .providers import imagegen, stt, tts
 from .scenarios import by_id, pick_scenario
 
 log = logging.getLogger(__name__)
@@ -534,6 +535,195 @@ async def api_admin_set_email(request: web.Request) -> web.Response:
                              "name": target["name"], "email": new_email})
 
 
+# ---------- vocabulary (daily words tied to the day's conversation) ----------
+
+_vocab_locks: dict = {}  # (kind, lang, word) -> asyncio.Lock, serializes generation
+
+
+def _vocab_lock(key):
+    lk = _vocab_locks.get(key)
+    if lk is None:
+        lk = asyncio.Lock()
+        _vocab_locks[key] = lk
+    return lk
+
+
+def _user_media(request: web.Request):
+    """Auth for <img>/<audio> loads: header, or a `t` token query param the
+    client appends (tags can't set headers)."""
+    user = _user_from(request)
+    if user is not None:
+        return user
+    tok = request.query.get("t", "").strip()
+    if not tok:
+        return None
+    return db.get_user(int(tok)) if tok.isdigit() else db.user_by_token(tok)
+
+
+def _vocab_scenario(user):
+    """The scenario whose words are 'today's words' — the same one the lesson
+    will run. Placement (very first chat) has no warm-up words."""
+    active = db.get_active_session(user["user_id"])
+    if active and active["turns"] > 0:
+        return by_id(active["scenario_id"])
+    if user["sessions_done"] == 0:
+        return None
+    return pick_scenario(user["level"], user["sessions_done"])
+
+
+async def _scenario_word(user, lang: str, word: str):
+    """The vocab item dict for `word` in the learner's current scenario, or
+    None — used to authorize on-demand asset generation."""
+    sc = _vocab_scenario(user)
+    if sc is None:
+        return None
+    loc = await coach.localize_scenario(sc, lang, native_of(user), cached_only=True)
+    for w in (loc.get("vocab") or []):
+        if w.get("word") == word:
+            return w
+    return None
+
+
+async def _ensure_vocab_image(lang: str, word: str, hint: str) -> None:
+    asset = db.vocab_asset_get(lang, word)
+    if asset and asset["data"]:
+        return
+    async with _vocab_lock(("img", lang, word)):
+        asset = db.vocab_asset_get(lang, word)
+        if asset and asset["data"]:
+            return
+        try:
+            mime, data = await imagegen.generate(word, hint)
+            db.vocab_asset_set_image(lang, word, mime, bytes(data))
+        except Exception:
+            log.warning("vocab image gen failed for %s/%s", lang, word)
+
+
+async def _ensure_vocab_audio(lang: str, word: str) -> None:
+    asset = db.vocab_asset_get(lang, word)
+    if asset and asset["tts_b64"]:
+        return
+    async with _vocab_lock(("tts", lang, word)):
+        asset = db.vocab_asset_get(lang, word)
+        if asset and asset["tts_b64"]:
+            return
+        try:
+            audio = await tts.speak(word[:60], language=lang, speed=0.85)
+            db.vocab_asset_set_tts(lang, word, base64.b64encode(audio).decode())
+        except Exception:
+            log.warning("vocab tts gen failed for %s/%s", lang, word)
+
+
+async def api_vocab_today(request: web.Request) -> web.Response:
+    """Today's word set — the vocabulary of the day's conversation scenario,
+    with each learner's progress. Kicks off image/audio warming in the
+    background so assets are ready by the time a card is tapped."""
+    user = _user_from(request)
+    if user is None:
+        return _err(401, "unauthorized")
+    lang = target_of(user)
+    sc = _vocab_scenario(user)
+    if sc is None:
+        return web.json_response({"scenario_id": None, "title_mn": "", "words": []})
+    loc = await coach.localize_scenario(sc, lang, native_of(user))
+    prog = db.vocab_progress_map(user["user_id"], lang)
+    words = []
+    for w in (loc.get("vocab") or []):
+        word = w["word"]
+        asset = db.vocab_asset_get(lang, word)
+        has_img = bool(asset and asset["data"])
+        has_aud = bool(asset and asset["tts_b64"])
+        if w.get("concrete", True) and not has_img and imagegen.enabled():
+            asyncio.create_task(_ensure_vocab_image(lang, word, w.get("example", "")))
+        if not has_aud and config.tts_enabled:
+            asyncio.create_task(_ensure_vocab_audio(lang, word))
+        words.append({
+            "word": word,
+            "latin": w.get("latin", ""),
+            "mn": w.get("mn", ""),
+            "ipa": w.get("ipa", ""),
+            "pos": w.get("pos", ""),
+            "example": w.get("example", ""),
+            "example_mn": w.get("example_mn", ""),
+            "concrete": w.get("concrete", True),
+            "status": prog.get(word, "new"),
+            "image_url": f"/api/vocab/image?lang={lang}&word={quote(word)}",
+            "audio_url": f"/api/vocab/audio?lang={lang}&word={quote(word)}",
+        })
+    return web.json_response({
+        "scenario_id": sc.id,
+        "title_mn": loc.get("title", sc.title_mn),
+        "words": words,
+    })
+
+
+async def api_vocab_image(request: web.Request) -> web.Response:
+    user = _user_media(request)
+    if user is None:
+        return _err(401, "unauthorized")
+    lang = request.query.get("lang", "en")
+    word = request.query.get("word", "").strip()
+    if not word:
+        return _err(400, "word_required")
+    asset = db.vocab_asset_get(lang, word)
+    if not (asset and asset["data"]):
+        item = await _scenario_word(user, lang, word)
+        if item is None or not item.get("concrete", True):
+            return _err(404, "no_image")
+        if not imagegen.enabled():
+            return _err(404, "no_image")
+        await _ensure_vocab_image(lang, word, item.get("example", ""))
+        asset = db.vocab_asset_get(lang, word)
+        if not (asset and asset["data"]):
+            return _err(502, "gen_failed")
+    return web.Response(
+        body=bytes(asset["data"]),
+        content_type=asset["mime"] or "image/png",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
+
+
+async def api_vocab_audio(request: web.Request) -> web.Response:
+    user = _user_media(request)
+    if user is None:
+        return _err(401, "unauthorized")
+    lang = request.query.get("lang", "en")
+    word = request.query.get("word", "").strip()
+    if not word:
+        return _err(400, "word_required")
+    asset = db.vocab_asset_get(lang, word)
+    if not (asset and asset["tts_b64"]):
+        if await _scenario_word(user, lang, word) is None:
+            return _err(404, "no_audio")
+        await _ensure_vocab_audio(lang, word)
+        asset = db.vocab_asset_get(lang, word)
+        if not (asset and asset["tts_b64"]):
+            return _err(502, "gen_failed")
+    return web.Response(
+        body=base64.b64decode(asset["tts_b64"]),
+        content_type="audio/mpeg",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
+
+
+async def api_vocab_progress(request: web.Request) -> web.Response:
+    user = _user_from(request)
+    if user is None:
+        return _err(401, "unauthorized")
+    try:
+        body = await request.json()
+    except Exception:
+        return _err(400, "bad_json")
+    word = str(body.get("word", "")).strip()[:40]
+    status = body.get("status", "known")
+    if status not in ("known", "again", "new"):
+        status = "known"
+    if not word:
+        return _err(400, "word_required")
+    db.vocab_progress_set(user["user_id"], target_of(user), word, status)
+    return web.json_response({"ok": True})
+
+
 def add_api_routes(app: web.Application) -> None:
     from .web_auth import add_auth_routes
     add_auth_routes(app)
@@ -550,3 +740,7 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_get("/api/admin/accounts", api_admin_accounts)
     app.router.add_post("/api/admin/set-password", api_admin_set_password)
     app.router.add_post("/api/admin/set-email", api_admin_set_email)
+    app.router.add_get("/api/vocab/today", api_vocab_today)
+    app.router.add_get("/api/vocab/image", api_vocab_image)
+    app.router.add_get("/api/vocab/audio", api_vocab_audio)
+    app.router.add_post("/api/vocab/progress", api_vocab_progress)
