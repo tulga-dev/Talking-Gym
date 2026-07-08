@@ -8,6 +8,7 @@ import asyncio
 import base64
 import difflib
 import logging
+import os
 import secrets
 from urllib.parse import quote
 
@@ -425,18 +426,23 @@ _warm_state = {"running": False, "done": 0, "total": 0, "errors": 0}
 
 
 async def _warm_all():
-    """Pre-generate every scenario localization and opener audio into the
-    durable cache, so no learner ever hits the one-time generation delay.
-    A scenario is only ever spoken at its own level's speed, so one TTS per
-    (scenario, target language) suffices."""
+    """Pre-generate everything a learner would otherwise wait on into the
+    durable cache: scenario localizations, opener audio, the daily vocab word
+    sets, and each word's illustration + pronunciation audio. Vocab text is
+    warmed for every language pair (English/Mongolian skips localization but
+    still needs its words); media assets are deduped by (target lang, word)
+    since the word list is identical across native languages."""
     from .langs import NATIVE_LANGS, TARGET_LANGS
     from .scenarios import SCENARIOS
     combos = [(t, n) for t in TARGET_LANGS for n in NATIVE_LANGS
               if not (t == "en" and n == "mn")]
     loc_jobs = [(sc, t, n) for sc in SCENARIOS for (t, n) in combos]
     tts_jobs = [(sc, t) for sc in SCENARIOS for t in TARGET_LANGS]
+    vocab_combos = [(t, n) for t in TARGET_LANGS for n in NATIVE_LANGS]
+    vocab_jobs = [(sc, t, n) for sc in SCENARIOS if sc.id != "placement"
+                  for (t, n) in vocab_combos]
     _warm_state.update(running=True, done=0, errors=0,
-                       total=len(loc_jobs) + len(tts_jobs))
+                       total=len(loc_jobs) + len(tts_jobs) + len(vocab_jobs))
     sem = asyncio.Semaphore(5)
 
     async def warm_loc(sc, t, n):
@@ -458,8 +464,54 @@ async def _warm_all():
                 log.exception("warm tts failed %s/%s", sc.id, t)
             _warm_state["done"] += 1
 
+    async def warm_vocab(sc, t, n):
+        async with sem:
+            try:
+                await coach.scenario_vocab(sc, t, n, level=sc.level)
+            except Exception:
+                _warm_state["errors"] += 1
+                log.exception("warm vocab failed %s/%s/%s", sc.id, t, n)
+            _warm_state["done"] += 1
+
     await asyncio.gather(*[warm_loc(*j) for j in loc_jobs])
     await asyncio.gather(*[warm_tts(*j) for j in tts_jobs])
+    await asyncio.gather(*[warm_vocab(*j) for j in vocab_jobs])
+
+    # Media assets: one image + one audio per unique (target lang, word).
+    # Image generation is the only costly warm step, so it is scoped to the
+    # rollout language(s) by default — expand via WARM_ASSET_LANGS when other
+    # languages get learners. Vocab text above is warmed for every pair.
+    asset_langs = [x.strip() for x in os.getenv("WARM_ASSET_LANGS", "en").split(",")
+                   if x.strip() in TARGET_LANGS]
+    asset_words: dict = {}
+    for t in asset_langs:
+        for sc in SCENARIOS:
+            if sc.id == "placement":
+                continue
+            try:
+                vocab = await coach.scenario_vocab(sc, t, "mn", level=sc.level,
+                                                   cached_only=True)
+            except Exception:
+                vocab = []
+            for w in vocab:
+                asset_words.setdefault(
+                    (t, w["word"]), (w.get("concrete", True), w.get("example", "")))
+    _warm_state["total"] += len(asset_words)
+
+    async def warm_asset(t, word, concrete, example):
+        async with sem:
+            try:
+                if concrete and imagegen.enabled():
+                    await _ensure_vocab_image(t, word, example)
+                if config.tts_enabled:
+                    await _ensure_vocab_audio(t, word)
+            except Exception:
+                _warm_state["errors"] += 1
+                log.exception("warm asset failed %s/%s", t, word)
+            _warm_state["done"] += 1
+
+    await asyncio.gather(*[warm_asset(t, w, c, ex)
+                           for (t, w), (c, ex) in asset_words.items()])
     _warm_state["running"] = False
     log.info("Cache warm-up complete: %s jobs, %s errors",
              _warm_state["total"], _warm_state["errors"])
