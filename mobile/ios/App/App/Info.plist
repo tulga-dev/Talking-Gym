@@ -4,8 +4,6 @@
 <dict>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Talking Gym needs the microphone so you can practice speaking with Kitty.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>The camera shows your own preview during video calls with Kitty. Nothing is recorded or uploaded.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 
