@@ -141,6 +141,10 @@
   .voc-img{height:196px;border-radius:18px;background:#FFEDE6;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .voc-img img{width:100%;height:100%;object-fit:cover}
   .voc-img .ph{font-size:58px;font-weight:800;color:#FF8A5C;opacity:.55}
+  .voc-img .ph-ic{width:66px;height:66px;color:#FF8A5C;opacity:.6}
+  .wl-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .wl-chips .wchip{font-size:13px;font-weight:700;color:var(--ink);background:var(--sky);border:1px solid var(--line);padding:5px 12px;border-radius:20px}
+  .wl-chips .wmore{font-size:12px;font-weight:700;color:var(--mut);align-self:center;padding:5px 4px}
   .voc-wordrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
   .voc-word{font-size:29px;font-weight:800;color:var(--ink);letter-spacing:-.01em;word-break:break-word}
   .voc-say{width:46px;height:46px;flex:none;border-radius:50%;background:#FF6A4D;border:none;color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--ease)}
@@ -481,6 +485,14 @@
       <div class="sub" style="margin-top:5px;font-size:11px"><span data-i18n="capT">Өнөөдрийн дуут дасгал</span>: <span id="cap-used2">0</span>s / <span id="cap-max">300</span>s</div>
     </div>
 
+    <div class="acard" id="learned-card" hidden>
+      <div class="pc-top">
+        <div style="min-width:0"><div class="sub" data-i18n="wlT">Сурсан үгс</div><h4 id="wl-count" style="font-size:20px;margin:2px 0">0</h4></div>
+        <div class="lead" style="background:#FFEDE6;color:var(--blue);width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none"><svg class="i" style="width:21px;height:21px"><use href="#i-book"/></svg></div>
+      </div>
+      <div class="wl-chips" id="wl-chips"></div>
+    </div>
+
   </div>
 
   <!-- LESSON -->
@@ -537,6 +549,7 @@
         <div class="m"><b id="st-best">0</b><span data-i18n="mBest">дээд стрик</span></div>
         <div class="m"><b id="st-sessions">0</b><span data-i18n="mSessions">нийт дасгал</span></div>
         <div class="m"><b id="st-voice">0s</b><span data-i18n="mVoice">өнөөдөр ярьсан</span></div>
+        <div class="m"><b id="st-words">0</b><span data-i18n="mWords">сурсан үг</span></div>
       </div>
       <div class="sub" style="margin-top:10px"><b id="rank-name2"></b> · <span id="rank-progress"></span></div>
       <div class="rankbar"><div id="rank-fill" style="width:0%"></div></div>
@@ -682,6 +695,7 @@
       vocT:"Өнөөдрийн үгс", vocS:"Ярианыхаа гол үгсийг сур", vocAgain:"Дахин", vocGot:"Мэдсэн",
       vocDoneT:"Бэлэн боллоо!", vocDoneS:"Одоо эдгээр үгсээ яриандаа хэрэглэцгээе",
       vocStart:"Яриаг эхлүүлэх", vocLater:"Дараа", vocEmpty:"Өнөөдрийн үг бэлдэж байна…",
+      wlT:"Сурсан үгс", mWords:"сурсан үг", wlMore:"+{n} бусад",
       callConnecting:"Холбогдож байна…", callSpeaking:"Китти ярьж байна…", callListening:"Таны ээлж — яриарай",
       callThinking:"Китти бодож байна…", callSend:"Илгээх",
       planLbl:"Таны багц", redeemB:"Идэвхжүүлэх",
@@ -753,6 +767,7 @@
       vocT:"Today's words", vocS:"Learn the key words for your chat", vocAgain:"Again", vocGot:"Got it",
       vocDoneT:"All set!", vocDoneS:"Now let's use these words in your conversation",
       vocStart:"Start conversation", vocLater:"Later", vocEmpty:"Preparing today's words…",
+      wlT:"Words learned", mWords:"words learned", wlMore:"+{n} more",
       callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
       callThinking:"Kitty is thinking…", callSend:"Send",
       planLbl:"Your plan", redeemB:"Activate",
@@ -832,6 +847,7 @@
     vocT:"ᠡᠳᠦᠷ ᠦᠨ ᠦᠭᠡᠰ", vocS:"ᠶᠠᠷᠢᠶᠠᠨ ᠤ ᠭᠣᠣᠯ ᠦᠭᠡᠰ ᠢ ᠰᠤᠷ", vocAgain:"ᠳᠠᠬᠢᠨ", vocGot:"ᠣᠶᠢᠯᠭᠠᠯ᠎ᠠ",
     vocDoneT:"ᠪᠡᠯᠡᠨ ᠪᠣᠯᠣᠯ᠎ᠠ", vocDoneS:"ᠣᠳᠣ ᠡᠳᠡᠭᠡᠷ ᠦᠭᠡᠰ ᠢ ᠶᠠᠷᠢᠶᠠᠨ ᠳᠤ ᠪᠠᠨ ᠬᠡᠷᠡᠭᠯᠡᠶ᠎ᠡ",
     vocStart:"ᠶᠠᠷᠢᠶ᠎ᠠ ᠡᠬᠢᠯᠡᠭᠦᠯᠬᠦ", vocLater:"ᠳᠠᠷᠠᠭ᠎ᠠ", vocEmpty:"ᠡᠳᠦᠷ ᠦᠨ ᠦᠭᠡᠰ ᠢ ᠪᠡᠯᠡᠳᠬᠡᠵᠦ ᠪᠠᠶᠢᠨ᠎ᠠ…",
+    wlT:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡᠰ", mWords:"ᠰᠤᠷᠤᠭᠰᠠᠨ ᠦᠭᠡ", wlMore:"+{n}",
     callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"Kitty ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"Kitty ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
     planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ",
@@ -1094,6 +1110,7 @@
     $('st-best').textContent = me.best_streak;
     $('st-sessions').textContent = me.sessions_done;
     $('st-voice').textContent = me.voice_seconds_today + 's';
+    $('st-words').textContent = me.words_learned || 0;
     var span = (me.rank_next_xp || (me.xp + 1)) - me.rank_cur_xp;
     var got = me.xp - me.rank_cur_xp;
     $('rank-fill').style.width = me.rank_next_xp ? Math.min(100, got * 100 / span) + '%' : '100%';
@@ -1291,6 +1308,7 @@
     renderMe();
     refreshNext();
     refreshVocabCard();
+    refreshLearned();
     show('home');
   }
 
@@ -1342,6 +1360,22 @@
       if (n > 0){ c.textContent = n; c.hidden = false; }
     }).catch(function(){});
   }
+  function refreshLearned(){
+    req('/api/vocab/learned').then(function(j){
+      var words = j.words || [], n = j.count != null ? j.count : words.length;
+      $('learned-card').hidden = n === 0;
+      $('wl-count').textContent = n;
+      var chips = $('wl-chips'); chips.innerHTML = '';
+      var show = words.slice(0, 12);
+      show.forEach(function(w){
+        var s = document.createElement('span'); s.className = 'wchip'; s.textContent = w; chips.appendChild(s);
+      });
+      if (n > show.length){
+        var m = document.createElement('span'); m.className = 'wmore';
+        m.textContent = (d().wlMore || '+{n}').replace('{n}', n - show.length); chips.appendChild(m);
+      }
+    }).catch(function(){});
+  }
   function openVocab(){
     unlockVoice();
     vocList = []; vocIdx = 0; vocAgainQ = [];
@@ -1354,20 +1388,18 @@
       vocIdx = 0; renderVoc();
     }).catch(function(){ toast(d().tstErr); closeVocab(); });
   }
-  function closeVocab(){ $('vocab-overlay').hidden = true; try { voiceEl.pause(); } catch(e){} }
+  function closeVocab(){ $('vocab-overlay').hidden = true; try { voiceEl.pause(); } catch(e){} refreshLearned(); }
   function renderVoc(){
     var w = vocList[vocIdx]; if (!w) return finishVoc();
     var total = vocList.length;
     $('voc-count').textContent = (vocIdx + 1) + ' / ' + total;
     $('voc-fill').style.width = Math.round(vocIdx / total * 100) + '%';
-    var img = $('voc-img'), initial = (w.word[0] || '?').toUpperCase();
-    if (w.concrete){
-      img.innerHTML = '';
-      var el = new Image(); el.alt = w.word;
-      el.onerror = function(){ img.innerHTML = '<span class="ph">' + initial + '</span>'; };
-      el.src = mediaUrl(w.image_url);
-      img.appendChild(el);
-    } else { img.innerHTML = '<span class="ph">' + initial + '</span>'; }
+    var img = $('voc-img');
+    img.innerHTML = '';
+    var el = new Image(); el.alt = w.word;
+    el.onerror = function(){ img.innerHTML = '<svg class="ph-ic"><use href="#i-book"/></svg>'; };
+    el.src = mediaUrl(w.image_url);
+    img.appendChild(el);
     $('voc-word').textContent = w.word;
     $('voc-ipa').textContent = w.ipa || w.latin || '';
     $('voc-pos').textContent = w.pos || ''; $('voc-pos').style.display = w.pos ? '' : 'none';

@@ -113,6 +113,7 @@ def _me_payload(user) -> dict:
         "trained_today": db.did_session_today(user["user_id"]),
         "voice_seconds_today": db.voice_seconds_today(user["user_id"]),
         "voice_seconds_cap": config.daily_voice_seconds_cap,
+        "words_learned": db.vocab_learned_count(user["user_id"], target_of(user)),
     }
 
 
@@ -501,8 +502,8 @@ async def _warm_all():
     async def warm_asset(t, word, concrete, example):
         async with sem:
             try:
-                if concrete and imagegen.enabled():
-                    await _ensure_vocab_image(t, word, example)
+                if imagegen.enabled():
+                    await _ensure_vocab_image(t, word, example, concrete)
                 if config.tts_enabled:
                     await _ensure_vocab_audio(t, word)
             except Exception:
@@ -637,7 +638,7 @@ async def _scenario_word(user, lang: str, word: str):
     return None
 
 
-async def _ensure_vocab_image(lang: str, word: str, hint: str) -> None:
+async def _ensure_vocab_image(lang: str, word: str, hint: str, concrete: bool = True) -> None:
     asset = db.vocab_asset_get(lang, word)
     if asset and asset["data"]:
         return
@@ -646,7 +647,7 @@ async def _ensure_vocab_image(lang: str, word: str, hint: str) -> None:
         if asset and asset["data"]:
             return
         try:
-            mime, data = await imagegen.generate(word, hint)
+            mime, data = await imagegen.generate(word, hint, concrete)
             db.vocab_asset_set_image(lang, word, mime, bytes(data))
         except Exception:
             log.warning("vocab image gen failed for %s/%s", lang, word)
@@ -687,8 +688,9 @@ async def api_vocab_today(request: web.Request) -> web.Response:
         asset = db.vocab_asset_get(lang, word)
         has_img = bool(asset and asset["data"])
         has_aud = bool(asset and asset["tts_b64"])
-        if w.get("concrete", True) and not has_img and imagegen.enabled():
-            asyncio.create_task(_ensure_vocab_image(lang, word, w.get("example", "")))
+        if not has_img and imagegen.enabled():
+            asyncio.create_task(_ensure_vocab_image(
+                lang, word, w.get("example", ""), w.get("concrete", True)))
         if not has_aud and config.tts_enabled:
             asyncio.create_task(_ensure_vocab_audio(lang, word))
         words.append({
@@ -722,11 +724,10 @@ async def api_vocab_image(request: web.Request) -> web.Response:
     asset = db.vocab_asset_get(lang, word)
     if not (asset and asset["data"]):
         item = await _scenario_word(user, lang, word)
-        if item is None or not item.get("concrete", True):
+        if item is None or not imagegen.enabled():
             return _err(404, "no_image")
-        if not imagegen.enabled():
-            return _err(404, "no_image")
-        await _ensure_vocab_image(lang, word, item.get("example", ""))
+        await _ensure_vocab_image(lang, word, item.get("example", ""),
+                                  item.get("concrete", True))
         asset = db.vocab_asset_get(lang, word)
         if not (asset and asset["data"]):
             return _err(502, "gen_failed")
@@ -758,6 +759,17 @@ async def api_vocab_audio(request: web.Request) -> web.Response:
         content_type="audio/mpeg",
         headers={"Cache-Control": "public, max-age=31536000, immutable"},
     )
+
+
+async def api_vocab_learned(request: web.Request) -> web.Response:
+    """Words the learner has marked known, most recent first (for the progress
+    screen). Kept lightweight — just the words themselves."""
+    user = _user_from(request)
+    if user is None:
+        return _err(401, "unauthorized")
+    lang = target_of(user)
+    words = db.vocab_learned(user["user_id"], lang)
+    return web.json_response({"count": len(words), "words": words})
 
 
 async def api_vocab_progress(request: web.Request) -> web.Response:
@@ -797,4 +809,5 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_get("/api/vocab/today", api_vocab_today)
     app.router.add_get("/api/vocab/image", api_vocab_image)
     app.router.add_get("/api/vocab/audio", api_vocab_audio)
+    app.router.add_get("/api/vocab/learned", api_vocab_learned)
     app.router.add_post("/api/vocab/progress", api_vocab_progress)

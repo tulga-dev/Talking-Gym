@@ -29,17 +29,26 @@ def enabled() -> bool:
     return bool(config.gemini_api_key)
 
 
-async def generate(word: str, hint: str = "") -> tuple[str, bytes]:
+async def generate(word: str, hint: str = "", concrete: bool = True) -> tuple[str, bytes]:
     """Return (mime, image_bytes) illustrating `word`. `hint` is an example
-    sentence giving the model context for the word's meaning."""
+    sentence giving the model context. `concrete=False` (abstract words like
+    "plan", "please") asks for a symbolic scene instead of a literal object."""
     if not config.gemini_api_key:
         raise ProviderError("image gen not configured (GEMINI_API_KEY missing)")
     subject = f'the word "{word}"'
     if hint:
         subject += f' (as in: "{hint}")'
+    if concrete:
+        instruction = f"Illustrate {subject}."
+    else:
+        instruction = (
+            f"Show one simple, clear picture that captures the idea of {subject} — "
+            f"a symbolic object or a small everyday scene a learner instantly connects "
+            f"to the concept (for example, a calendar or checklist for 'plan')."
+        )
     payload = {
         "contents": [{"role": "user", "parts": [
-            {"text": f"{_STYLE} Illustrate {subject}."}
+            {"text": f"{_STYLE} {instruction}"}
         ]}],
         "generationConfig": {"responseModalities": ["IMAGE"]},
     }

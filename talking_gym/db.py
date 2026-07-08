@@ -401,6 +401,26 @@ def vocab_progress_map(user_id: int, lang: str) -> dict:
         return {r["word"]: r["status"] for r in rows}
 
 
+def vocab_learned(user_id: int, lang: str, limit: int = 100) -> list[str]:
+    """Words this learner has marked known, most recent first."""
+    with _conn() as con:
+        rows = con.execute(
+            "SELECT word FROM vocab_progress WHERE user_id=? AND lang=? AND status='known' "
+            "ORDER BY updated_at DESC LIMIT ?",
+            (user_id, lang, limit),
+        ).fetchall()
+        return [r["word"] for r in rows]
+
+
+def vocab_learned_count(user_id: int, lang: str) -> int:
+    with _conn() as con:
+        row = con.execute(
+            "SELECT COUNT(*) AS n FROM vocab_progress WHERE user_id=? AND lang=? AND status='known'",
+            (user_id, lang),
+        ).fetchone()
+        return int(row["n"]) if row else 0
+
+
 def vocab_progress_set(user_id: int, lang: str, word: str, status: str) -> None:
     with _conn() as con:
         con.execute(
