@@ -772,6 +772,58 @@ async def api_vocab_learned(request: web.Request) -> web.Response:
     return web.json_response({"count": len(words), "words": words})
 
 
+def _word_match(word: str, heard: str) -> bool:
+    """Lenient match between a target word and what STT heard — tolerant of
+    trailing punctuation, articles the learner might add, and word spacing."""
+    norm = lambda s: "".join(c for c in s.lower() if c.isalnum() or c.isspace()).strip()
+    nw, nh = norm(word), norm(heard)
+    if not nw or not nh:
+        return False
+    if nw == nh or nw in nh.split() or nw in nh or nh in nw:
+        return True
+    return nw.replace(" ", "") in nh.replace(" ", "")
+
+
+async def api_vocab_speak(request: web.Request) -> web.Response:
+    """Speaking test: learner records themselves saying a word; STT checks it.
+    A match marks the word known. Not counted against the daily voice cap —
+    single-word practice should never be blocked."""
+    user = _user_from(request)
+    if user is None:
+        return _err(401, "unauthorized")
+    lang = request.query.get("lang", "").strip() or target_of(user)
+    if lang not in ("en", "ko", "zh", "ja"):
+        lang = target_of(user)
+    word = request.query.get("word", "").strip()[:40]
+    if not word:
+        return _err(400, "word_required")
+    if not (request.content_type or "").startswith("multipart/"):
+        return _err(400, "audio_required")
+    reader = await request.multipart()
+    field = await reader.next()
+    while field is not None and field.name != "audio":
+        field = await reader.next()
+    if field is None:
+        return _err(400, "audio_missing")
+    audio = bytes(await field.read(decode=False))
+    if len(audio) > MAX_AUDIO_BYTES:
+        return _err(413, "audio_too_large")
+    filename = field.filename or "word.webm"
+    mime = field.headers.get("Content-Type", "audio/webm")
+    try:
+        heard = await stt.transcribe(audio, filename=filename, mime=mime,
+                                     language=lang_meta(lang)["stt"])
+    except ProviderError:
+        return _err(502, "stt_failed")
+    except Exception:
+        log.exception("vocab speak STT failed")
+        return _err(502, "stt_failed")
+    match = _word_match(word, heard or "")
+    if match:
+        db.vocab_progress_set(user["user_id"], lang, word, "known")
+    return web.json_response({"ok": True, "heard": (heard or "").strip()[:80], "match": match})
+
+
 async def api_vocab_progress(request: web.Request) -> web.Response:
     user = _user_from(request)
     if user is None:
@@ -810,4 +862,5 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_get("/api/vocab/image", api_vocab_image)
     app.router.add_get("/api/vocab/audio", api_vocab_audio)
     app.router.add_get("/api/vocab/learned", api_vocab_learned)
+    app.router.add_post("/api/vocab/speak", api_vocab_speak)
     app.router.add_post("/api/vocab/progress", api_vocab_progress)
