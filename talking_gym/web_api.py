@@ -577,8 +577,9 @@ async def _scenario_word(user, lang: str, word: str):
     sc = _vocab_scenario(user)
     if sc is None:
         return None
-    loc = await coach.localize_scenario(sc, lang, native_of(user), cached_only=True)
-    for w in (loc.get("vocab") or []):
+    vocab = await coach.scenario_vocab(sc, lang, native_of(user), user["level"],
+                                       cached_only=True)
+    for w in vocab:
         if w.get("word") == word:
             return w
     return None
@@ -625,10 +626,11 @@ async def api_vocab_today(request: web.Request) -> web.Response:
     sc = _vocab_scenario(user)
     if sc is None:
         return web.json_response({"scenario_id": None, "title_mn": "", "words": []})
-    loc = await coach.localize_scenario(sc, lang, native_of(user))
+    loc = await coach.localize_scenario(sc, lang, native_of(user), cached_only=True)
+    vocab = await coach.scenario_vocab(sc, lang, native_of(user), user["level"])
     prog = db.vocab_progress_map(user["user_id"], lang)
     words = []
-    for w in (loc.get("vocab") or []):
+    for w in vocab:
         word = w["word"]
         asset = db.vocab_asset_get(lang, word)
         has_img = bool(asset and asset["data"])

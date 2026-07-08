@@ -139,11 +139,6 @@ Rewrite BOTH the opener and the model answer in natural, simple {lang}, suitable
 for a {level} learner. Keep the tutor's name {coach}. The opener greets the learner
 and asks one question.
 
-Also pick the 6 most useful vocabulary words a {level} learner needs for THIS
-conversation (drawn from the situation, opener and model answer) — high-frequency
-words they will actually say or hear here. Prefer concrete words that can be drawn
-as a simple picture; include an abstract one only if it is essential to the scenario.
-
 {pipeline}
 
 Return JSON:
@@ -155,10 +150,38 @@ Return JSON:
   "example_latin": "the model answer rendered as {roman}",
   "example_mn": "translation of the model answer into {native}",
   "title": "a short scenario title in {native}",
-  "setup": "the situation description in {native} (one sentence, addressed to the learner)",
+  "setup": "the situation description in {native} (one sentence, addressed to the learner)"
+}}"""
+
+
+# ---- daily vocabulary: the key words for a scenario's conversation ----
+# Separate from localization so it runs for EVERY language pair (English/Mongolian
+# learners skip localization entirely — but they still need their word set).
+
+VOCAB_SYSTEM = (
+    "You are a bilingual vocabulary assistant for Mongolian learners. All "
+    "native-language translations must be natural spoken Mongolian (or the "
+    "requested script), never word-for-word calques. Output ONE JSON object, "
+    "nothing else."
+)
+
+VOCAB_TEMPLATE = """A speaking-practice scenario for a Mongolian learner studying {lang}.
+Situation (in Mongolian): {setup_mn}
+The tutor's opening line (English): "{opener_en}"
+A model learner answer (English): "{example_en}"
+
+List the 6 most useful vocabulary words a {level} learner needs for THIS
+conversation — high-frequency words they will actually say or hear here. Prefer
+concrete words that can be shown as a simple picture; include an abstract word
+only if it is essential to the scenario.
+
+{pipeline}
+
+Return JSON:
+{{
   "vocab": [
     {{
-      "word": "the word/short phrase in {lang}",
+      "word": "the word or short phrase in {lang}",
       "latin": "the word rendered as {roman}",
       "mn": "its meaning in {native}",
       "ipa": "IPA pronunciation if {lang} is English, else an empty string",

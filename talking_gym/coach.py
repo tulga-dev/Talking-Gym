@@ -19,7 +19,8 @@ from .langs import (lang_meta, native_of, native_prompt, pipeline_for,
                     roman_for, target_of)
 from .prompts import (FINISH_HINT, LEARNER_BLOCK, LOCALIZE_SYSTEM,
                       LOCALIZE_TEMPLATE, PLACEMENT_FINISH, PLACEMENT_HINT,
-                      TURN_TEMPLATE, VOCAB_BLOCK, system_prompt)
+                      TURN_TEMPLATE, VOCAB_BLOCK, VOCAB_SYSTEM, VOCAB_TEMPLATE,
+                      system_prompt)
 from .providers import ProviderError
 from .providers import llm
 from .scenarios import Scenario, by_id, pick_scenario
@@ -220,7 +221,6 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
             "example": str(data.get("example", "")).strip() or authored["example"],
             "example_mn": str(data.get("example_mn", "")).strip() or authored["example_mn"],
             "example_latin": str(data.get("example_latin", "")).strip(),
-            "vocab": _clean_vocab(data.get("vocab")),
         }
     except Exception:
         log.warning("Scenario localization failed for %s/%s; using English", scenario.id, target_lang)
@@ -231,6 +231,59 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
     except Exception:
         log.exception("cache_set failed for %s", dbkey)
     return loc
+
+
+_vocab_cache: dict[tuple, list] = {}
+
+
+async def scenario_vocab(scenario: Scenario, target_lang: str, native: str = "mn",
+                         level: str = "beginner", cached_only: bool = False) -> list[dict]:
+    """The 6 key words for a scenario's conversation, in the target language with
+    native translations. Generated once per (scenario, target, native) and cached
+    (process + DB), shared by all learners. Runs for every language pair — unlike
+    localization, which English/Mongolian learners skip. cached_only never calls
+    the LLM (for latency-critical paths)."""
+    if scenario.id == "placement":
+        return []
+    key = (scenario.id, target_lang, native)
+    if key in _vocab_cache:
+        return _vocab_cache[key]
+    dbkey = f"vocab:v1:{scenario.id}:{target_lang}:{native}"
+    try:
+        stored = db.cache_get(dbkey)
+        if stored:
+            vocab = json.loads(stored)
+            _vocab_cache[key] = vocab
+            return vocab
+    except Exception:
+        log.exception("vocab cache_get failed for %s", dbkey)
+    if cached_only:
+        return []
+    meta = lang_meta(target_lang)
+    prompt = VOCAB_TEMPLATE.format(
+        lang=meta["name_en"],
+        roman=roman_for(target_lang, native) or "an empty string",
+        native=native_prompt(native),
+        pipeline=pipeline_for(target_lang, native),
+        setup_mn=scenario.setup_mn,
+        opener_en=scenario.opener_en,
+        example_en=scenario.example_en,
+        level=level,
+    )
+    try:
+        data = llm.parse_json_block(await llm.chat(VOCAB_SYSTEM, prompt, effort="low"))
+        vocab = _clean_vocab(data.get("vocab"))
+    except Exception:
+        log.warning("Vocab generation failed for %s/%s", scenario.id, target_lang)
+        return []
+    if not vocab:
+        return []
+    _vocab_cache[key] = vocab
+    try:
+        db.cache_set(dbkey, json.dumps(vocab, ensure_ascii=False))
+    except Exception:
+        log.exception("vocab cache_set failed for %s", dbkey)
+    return vocab
 
 
 async def handle_turn(user_id: int, transcript: str,
@@ -266,7 +319,8 @@ async def handle_turn(user_id: int, transcript: str,
         pass
     learner = LEARNER_BLOCK.format(profile=profile) if (profile and not is_placement) else ""
 
-    words = [w["word"] for w in (loc.get("vocab") or []) if w.get("word")]
+    vlist = await scenario_vocab(scenario, target_lang, native, user["level"], cached_only=True)
+    words = [w["word"] for w in vlist if w.get("word")]
     vocab = VOCAB_BLOCK.format(words=", ".join(words)) if (words and not is_placement) else ""
 
     prompt = TURN_TEMPLATE.format(
