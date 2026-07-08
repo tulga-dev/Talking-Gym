@@ -1818,7 +1818,7 @@
     addUser(j.transcript);
     if (j.not_an_answer) {
       // Mic test — Kitty just answers back; no score, no turn consumed.
-      addTeacher(j.reply_en, '', j.tts_b64, true, j.reply_latin);
+      addTeacher(j.reply_en, j.reply_mn || '', j.tts_b64, true, j.reply_latin);
       micState('idle');
       return;
     }
@@ -1827,7 +1827,7 @@
       session = null;
       releaseMic();   // lesson over — turn the tab's recording indicator off
       if (j.placed_level) toast(d().placedT + ': ' + lvlLabel(j.placed_level) + ' ✓');
-      if (j.reply_en) addTeacher(j.reply_en, '', j.tts_b64, true, j.reply_latin);
+      if (j.reply_en) addTeacher(j.reply_en, j.reply_mn || '', j.tts_b64, true, j.reply_latin);
       else if (j.tts_b64) playB64(j.tts_b64);
       $('mic-zone').hidden = true;
       $('done-card').hidden = false;
@@ -1838,7 +1838,7 @@
       refreshMe(); refreshNext();
     } else {
       setDots(j.turn_no + 1, j.max_turns);
-      addTeacher(j.reply_en, '', j.tts_b64, true, j.reply_latin);
+      addTeacher(j.reply_en, j.reply_mn || '', j.tts_b64, true, j.reply_latin);
       if (j.suggested_en) addExample(j.suggested_en, j.suggested_mn || '', j.suggested_latin);
       micState('idle');
       refreshMe();

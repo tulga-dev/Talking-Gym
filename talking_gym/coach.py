@@ -43,6 +43,7 @@ class CoachReply:
     done: bool
     suggested_en: str = ""          # model answer for the coach's next question
     suggested_mn: str = ""          # its Mongolian meaning
+    reply_mn: str = ""              # native translation of reply_en (beginner/intermediate aid)
     reply_latin: str = ""           # romanization for non-Latin target languages
     corrected_latin: str = ""
     suggested_latin: str = ""
@@ -358,6 +359,7 @@ async def handle_turn(user_id: int, transcript: str,
         done=bool(data.get("done", False)) or turn >= max_turns,
         suggested_en=str(data.get("suggested_en", "")).strip(),
         suggested_mn=str(data.get("suggested_mn", "")).strip(),
+        reply_mn=str(data.get("reply_mn", "")).strip(),
         reply_latin=str(data.get("reply_latin", "")).strip(),
         corrected_latin=str(data.get("corrected_latin", "")).strip(),
         suggested_latin=str(data.get("suggested_latin", "")).strip(),

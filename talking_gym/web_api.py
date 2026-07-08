@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 MAX_AUDIO_BYTES = 4 * 1024 * 1024  # ~4MB ≈ well over a minute of opus
 
 # Slower speech for lower levels — easier to follow, feels like a patient tutor.
-LEVEL_SPEED = {"beginner": 0.8, "intermediate": 0.9, "advanced": 1.0}
+LEVEL_SPEED = {"beginner": 0.75, "intermediate": 0.9, "advanced": 1.0}
 
 # Spoken scaffolds, in the target language, so the audio stays immersive:
 # (correction preface, next-question cue). {c}/{r} = corrected / reply text.
@@ -345,6 +345,7 @@ async def api_turn(request: web.Request) -> web.Response:
     out = {
         "transcript": transcript,
         "reply_en": reply.reply_en,
+        "reply_mn": reply.reply_mn,
         "corrected": reply.corrected,
         "feedback_mn": reply.feedback_mn,
         "score": reply.score,
