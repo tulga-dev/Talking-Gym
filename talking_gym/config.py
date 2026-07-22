@@ -50,6 +50,9 @@ class Config:
     openai_model: str = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
     openai_base_url: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
     openai_realtime_model: str = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime-1.5")
+    # Realtime voice for Kitty. marin = bright female (OpenAI's recommended
+    # female voice); other options: shimmer, coral, sage, cedar (male), ...
+    openai_realtime_voice: str = os.getenv("OPENAI_REALTIME_VOICE", "marin")
 
     # Google Gemini — alternate LLM backend learners can switch to mid-session.
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")

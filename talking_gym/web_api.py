@@ -584,7 +584,9 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
                                        max_msg_size=8 * 1024 * 1024) as oai:
                 await oai.send_json({"type": "session.update",
                                      "session": {"type": "realtime",
-                                                 "instructions": _rt_instructions(user)}})
+                                                 "instructions": _rt_instructions(user),
+                                                 "audio": {"output": {
+                                                     "voice": config.openai_realtime_voice}}}})
                 await oai.send_json({"type": "response.create"})   # Kitty greets first
 
                 async def up():
