@@ -132,6 +132,8 @@ def _me_payload(user) -> dict:
         "voice_seconds_cap": config.daily_voice_seconds_cap,
         "words_learned": db.vocab_learned_count(user["user_id"], target_of(user)),
         "founder": user["user_id"] in config.founder_ids,
+        "rt_seconds_today": db.rt_seconds_today(user["user_id"]),
+        "rt_seconds_cap": config.rt_daily_seconds_cap,
     }
 
 
@@ -587,15 +589,12 @@ def _rt_instructions(user) -> str:
     )
 
 
-RT_MAX_CALL_SECONDS = 600   # hard per-call limit (realtime minutes are billed)
-
-
 async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Response:
     """Live voice call with Kitty (beta, all signed-in users). Relays the
     browser's WebSocket to OpenAI Realtime (gpt-realtime-1.5) — mic audio up,
     spoken replies down — with the coach persona injected server-side.
-    Call time counts against the daily voice cap; each call is capped at
-    RT_MAX_CALL_SECONDS."""
+    Everyone (founders included) gets rt_daily_seconds_cap of call time per
+    day; a call ends when the day's remaining budget runs out."""
     import time as _time
 
     import aiohttp as _aiohttp
@@ -606,8 +605,8 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
     if not config.openai_api_key:
         return _err(501, "openai_not_configured")
     uid = user["user_id"]
-    if (uid not in config.founder_ids
-            and db.voice_seconds_today(uid) >= config.daily_voice_seconds_cap):
+    remaining = config.rt_daily_seconds_cap - db.rt_seconds_today(uid)
+    if remaining <= 5:
         return _err(429, "voice_cap")
 
     ws = web.WebSocketResponse(heartbeat=20)
@@ -673,14 +672,14 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
                 done, pending = await asyncio.wait(
                     [asyncio.create_task(up()), asyncio.create_task(down())],
                     return_when=asyncio.FIRST_COMPLETED,
-                    timeout=RT_MAX_CALL_SECONDS)
+                    timeout=remaining)   # call ends when today's budget is spent
                 for t in pending:
                     t.cancel()
     except Exception:
         log.exception("rt relay failed")
     finally:
         try:
-            db.add_voice_seconds(uid, max(1, int(_time.time() - t_start)))
+            db.add_rt_seconds(uid, max(1, int(_time.time() - t_start)))
         except Exception:
             pass   # t_start unset when the OpenAI connect itself failed
         if call_log:

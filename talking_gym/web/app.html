@@ -1770,7 +1770,7 @@
   }
   function openLive(){
     if (lvOn) return;
-    if (me && !me.founder && me.voice_seconds_today >= me.voice_seconds_cap){ toast(d().tstCap); return; }
+    if (me && me.rt_seconds_cap && me.rt_seconds_today >= me.rt_seconds_cap - 5){ toast(d().tstCap); return; }
     unlockVoice(); try { voiceEl.pause(); } catch(e){}
     $('live-overlay').hidden = false;
     $('lv-chat').innerHTML = ''; lvKittyEl = null; lvUserEl = null;

@@ -56,6 +56,9 @@ class Config:
     # Transcribes the learner's speech so the call shows both sides as text.
     openai_transcribe_model: str = os.getenv("OPENAI_TRANSCRIBE_MODEL",
                                              "gpt-4o-mini-transcribe")
+    # Daily live-call budget per user, seconds. Applies to EVERYONE (realtime
+    # minutes are billed; no founder exemption).
+    rt_daily_seconds_cap: int = int(os.getenv("RT_DAILY_SECONDS_CAP", "300"))
 
     # Google Gemini — alternate LLM backend learners can switch to mid-session.
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")

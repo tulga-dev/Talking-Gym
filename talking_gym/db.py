@@ -100,6 +100,12 @@ _SQLITE_SCHEMA = [
         updated_at  TEXT,
         PRIMARY KEY (user_id, lang, word)
     )""",
+    """CREATE TABLE IF NOT EXISTS rt_usage (
+        user_id  INTEGER,
+        day      TEXT,
+        seconds  INTEGER DEFAULT 0,
+        PRIMARY KEY (user_id, day)
+    )""",
 ]
 
 # Telegram user/chat ids exceed 32-bit — BIGINT is required on Postgres.
@@ -184,6 +190,12 @@ _PG_SCHEMA = [
         reps        INTEGER DEFAULT 0,
         updated_at  TEXT,
         PRIMARY KEY (user_id, lang, word)
+    )""",
+    """CREATE TABLE IF NOT EXISTS rt_usage (
+        user_id  BIGINT,
+        day      TEXT,
+        seconds  INTEGER DEFAULT 0,
+        PRIMARY KEY (user_id, day)
     )""",
 ]
 
@@ -653,6 +665,37 @@ def voice_seconds_today(user_id: int) -> int:
             "SELECT seconds FROM voice_usage WHERE user_id=? AND day=?", (user_id, day)
         ).fetchone()
         return row["seconds"] if row else 0
+
+
+# ---------- live-call usage (separate daily budget; applies to everyone) ----------
+
+def rt_seconds_today(user_id: int) -> int:
+    day = _today().isoformat()
+    with _conn() as con:
+        row = con.execute(
+            "SELECT seconds FROM rt_usage WHERE user_id=? AND day=?", (user_id, day)
+        ).fetchone()
+        return row["seconds"] if row else 0
+
+
+def add_rt_seconds(user_id: int, seconds: int) -> int:
+    day = _today().isoformat()
+    with _conn() as con:
+        row = con.execute(
+            "SELECT seconds FROM rt_usage WHERE user_id=? AND day=?", (user_id, day)
+        ).fetchone()
+        if row:
+            total = row["seconds"] + seconds
+            con.execute(
+                "UPDATE rt_usage SET seconds=? WHERE user_id=? AND day=?", (total, user_id, day)
+            )
+        else:
+            total = seconds
+            con.execute(
+                "INSERT INTO rt_usage (user_id, day, seconds) VALUES (?,?,?)",
+                (user_id, day, seconds),
+            )
+        return total
 
 
 def add_xp(user_id: int, amount: int) -> int:

@@ -1,7 +1,7 @@
 /* Talking Gym PWA — app shell cache.
    HTML is network-first (UI updates propagate on next online load);
    static assets are cache-first. Offline falls back to the cached shell. */
-const CACHE = "tg-app-v20";
+const CACHE = "tg-app-v21";
 const ASSETS = ["/app", "/app/manifest.webmanifest", "/app/icon-192.png", "/app/icon-512.png"];
 
 self.addEventListener("install", (e) => {
