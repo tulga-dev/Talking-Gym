@@ -54,6 +54,7 @@ class CoachReply:
     best_streak: int | None = None
     placed_level: str = ""          # set when the placement session completes
     not_an_answer: bool = False     # mic test / meta comment — turn not consumed
+    retry: bool = False             # wrong/garbled answer — same question again, turn not consumed
 
 
 # ---------- gamification (Duolingo-style) ----------
@@ -369,6 +370,8 @@ async def handle_turn(user_id: int, transcript: str,
         turn_no=turn,
         max_turns=max_turns,
         not_an_answer=bool(data.get("not_an_answer", False)),
+        # Never retry on the final turn — accept their best attempt and finish.
+        retry=bool(data.get("retry", False)) and turn < max_turns,
     )
 
     if reply.not_an_answer:
@@ -380,6 +383,17 @@ async def handle_turn(user_id: int, transcript: str,
         reply.feedback_mn = ""
         reply.corrected_latin = ""
         db.record_note(user_id, f'Learner (not an answer): "{transcript}" / Coach: "{reply.reply_en}"')
+        return reply
+
+    if reply.retry:
+        # Second chance on the same question: show the correction but don't
+        # consume a turn; mark the history so the model won't retry twice.
+        reply.done = False
+        db.record_note(user_id, f'Learner: "{transcript}" / Coach (RETRY, same '
+                                f'question): "{reply.reply_en}"')
+        if reply.suggested_en:
+            db.set_last_example(user_id, reply.suggested_en)
+        reply.xp_earned = 0
         return reply
 
     line = f'Learner: "{transcript}" / Coach: "{reply.reply_en}"'

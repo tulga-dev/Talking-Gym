@@ -48,18 +48,34 @@ def _speech_alike(a: str, b: str) -> bool:
 def _snap_to_example(transcript: str, example: str) -> str:
     """Learners are told to read the example aloud — when STT mishears a word
     or two of accented speech, the coach ends up 'correcting' its own example.
-    If the transcript is clearly the example, trust the known text instead."""
+    If the transcript is clearly the example — or clearly one part of a
+    multi-sentence example (learners often repeat just one piece, e.g.
+    "and a cookie, for here") — trust the known text instead."""
     if not example or not transcript:
         return transcript
     norm = lambda s: " ".join(
         "".join(c.lower() if (c.isalnum() or c.isspace()) else " " for c in s).split()
     )
-    a, b = norm(transcript), norm(example)
-    if not a or not b:
+    a = norm(transcript)
+    if not a:
         return transcript
-    if difflib.SequenceMatcher(None, a, b).ratio() >= 0.75:
-        return example
-    return transcript
+    # Candidates: the whole example, each sentence, and each run of
+    # consecutive sentences (covers partial repeats).
+    import re as _re
+    sents = [s.strip() for s in _re.split(r"[.!?]+", example) if s.strip()]
+    candidates = [example]
+    for i in range(len(sents)):
+        for j in range(i, len(sents)):
+            candidates.append(". ".join(sents[i:j + 1]))
+    best, best_ratio = transcript, 0.0
+    for cand in candidates:
+        b = norm(cand)
+        if not b:
+            continue
+        r = difflib.SequenceMatcher(None, a, b).ratio()
+        if r > best_ratio:
+            best, best_ratio = cand, r
+    return best if best_ratio >= 0.72 else transcript
 
 
 def _user_from(request: web.Request):
@@ -364,6 +380,7 @@ async def api_turn(request: web.Request) -> web.Response:
         "best_streak": reply.best_streak,
         "placed_level": reply.placed_level,
         "not_an_answer": reply.not_an_answer,
+        "retry": reply.retry,
     }
 
     if spoken and config.tts_enabled:

@@ -2028,6 +2028,14 @@
       return;
     }
     addFeedback(j);
+    if (j.retry) {
+      // Second chance: show the correction, Kitty re-asks, same turn.
+      addTeacher(j.reply_en, j.reply_mn || '', j.tts_b64, true, j.reply_latin);
+      if (j.suggested_en) addExample(j.suggested_en, j.suggested_mn || '', j.suggested_latin);
+      micState('idle');
+      refreshMe();
+      return;
+    }
     if (j.done) {
       session = null;
       releaseMic();   // lesson over — turn the tab's recording indicator off
