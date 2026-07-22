@@ -69,9 +69,11 @@ class Config:
 
     daily_voice_seconds_cap: int = int(os.getenv("DAILY_VOICE_SECONDS_CAP", "1500"))
     # Comma-separated user ids exempt from the voice cap (founder/test accounts).
+    # The founder's Telegram id and email-login account id are baked in;
+    # FOUNDER_IDS extends the set.
     founder_ids: frozenset = field(default_factory=lambda: frozenset(
         int(x) for x in os.getenv("FOUNDER_IDS", "").split(",") if x.strip().isdigit()
-    ))
+    ) | {4688200350224636253, 8072857934932995731})
     turns_per_session: int = int(os.getenv("TURNS_PER_SESSION", "5"))
     default_reminder_hour: int = int(os.getenv("DEFAULT_REMINDER_HOUR", "19"))
     tz_name: str = os.getenv("TIMEZONE", "Asia/Ulaanbaatar")
