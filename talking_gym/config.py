@@ -35,6 +35,8 @@ class Config:
 
     llm_base_url: str = os.getenv("LLM_BASE_URL", "https://api.x.ai/v1")
     llm_model: str = os.getenv("LLM_MODEL", "grok-4.3")
+    # Alternate Grok tier, selectable per turn (A/B and the in-app switcher).
+    llm_model_45: str = os.getenv("LLM_MODEL_45", "grok-4.5")
 
     stt_url: str = os.getenv("STT_URL", "https://api.x.ai/v1/stt")
     stt_model: str = os.getenv("STT_MODEL", "grok-stt")

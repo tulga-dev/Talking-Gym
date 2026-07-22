@@ -25,11 +25,12 @@ async def chat(system: str, user: str, effort: str | None = None,
     localization) can afford real reasoning for better output quality.
 
     `model` selects the backend: "gemini" routes to Google Gemini (falling back
-    to Grok if Gemini isn't configured); anything else uses xAI Grok."""
+    to Grok if Gemini isn't configured); "grok45" uses the newer grok-4.5;
+    anything else uses the default xAI Grok model."""
     if model == "gemini" and gemini.enabled():
         return await gemini.chat(system, user, effort=effort)
     payload = {
-        "model": config.llm_model,
+        "model": config.llm_model_45 if model == "grok45" else config.llm_model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},

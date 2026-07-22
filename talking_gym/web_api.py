@@ -284,7 +284,7 @@ async def api_turn(request: web.Request) -> web.Response:
     # Learner's LLM pick rides in the query string so it works uniformly for the
     # multipart (voice) and JSON (text) bodies. Allowlisted to known backends.
     model = request.query.get("model", "grok").strip().lower()
-    if model not in ("grok", "gemini"):
+    if model not in ("grok", "grok45", "gemini"):
         model = "grok"
 
     transcript = ""
