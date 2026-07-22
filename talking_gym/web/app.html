@@ -457,8 +457,9 @@
   <div id="reg-extra">
     <label data-i18n="obName">Таны нэр</label>
     <input id="ob-name" maxlength="40" autocomplete="name">
-    <label data-i18n="obLang">Ямар хэл сурах вэ?</label>
-    <div class="lang-pick" id="ob-langs">
+    <!-- English-only for launch; re-enable the picker when ko/zh/ja content is ready -->
+    <label data-i18n="obLang" style="display:none">Ямар хэл сурах вэ?</label>
+    <div class="lang-pick" id="ob-langs" style="display:none">
       <button type="button" data-tlang="en" class="on">🇬🇧 English</button>
       <button type="button" data-tlang="ko">🇰🇷 한국어</button>
       <button type="button" data-tlang="zh">🇨🇳 中文</button>
@@ -625,7 +626,7 @@
       <button class="start-btn" id="btn-share"><svg class="i" style="width:17px;height:17px"><use href="#i-share"/></svg><span data-i18n="shareB">Амжилтаа хуваалцах</span></button>
     </div>
     <div class="acard">
-      <div class="setrow" id="row-tlang"><svg class="i"><use href="#i-msg"/></svg><span class="lbl2" data-i18n="sStudy">Судлах хэл</span><span class="val" id="tlang-val"></span></div>
+      <div class="setrow" id="row-tlang" style="display:none"><svg class="i"><use href="#i-msg"/></svg><span class="lbl2" data-i18n="sStudy">Судлах хэл</span><span class="val" id="tlang-val"></span></div>
       <div class="setrow" id="row-rem"><svg class="i"><use href="#i-clock"/></svg><span class="lbl2" data-i18n="sRem">Сануулга</span><span class="val" id="rem-val">—</span></div>
       <div class="setrow" id="row-lang"><svg class="i"><use href="#i-globe"/></svg><span class="lbl2" data-i18n="sLang">Апп-ын хэл</span><span class="val" id="lang-row-val"></span></div>
       <div class="setrow" id="row-logout"><svg class="i"><use href="#i-out"/></svg><span class="lbl2" data-i18n="sOut">Гарах</span><span class="val">→</span></div>
