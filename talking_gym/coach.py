@@ -210,9 +210,10 @@ async def localize_scenario(scenario: Scenario, target_lang: str, native: str = 
         level="beginner",
     )
     try:
-        # Localizations are generated once and cached — spend real reasoning
-        # here for natural phrasing; latency doesn't matter on this path.
-        data = llm.parse_json_block(await llm.chat(LOCALIZE_SYSTEM, prompt, effort="low"))
+        # Localizations are generated once and cached — use the stronger
+        # grok-4.5 with real reasoning; latency doesn't matter on this path.
+        data = llm.parse_json_block(await llm.chat(LOCALIZE_SYSTEM, prompt,
+                                                   effort="low", model="grok45"))
         loc = {
             "title": str(data.get("title", "")).strip() or authored["title"],
             "setup": str(data.get("setup", "")).strip() or authored["setup"],
@@ -272,7 +273,9 @@ async def scenario_vocab(scenario: Scenario, target_lang: str, native: str = "mn
         level=level,
     )
     try:
-        data = llm.parse_json_block(await llm.chat(VOCAB_SYSTEM, prompt, effort="low"))
+        # One-time cached generation — stronger model, latency irrelevant.
+        data = llm.parse_json_block(await llm.chat(VOCAB_SYSTEM, prompt,
+                                                   effort="low", model="grok45"))
         vocab = _clean_vocab(data.get("vocab"))
     except Exception:
         log.warning("Vocab generation failed for %s/%s", scenario.id, target_lang)
