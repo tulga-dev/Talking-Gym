@@ -546,8 +546,7 @@ async def api_admin_rt_test(request: web.Request) -> web.Response:
         return _err(501, "openai_not_configured")
     model = request.query.get("rtmodel", config.openai_realtime_model)
     url = f"wss://api.openai.com/v1/realtime?model={model}"
-    headers = {"Authorization": f"Bearer {config.openai_api_key}",
-               "OpenAI-Beta": "realtime=v1"}
+    headers = {"Authorization": f"Bearer {config.openai_api_key}"}
     events: dict = {}
     text_parts: list = []
     audio_b64_len = 0
@@ -560,7 +559,7 @@ async def api_admin_rt_test(request: web.Request) -> web.Response:
                 await ws.send_json({
                     "type": "response.create",
                     "response": {
-                        "modalities": ["audio", "text"],
+                        # GA API: session defaults (audio+text) apply.
                         "instructions": ("Say exactly one short friendly sentence "
                                          "greeting an English learner named Bat."),
                     },
