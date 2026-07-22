@@ -41,17 +41,25 @@ async def chat(system: str, user: str, effort: str | None = None,
     headers = {"Authorization": f"Bearer {config.xai_api_key}"}
     url = f"{config.llm_base_url.rstrip('/')}/chat/completions"
     resp = None
-    for attempt in (1, 2):
+    for attempt in (1, 2, 3):
         try:
             resp = await _client.post(url, json=payload, headers=headers)
         except httpx.TransportError as e:
             # One retry on connection resets/timeouts — common transient blips.
-            if attempt == 2:
+            if attempt == 3:
                 raise ProviderError(f"LLM transport error: {e}")
             log.warning("LLM transport error, retrying: %s", e)
             continue
         if resp.status_code in (429, 500, 502, 503, 504) and attempt == 1:
             log.warning("LLM HTTP %s, retrying once", resp.status_code)
+            continue
+        if (resp.status_code == 400 and "reasoning_effort" in payload
+                and "reasoning" in resp.text.lower()):
+            # Some models (e.g. grok-4.5) reject the reasoning_effort param —
+            # drop it and retry so new models work without a code change.
+            log.warning("LLM rejected reasoning_effort for %s; retrying without",
+                        payload["model"])
+            payload.pop("reasoning_effort")
             continue
         break
     if resp.status_code != 200:
