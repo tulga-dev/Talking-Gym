@@ -587,17 +587,28 @@ def _rt_instructions(user) -> str:
     )
 
 
+RT_MAX_CALL_SECONDS = 600   # hard per-call limit (realtime minutes are billed)
+
+
 async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Response:
-    """Founder-only prototype: live voice call with Kitty. Relays the browser's
-    WebSocket to OpenAI Realtime (gpt-realtime-1.5) — mic audio up, spoken
-    replies down — with the coach persona injected server-side."""
+    """Live voice call with Kitty (beta, all signed-in users). Relays the
+    browser's WebSocket to OpenAI Realtime (gpt-realtime-1.5) — mic audio up,
+    spoken replies down — with the coach persona injected server-side.
+    Call time counts against the daily voice cap; each call is capped at
+    RT_MAX_CALL_SECONDS."""
+    import time as _time
+
     import aiohttp as _aiohttp
 
     user = _user_media(request)
-    if user is None or user["user_id"] not in config.founder_ids:
+    if user is None:
         return _err(403, "forbidden")
     if not config.openai_api_key:
         return _err(501, "openai_not_configured")
+    uid = user["user_id"]
+    if (uid not in config.founder_ids
+            and db.voice_seconds_today(uid) >= config.daily_voice_seconds_cap):
+        return _err(429, "voice_cap")
 
     ws = web.WebSocketResponse(heartbeat=20)
     await ws.prepare(request)
@@ -658,17 +669,23 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
                         if et in _RT_SERVER_EVENTS:
                             await ws.send_str(msg.data)
 
+                t_start = _time.time()
                 done, pending = await asyncio.wait(
                     [asyncio.create_task(up()), asyncio.create_task(down())],
-                    return_when=asyncio.FIRST_COMPLETED)
+                    return_when=asyncio.FIRST_COMPLETED,
+                    timeout=RT_MAX_CALL_SECONDS)
                 for t in pending:
                     t.cancel()
     except Exception:
         log.exception("rt relay failed")
     finally:
+        try:
+            db.add_voice_seconds(uid, max(1, int(_time.time() - t_start)))
+        except Exception:
+            pass   # t_start unset when the OpenAI connect itself failed
         if call_log:
             try:
-                db.cache_set(f"rtlog:{user['user_id']}",
+                db.cache_set(f"rtlog:{uid}",
                              json.dumps(call_log[-60:], ensure_ascii=False))
             except Exception:
                 log.exception("rt log save failed")

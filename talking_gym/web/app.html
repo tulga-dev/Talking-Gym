@@ -526,11 +526,11 @@
       <svg class="i pcard-go"><use href="#i-arrow"/></svg>
     </button>
 
-    <button class="pcard" id="live-card" hidden>
+    <button class="pcard" id="live-card">
       <div class="pcard-ic"><svg class="i"><use href="#i-sound"/></svg></div>
       <div class="pcard-body">
-        <div class="pcard-t">Live call (beta)</div>
-        <div class="pcard-s">Realtime voice with Kitty — founder test</div>
+        <div class="pcard-t" data-i18n="lvT">Шууд дуудлага (beta)</div>
+        <div class="pcard-s" data-i18n="lvS">Киттитэй бодит цагийн яриа</div>
       </div>
       <svg class="i pcard-go"><use href="#i-arrow"/></svg>
     </button>
@@ -806,6 +806,7 @@
       todayT:"Өнөөдрийн дасгал", vocNew:"шинэ үг", lbWords:"Үг",
       vocSpk:"Дуудлагын сорил — үгээ хэлээрэй", vocSkip:"Алгасах", vocSListen:"Сонсож байна…",
       vocSGood:"Сайн байна!", vocSBad:"Дахин оролдоорой", vocListen:"Зөвийг сонсох",
+      lvT:"Шууд дуудлага (beta)", lvS:"Киттитэй бодит цагийн яриа",
       callConnecting:"Холбогдож байна…", callSpeaking:"Китти ярьж байна…", callListening:"Таны ээлж — яриарай",
       callThinking:"Китти бодож байна…", callSend:"Илгээх",
       planLbl:"Таны багц", redeemB:"Идэвхжүүлэх",
@@ -881,6 +882,7 @@
       todayT:"Today's workout", vocNew:"new words", lbWords:"Words",
       vocSpk:"Speaking test — say the word", vocSkip:"Skip", vocSListen:"Listening…",
       vocSGood:"Nice!", vocSBad:"Try again", vocListen:"Hear the word", lvEnd:"End call",
+      lvT:"Live call (beta)", lvS:"Realtime voice with Kitty",
       callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
       callThinking:"Kitty is thinking…", callSend:"Send",
       planLbl:"Your plan", redeemB:"Activate",
@@ -964,6 +966,7 @@
     todayT:"ᠡᠳᠦᠷ ᠦᠨ ᠳᠠᠰᠬᠠᠯ", vocNew:"ᠰᠢᠨ᠎ᠡ ᠦᠭᠡ", lbWords:"ᠦᠭᠡ",
     vocSpk:"ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ ᠶᠢᠨ ᠰᠣᠷᠢᠯ — ᠦᠭᠡ ᠪᠡᠨ ᠬᠡᠯᠡᠭᠡᠷᠡᠢ", vocSkip:"ᠠᠯᠠᠭᠠᠰᠠᠬᠤ", vocSListen:"ᠰᠣᠨᠣᠰᠴᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     vocSGood:"ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ!", vocSBad:"ᠳᠠᠬᠢᠨ ᠣᠷᠣᠯᠳᠣᠭᠠᠷᠠᠢ", vocListen:"ᠰᠣᠨᠣᠰᠬᠤ",
+    lvT:"ᠰᠢᠭᠤᠳ ᠳᠠᠭᠤᠳᠠᠯᠭ᠎ᠠ (beta)", lvS:"Kitty ᠲᠡᠢ ᠰᠢᠭᠤᠳ ᠶᠠᠷᠢᠯᠴᠠᠬᠤ",
     callConnecting:"ᠬᠣᠯᠪᠣᠭᠳᠠᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSpeaking:"Kitty ᠶᠠᠷᠢᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…",
     callListening:"ᠲᠠᠨ ᠤ ᠡᠭᠡᠯᠵᠢ — ᠶᠠᠷᠢᠭᠠᠷᠠᠢ", callThinking:"Kitty ᠪᠣᠳᠣᠵᠤ ᠪᠠᠶᠢᠨ᠎ᠠ…", callSend:"ᠢᠯᠡᠭᠡᠬᠦ",
     planLbl:"ᠲᠠᠨ ᠤ ᠪᠠᠭᠴᠠ", redeemB:"ᠢᠳᠡᠪᠬᠢᠵᠢᠭᠦᠯᠬᠦ",
@@ -1228,7 +1231,6 @@
     $('st-voice').textContent = me.voice_seconds_today + 's';
     $('st-words').textContent = me.words_learned || 0;
     $('p-words').textContent = me.words_learned || 0;
-    $('live-card').hidden = !me.founder;
     var span = (me.rank_next_xp || (me.xp + 1)) - me.rank_cur_xp;
     var got = me.xp - me.rank_cur_xp;
     $('rank-fill').style.width = me.rank_next_xp ? Math.min(100, got * 100 / span) + '%' : '100%';
@@ -1768,6 +1770,7 @@
   }
   function openLive(){
     if (lvOn) return;
+    if (me && !me.founder && me.voice_seconds_today >= me.voice_seconds_cap){ toast(d().tstCap); return; }
     unlockVoice(); try { voiceEl.pause(); } catch(e){}
     $('live-overlay').hidden = false;
     $('lv-chat').innerHTML = ''; lvKittyEl = null; lvUserEl = null;
