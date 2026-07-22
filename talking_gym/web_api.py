@@ -552,17 +552,21 @@ def _rt_instructions(user) -> str:
     # names badly (observed: "Battulga" spoken as an English profanity).
     return (
         f"You are Kitty, a warm, patient English speaking coach on a live voice "
-        f"call with a Mongolian learner (level: {user['level']}). Speak "
-        f"ONLY simple English: short sentences of 3-8 words, everyday words, ONE "
-        f"question at a time. Speak SLOWLY and very CLEARLY, leaving a small "
-        f"pause between sentences, so a beginner can follow every word. React "
-        f"warmly to what "
-        f"they say; if they make a mistake, gently say the correct sentence, "
-        f"then ask your next simple question. If they are badly stuck, say the "
-        f"Mongolian translation of your question once, then continue in English. "
-        f"Never lecture; keep every reply under 3 short sentences. Do not use "
-        f"the learner's name. Start by greeting them warmly and asking one "
-        f"easy question."
+        f"call with a Mongolian learner (level: {user['level']}). The learner "
+        f"speaks English WITH A STRONG MONGOLIAN ACCENT — expect unusual "
+        f"pronunciation and interpret everything they say as attempted simple "
+        f"English. NEVER switch to another language, even if their speech is "
+        f"unclear or sounds like a different language; if you truly cannot "
+        f"understand, warmly ask them to say it again, slowly. Speak ONLY "
+        f"simple English: short sentences of 3-8 words, everyday words, ONE "
+        f"question at a time. Speak SLOWLY, clearly, with a pause between "
+        f"sentences, so a beginner follows every word. React warmly; if they "
+        f"make a mistake, gently say the correct sentence, then ask your next "
+        f"simple question. If they are badly stuck, say the Mongolian "
+        f"translation of your question once, then continue in English. Never "
+        f"lecture; keep every reply under 3 short sentences. Do not use the "
+        f"learner's name. Start by greeting them warmly and asking one easy "
+        f"question."
     )
 
 
@@ -582,17 +586,28 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
     await ws.prepare(request)
     url = f"wss://api.openai.com/v1/realtime?model={config.openai_realtime_model}"
     headers = {"Authorization": f"Bearer {config.openai_api_key}"}
+    call_log: list = []   # both sides' transcripts, saved on hangup for debugging
     try:
         async with _aiohttp.ClientSession() as sess:
             async with sess.ws_connect(url, headers=headers, heartbeat=20,
                                        max_msg_size=8 * 1024 * 1024) as oai:
+                target = target_of(user)
                 await oai.send_json({"type": "session.update", "session": {
                     "type": "realtime",
                     "instructions": _rt_instructions(user),
                     "audio": {
                         "input": {"transcription": {
-                            "model": config.openai_transcribe_model}},
-                        "output": {"voice": config.openai_realtime_voice},
+                            "model": config.openai_transcribe_model,
+                            # Pin the language: without it, accented English
+                            # gets auto-detected as random languages.
+                            "language": target,
+                            "prompt": ("Simple English spoken slowly by a "
+                                       "Mongolian beginner with a strong "
+                                       "accent. Short everyday sentences."),
+                        }},
+                        "output": {"voice": config.openai_realtime_voice,
+                                   # Slower speech for learners.
+                                   "speed": 0.85},
                     },
                 }})
                 await oai.send_json({"type": "response.create"})   # Kitty greets first
@@ -613,9 +628,16 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
                         if msg.type != _aiohttp.WSMsgType.TEXT:
                             break
                         try:
-                            et = json.loads(msg.data).get("type")
+                            ev = json.loads(msg.data)
                         except ValueError:
                             continue
+                        et = ev.get("type")
+                        if et == "conversation.item.input_audio_transcription.completed":
+                            call_log.append("Learner: " + str(ev.get("transcript", ""))[:300])
+                        elif et == "response.output_audio_transcript.done":
+                            call_log.append("Kitty: " + str(ev.get("transcript", ""))[:300])
+                        elif et == "error":
+                            call_log.append("ERROR: " + str(ev.get("error", ""))[:300])
                         if et in _RT_SERVER_EVENTS:
                             await ws.send_str(msg.data)
 
@@ -627,9 +649,24 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
     except Exception:
         log.exception("rt relay failed")
     finally:
+        if call_log:
+            try:
+                db.cache_set(f"rtlog:{user['user_id']}",
+                             json.dumps(call_log[-60:], ensure_ascii=False))
+            except Exception:
+                log.exception("rt log save failed")
         if not ws.closed:
             await ws.close()
     return ws
+
+
+async def api_admin_rt_last(request: web.Request) -> web.Response:
+    """Founder-only: transcript of the caller's most recent live call."""
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    raw = db.cache_get(f"rtlog:{user['user_id']}")
+    return web.json_response({"lines": json.loads(raw) if raw else []})
 
 
 async def api_admin_rt_test(request: web.Request) -> web.Response:
@@ -1031,6 +1068,7 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_post("/api/admin/warm", api_admin_warm)
     app.router.add_get("/api/admin/warm", api_admin_warm)
     app.router.add_get("/api/rt/ws", api_rt_ws)
+    app.router.add_get("/api/admin/rt-last", api_admin_rt_last)
     app.router.add_get("/api/admin/rt-test", api_admin_rt_test)
     app.router.add_get("/api/admin/accounts", api_admin_accounts)
     app.router.add_post("/api/admin/set-password", api_admin_set_password)

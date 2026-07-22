@@ -1740,7 +1740,10 @@
     var buf = lvCtx.createBuffer(1, f.length, 24000);
     buf.getChannelData(0).set(f);
     var s = lvCtx.createBufferSource(); s.buffer = buf; s.connect(lvCtx.destination);
-    var t = Math.max(lvCtx.currentTime + 0.05, lvPlayT);
+    // Jitter buffer: keep ~150ms of lead; if the network fell behind, restart
+    // the cursor instead of stacking chunks on top of each other.
+    if (lvPlayT < lvCtx.currentTime + 0.02) lvPlayT = lvCtx.currentTime + 0.15;
+    var t = lvPlayT;
     s.start(t); lvPlayT = t + buf.duration;
     lvSources.push(s);
     if (lvSources.length > 60) lvSources.splice(0, 20);
@@ -1860,7 +1863,7 @@
       return Promise.resolve(micStream);
     }
     releaseMic();  // dead or muted track — reopen the device fresh
-    return navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+    return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).then(function(s){
       micStream = s;
       return s;
     });
