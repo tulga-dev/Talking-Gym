@@ -581,7 +581,8 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
             async with sess.ws_connect(url, headers=headers, heartbeat=20,
                                        max_msg_size=8 * 1024 * 1024) as oai:
                 await oai.send_json({"type": "session.update",
-                                     "session": {"instructions": _rt_instructions(user)}})
+                                     "session": {"type": "realtime",
+                                                 "instructions": _rt_instructions(user)}})
                 await oai.send_json({"type": "response.create"})   # Kitty greets first
 
                 async def up():
