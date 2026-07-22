@@ -7,6 +7,7 @@ for focus testing; replace with phone/OTP auth before public launch.
 import asyncio
 import base64
 import difflib
+import json
 import logging
 import os
 import secrets
@@ -114,6 +115,7 @@ def _me_payload(user) -> dict:
         "voice_seconds_today": db.voice_seconds_today(user["user_id"]),
         "voice_seconds_cap": config.daily_voice_seconds_cap,
         "words_learned": db.vocab_learned_count(user["user_id"], target_of(user)),
+        "founder": user["user_id"] in config.founder_ids,
     }
 
 
@@ -530,6 +532,93 @@ async def api_admin_warm(request: web.Request) -> web.Response:
     return web.json_response(_warm_state)
 
 
+# Client->OpenAI events the relay forwards verbatim (audio + turn control).
+_RT_CLIENT_EVENTS = {"input_audio_buffer.append", "input_audio_buffer.commit",
+                     "input_audio_buffer.clear", "response.cancel", "response.create"}
+# OpenAI->client events worth relaying (audio out, captions, barge-in cues).
+_RT_SERVER_EVENTS = {"session.created", "session.updated",
+                     "input_audio_buffer.speech_started",
+                     "input_audio_buffer.speech_stopped",
+                     "response.created", "response.done", "error",
+                     "response.output_audio.delta", "response.output_audio.done",
+                     "response.output_audio_transcript.delta",
+                     "response.output_audio_transcript.done"}
+
+
+def _rt_instructions(user) -> str:
+    name = (user["name"] or "my friend").split()[0]
+    return (
+        f"You are Kitty, a warm, patient English speaking coach on a live voice "
+        f"call with {name}, a Mongolian learner (level: {user['level']}). Speak "
+        f"ONLY simple English: short sentences of 3-8 words, everyday words, ONE "
+        f"question at a time. Speak slowly and clearly. React warmly to what "
+        f"they say; if they make a mistake, gently say the correct sentence, "
+        f"then ask your next simple question. If they are badly stuck, say the "
+        f"Mongolian translation of your question once, then continue in English. "
+        f"Never lecture; keep every reply under 3 short sentences. Start by "
+        f"greeting them by name and asking one easy question."
+    )
+
+
+async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Response:
+    """Founder-only prototype: live voice call with Kitty. Relays the browser's
+    WebSocket to OpenAI Realtime (gpt-realtime-1.5) — mic audio up, spoken
+    replies down — with the coach persona injected server-side."""
+    import aiohttp as _aiohttp
+
+    user = _user_media(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    if not config.openai_api_key:
+        return _err(501, "openai_not_configured")
+
+    ws = web.WebSocketResponse(heartbeat=20)
+    await ws.prepare(request)
+    url = f"wss://api.openai.com/v1/realtime?model={config.openai_realtime_model}"
+    headers = {"Authorization": f"Bearer {config.openai_api_key}"}
+    try:
+        async with _aiohttp.ClientSession() as sess:
+            async with sess.ws_connect(url, headers=headers, heartbeat=20,
+                                       max_msg_size=8 * 1024 * 1024) as oai:
+                await oai.send_json({"type": "session.update",
+                                     "session": {"instructions": _rt_instructions(user)}})
+                await oai.send_json({"type": "response.create"})   # Kitty greets first
+
+                async def up():
+                    async for msg in ws:
+                        if msg.type != _aiohttp.WSMsgType.TEXT:
+                            break
+                        try:
+                            ev = json.loads(msg.data)
+                        except ValueError:
+                            continue
+                        if ev.get("type") in _RT_CLIENT_EVENTS:
+                            await oai.send_str(msg.data)
+
+                async def down():
+                    async for msg in oai:
+                        if msg.type != _aiohttp.WSMsgType.TEXT:
+                            break
+                        try:
+                            et = json.loads(msg.data).get("type")
+                        except ValueError:
+                            continue
+                        if et in _RT_SERVER_EVENTS:
+                            await ws.send_str(msg.data)
+
+                done, pending = await asyncio.wait(
+                    [asyncio.create_task(up()), asyncio.create_task(down())],
+                    return_when=asyncio.FIRST_COMPLETED)
+                for t in pending:
+                    t.cancel()
+    except Exception:
+        log.exception("rt relay failed")
+    finally:
+        if not ws.closed:
+            await ws.close()
+    return ws
+
+
 async def api_admin_rt_test(request: web.Request) -> web.Response:
     """Founder-only probe: exercise the OpenAI Realtime (speech-to-speech)
     WebSocket from the server — proves the key, model access, and audio-out.
@@ -928,6 +1017,7 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_post("/api/plan/grant", api_plan_grant)
     app.router.add_post("/api/admin/warm", api_admin_warm)
     app.router.add_get("/api/admin/warm", api_admin_warm)
+    app.router.add_get("/api/rt/ws", api_rt_ws)
     app.router.add_get("/api/admin/rt-test", api_admin_rt_test)
     app.router.add_get("/api/admin/accounts", api_admin_accounts)
     app.router.add_post("/api/admin/set-password", api_admin_set_password)

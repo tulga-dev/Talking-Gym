@@ -188,6 +188,15 @@
   .voc-sstat.bad{color:#B23325}
   .voc-sskip{margin-top:10px;margin-bottom:2px;background:none;border:none;color:var(--mut);font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px}
   .voc-score{font-size:16px;font-weight:800;color:var(--blue)}
+  /* live call (founder beta) */
+  #live-overlay{position:fixed;inset:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:80;background:#F0E6DC;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px}
+  .lv-face{width:170px;height:170px;border-radius:50%;background:#FFEDE6;display:flex;align-items:center;justify-content:center;box-shadow:0 18px 40px -16px rgba(240,73,42,.5)}
+  #live-overlay.talking .lv-face{animation:lvpulse 1.2s ease-in-out infinite}
+  @keyframes lvpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,106,77,.35),0 18px 40px -16px rgba(240,73,42,.5)}50%{box-shadow:0 0 0 18px rgba(255,106,77,0),0 18px 40px -16px rgba(240,73,42,.5)}}
+  .lv-state{font-size:14px;font-weight:800;color:var(--mut)}
+  .lv-cap{min-height:44px;max-width:320px;text-align:center;font-size:15px;color:var(--ink);line-height:1.5}
+  .lv-end{width:64px;height:64px;border-radius:50%;background:#E5443B;border:none;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -8px rgba(229,68,59,.6);margin-top:8px}
+  .lv-end .i{width:24px;height:24px}
   .voc-done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px}
   .voc-done h3{font-size:22px;color:var(--ink);margin-top:8px}
   .voc-done-sub{font-size:14px;color:var(--mut);max-width:260px;margin-bottom:14px;line-height:1.5}
@@ -507,6 +516,15 @@
       <svg class="i pcard-go"><use href="#i-arrow"/></svg>
     </button>
 
+    <button class="pcard" id="live-card" hidden>
+      <div class="pcard-ic"><svg class="i"><use href="#i-sound"/></svg></div>
+      <div class="pcard-body">
+        <div class="pcard-t">Live call (beta)</div>
+        <div class="pcard-s">Realtime voice with Kitty — founder test</div>
+      </div>
+      <svg class="i pcard-go"><use href="#i-arrow"/></svg>
+    </button>
+
     <h3 class="sec-t" data-i18n="progT2">Таны ахиц</h3>
     <div class="acard">
       <div class="pc-top">
@@ -698,6 +716,14 @@
     <button class="voc-start" id="voc-start"><svg class="i"><use href="#i-mic"/></svg><span data-i18n="vocStart">Яриаг эхлүүлэх</span></button>
     <button class="voc-later" id="voc-later" data-i18n="vocLater">Дараа</button>
   </div>
+</div>
+
+<!-- LIVE CALL (founder beta) -->
+<div id="live-overlay" hidden>
+  <div class="lv-face"><svg viewBox="0 0 64 64" width="120" height="120"><use href="#kitty-face"/></svg></div>
+  <div class="lv-state" id="lv-state">…</div>
+  <div class="lv-cap" id="lv-cap"></div>
+  <button class="lv-end" id="lv-end" aria-label="End call"><svg class="i"><use href="#i-x"/></svg></button>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -1190,6 +1216,7 @@
     $('st-voice').textContent = me.voice_seconds_today + 's';
     $('st-words').textContent = me.words_learned || 0;
     $('p-words').textContent = me.words_learned || 0;
+    $('live-card').hidden = !me.founder;
     var span = (me.rank_next_xp || (me.xp + 1)) - me.rank_cur_xp;
     var got = me.xp - me.rank_cur_xp;
     $('rank-fill').style.width = me.rank_next_xp ? Math.min(100, got * 100 / span) + '%' : '100%';
@@ -1670,6 +1697,97 @@
   $('vs-cancel').addEventListener('click', function(){ spkFinish(false); });
   $('vs-listen').addEventListener('click', function(){ playVocAudio(vocAll[spkIdx]); });
   $('vs-skip').addEventListener('click', function(){ spkStop(); nextSpeak(); });
+  /* ---------- live voice call (founder beta, gpt-realtime relay) ---------- */
+  var lvWs = null, lvCtx = null, lvProc = null, lvSrc = null, lvOn = false;
+  var lvPlayT = 0, lvSources = [];
+  function lvState(txt){ $('lv-state').textContent = txt; }
+  function b64ToF32(b64){
+    var bin = atob(b64), n = bin.length / 2, f = new Float32Array(n);
+    for (var i = 0; i < n; i++){
+      var lo = bin.charCodeAt(2*i), hi = bin.charCodeAt(2*i+1);
+      var v = (hi << 8) | lo; if (v >= 32768) v -= 65536;
+      f[i] = v / 32768;
+    }
+    return f;
+  }
+  function lvPlay(b64){
+    if (!lvCtx) return;
+    var f = b64ToF32(b64);
+    if (!f.length) return;
+    var buf = lvCtx.createBuffer(1, f.length, 24000);
+    buf.getChannelData(0).set(f);
+    var s = lvCtx.createBufferSource(); s.buffer = buf; s.connect(lvCtx.destination);
+    var t = Math.max(lvCtx.currentTime + 0.05, lvPlayT);
+    s.start(t); lvPlayT = t + buf.duration;
+    lvSources.push(s);
+    if (lvSources.length > 60) lvSources.splice(0, 20);
+  }
+  function lvStopPlayback(){
+    lvSources.forEach(function(s){ try { s.stop(); } catch(e){} });
+    lvSources = []; lvPlayT = 0;
+    $('live-overlay').classList.remove('talking');
+  }
+  function lvFloatTo16b64(f32, inRate){
+    var ratio = inRate / 24000, outLen = Math.floor(f32.length / ratio);
+    var out = new Int16Array(outLen);
+    for (var i = 0; i < outLen; i++){
+      var v = f32[Math.floor(i * ratio)];
+      v = Math.max(-1, Math.min(1, v));
+      out[i] = v < 0 ? v * 32768 : v * 32767;
+    }
+    var bytes = new Uint8Array(out.buffer), bin = '';
+    for (var j = 0; j < bytes.length; j += 8000)
+      bin += String.fromCharCode.apply(null, bytes.subarray(j, j + 8000));
+    return btoa(bin);
+  }
+  function openLive(){
+    if (lvOn) return;
+    unlockVoice(); try { voiceEl.pause(); } catch(e){}
+    $('live-overlay').hidden = false; $('lv-cap').textContent = '';
+    lvState('Connecting…'); lvOn = true;
+    getMicStream().then(function(stream){
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      lvCtx = new Ctx();
+      var proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+      lvWs = new WebSocket(proto + location.host + '/api/rt/ws?t=' + encodeURIComponent(token));
+      lvWs.onopen = function(){
+        lvState('Connected — Kitty is joining…');
+        lvSrc = lvCtx.createMediaStreamSource(stream);
+        lvProc = lvCtx.createScriptProcessor(4096, 1, 1);
+        var mute = lvCtx.createGain(); mute.gain.value = 0;  // proc must reach destination to run; keep it silent
+        lvSrc.connect(lvProc); lvProc.connect(mute); mute.connect(lvCtx.destination);
+        lvProc.onaudioprocess = function(e){
+          if (!lvOn || !lvWs || lvWs.readyState !== 1) return;
+          var b64 = lvFloatTo16b64(e.inputBuffer.getChannelData(0), lvCtx.sampleRate);
+          lvWs.send(JSON.stringify({type:'input_audio_buffer.append', audio: b64}));
+        };
+      };
+      lvWs.onmessage = function(m){
+        var ev; try { ev = JSON.parse(m.data); } catch(e){ return; }
+        var t = ev.type || '';
+        if (t === 'response.output_audio.delta'){ $('live-overlay').classList.add('talking'); lvState('Kitty is speaking…'); lvPlay(ev.delta || ''); }
+        else if (t === 'response.output_audio_transcript.delta'){ $('lv-cap').textContent = ($('lv-cap').textContent + (ev.delta || '')).slice(-160); }
+        else if (t === 'response.done'){ $('live-overlay').classList.remove('talking'); lvState('Your turn — just speak'); }
+        else if (t === 'input_audio_buffer.speech_started'){ lvStopPlayback(); lvState('Listening…'); }
+        else if (t === 'error'){ lvState('Error'); $('lv-cap').textContent = (ev.error && ev.error.message) || 'connection error'; }
+      };
+      lvWs.onclose = function(){ if (lvOn) lvState('Call ended'); };
+      lvWs.onerror = function(){ lvState('Connection failed'); };
+    }).catch(function(){ toast(d().micHintDenied); closeLive(); });
+  }
+  function closeLive(){
+    lvOn = false;
+    lvStopPlayback();
+    if (lvProc){ try { lvProc.disconnect(); } catch(e){} lvProc = null; }
+    if (lvSrc){ try { lvSrc.disconnect(); } catch(e){} lvSrc = null; }
+    if (lvWs){ try { lvWs.close(); } catch(e){} lvWs = null; }
+    if (lvCtx){ try { lvCtx.close(); } catch(e){} lvCtx = null; }
+    releaseMic();
+    $('live-overlay').hidden = true;
+  }
+  $('live-card').addEventListener('click', openLive);
+  $('lv-end').addEventListener('click', closeLive);
+
   $('vocab-card').addEventListener('click', openVocab);
   $('voc-close').addEventListener('click', closeVocab);
   $('voc-later').addEventListener('click', closeVocab);
