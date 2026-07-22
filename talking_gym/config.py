@@ -45,6 +45,12 @@ class Config:
     # "none" skips grok-4.3's thinking phase — coaching JSON doesn't need it.
     llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "none")
 
+    # OpenAI — GPT-5.6 Luna as an alternate live-turn backend; realtime probe.
+    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
+    openai_base_url: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+    openai_realtime_model: str = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime-1.5")
+
     # Google Gemini — alternate LLM backend learners can switch to mid-session.
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-flash-latest")

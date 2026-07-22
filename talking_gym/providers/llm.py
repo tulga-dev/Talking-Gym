@@ -8,6 +8,7 @@ import httpx
 from ..config import config
 from . import ProviderError
 from . import gemini
+from . import openai_llm
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +30,8 @@ async def chat(system: str, user: str, effort: str | None = None,
     anything else uses the default xAI Grok model."""
     if model == "gemini" and gemini.enabled():
         return await gemini.chat(system, user, effort=effort)
+    if model == "luna" and openai_llm.enabled():
+        return await openai_llm.chat(system, user, effort=effort)
     payload = {
         "model": config.llm_model_45 if model == "grok45" else config.llm_model,
         "messages": [

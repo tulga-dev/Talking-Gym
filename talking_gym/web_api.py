@@ -284,7 +284,7 @@ async def api_turn(request: web.Request) -> web.Response:
     # Learner's LLM pick rides in the query string so it works uniformly for the
     # multipart (voice) and JSON (text) bodies. Allowlisted to known backends.
     model = request.query.get("model", "grok").strip().lower()
-    if model not in ("grok", "grok45", "gemini"):
+    if model not in ("grok", "grok45", "gemini", "luna"):
         model = "grok"
 
     transcript = ""
@@ -528,6 +528,79 @@ async def api_admin_warm(request: web.Request) -> web.Response:
     if request.method == "POST" and not _warm_state["running"]:
         asyncio.create_task(_warm_all())
     return web.json_response(_warm_state)
+
+
+async def api_admin_rt_test(request: web.Request) -> web.Response:
+    """Founder-only probe: exercise the OpenAI Realtime (speech-to-speech)
+    WebSocket from the server — proves the key, model access, and audio-out.
+    Asks for one short spoken sentence; reports text, audio bytes, latency,
+    and the raw event types seen (diagnostic against protocol drift)."""
+    import time as _time
+
+    import aiohttp
+
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    if not config.openai_api_key:
+        return _err(501, "openai_not_configured")
+    model = request.query.get("rtmodel", config.openai_realtime_model)
+    url = f"wss://api.openai.com/v1/realtime?model={model}"
+    headers = {"Authorization": f"Bearer {config.openai_api_key}",
+               "OpenAI-Beta": "realtime=v1"}
+    events: dict = {}
+    text_parts: list = []
+    audio_b64_len = 0
+    err = None
+    t0 = _time.time()
+    first_audio = None
+    try:
+        async with aiohttp.ClientSession() as sess:
+            async with sess.ws_connect(url, headers=headers, heartbeat=20) as ws:
+                await ws.send_json({
+                    "type": "response.create",
+                    "response": {
+                        "modalities": ["audio", "text"],
+                        "instructions": ("Say exactly one short friendly sentence "
+                                         "greeting an English learner named Bat."),
+                    },
+                })
+                deadline = _time.time() + 25
+                while _time.time() < deadline:
+                    try:
+                        msg = await ws.receive(timeout=deadline - _time.time())
+                    except asyncio.TimeoutError:
+                        break
+                    if msg.type != aiohttp.WSMsgType.TEXT:
+                        break
+                    ev = msg.json()
+                    et = ev.get("type", "?")
+                    events[et] = events.get(et, 0) + 1
+                    if et == "error":
+                        err = str(ev.get("error", ev))[:300]
+                        break
+                    delta = ev.get("delta", "")
+                    if isinstance(delta, str) and delta:
+                        if "audio" in et and "transcript" not in et:
+                            audio_b64_len += len(delta)
+                            if first_audio is None:
+                                first_audio = round(_time.time() - t0, 2)
+                        elif "text" in et or "transcript" in et:
+                            text_parts.append(delta)
+                    if et in ("response.done", "response.completed"):
+                        break
+    except Exception as e:
+        err = f"{type(e).__name__}: {e}"[:300]
+    return web.json_response({
+        "model": model,
+        "ok": err is None and (audio_b64_len > 0 or text_parts),
+        "error": err,
+        "text": "".join(text_parts)[:300],
+        "audio_bytes": audio_b64_len * 3 // 4,
+        "first_audio_s": first_audio,
+        "total_s": round(_time.time() - t0, 2),
+        "events": events,
+    })
 
 
 async def api_admin_accounts(request: web.Request) -> web.Response:
@@ -856,6 +929,7 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_post("/api/plan/grant", api_plan_grant)
     app.router.add_post("/api/admin/warm", api_admin_warm)
     app.router.add_get("/api/admin/warm", api_admin_warm)
+    app.router.add_get("/api/admin/rt-test", api_admin_rt_test)
     app.router.add_get("/api/admin/accounts", api_admin_accounts)
     app.router.add_post("/api/admin/set-password", api_admin_set_password)
     app.router.add_post("/api/admin/set-email", api_admin_set_email)
