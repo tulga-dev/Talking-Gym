@@ -542,7 +542,9 @@ _RT_SERVER_EVENTS = {"session.created", "session.updated",
                      "response.created", "response.done", "error",
                      "response.output_audio.delta", "response.output_audio.done",
                      "response.output_audio_transcript.delta",
-                     "response.output_audio_transcript.done"}
+                     "response.output_audio_transcript.done",
+                     "conversation.item.input_audio_transcription.delta",
+                     "conversation.item.input_audio_transcription.completed"}
 
 
 def _rt_instructions(user) -> str:
@@ -552,7 +554,9 @@ def _rt_instructions(user) -> str:
         f"You are Kitty, a warm, patient English speaking coach on a live voice "
         f"call with a Mongolian learner (level: {user['level']}). Speak "
         f"ONLY simple English: short sentences of 3-8 words, everyday words, ONE "
-        f"question at a time. Speak slowly and clearly. React warmly to what "
+        f"question at a time. Speak SLOWLY and very CLEARLY, leaving a small "
+        f"pause between sentences, so a beginner can follow every word. React "
+        f"warmly to what "
         f"they say; if they make a mistake, gently say the correct sentence, "
         f"then ask your next simple question. If they are badly stuck, say the "
         f"Mongolian translation of your question once, then continue in English. "
@@ -582,11 +586,15 @@ async def api_rt_ws(request: web.Request) -> web.WebSocketResponse | web.Respons
         async with _aiohttp.ClientSession() as sess:
             async with sess.ws_connect(url, headers=headers, heartbeat=20,
                                        max_msg_size=8 * 1024 * 1024) as oai:
-                await oai.send_json({"type": "session.update",
-                                     "session": {"type": "realtime",
-                                                 "instructions": _rt_instructions(user),
-                                                 "audio": {"output": {
-                                                     "voice": config.openai_realtime_voice}}}})
+                await oai.send_json({"type": "session.update", "session": {
+                    "type": "realtime",
+                    "instructions": _rt_instructions(user),
+                    "audio": {
+                        "input": {"transcription": {
+                            "model": config.openai_transcribe_model}},
+                        "output": {"voice": config.openai_realtime_voice},
+                    },
+                }})
                 await oai.send_json({"type": "response.create"})   # Kitty greets first
 
                 async def up():

@@ -189,14 +189,24 @@
   .voc-sskip{margin-top:10px;margin-bottom:2px;background:none;border:none;color:var(--mut);font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px}
   .voc-score{font-size:16px;font-weight:800;color:var(--blue)}
   /* live call (founder beta) */
-  #live-overlay{position:fixed;inset:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:80;background:#F0E6DC;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px}
-  .lv-face{width:170px;height:170px;border-radius:50%;background:#FFEDE6;display:flex;align-items:center;justify-content:center;box-shadow:0 18px 40px -16px rgba(240,73,42,.5)}
+  #live-overlay{position:fixed;inset:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:80;background:#F0E6DC;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 14px)}
+  .lv-top{display:flex;align-items:center;gap:11px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .lv-face{width:52px;height:52px;flex:none;border-radius:50%;background:#FFEDE6;display:flex;align-items:center;justify-content:center}
   #live-overlay.talking .lv-face{animation:lvpulse 1.2s ease-in-out infinite}
-  @keyframes lvpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,106,77,.35),0 18px 40px -16px rgba(240,73,42,.5)}50%{box-shadow:0 0 0 18px rgba(255,106,77,0),0 18px 40px -16px rgba(240,73,42,.5)}}
-  .lv-state{font-size:14px;font-weight:800;color:var(--mut)}
-  .lv-cap{min-height:44px;max-width:320px;text-align:center;font-size:15px;color:var(--ink);line-height:1.5}
-  .lv-end{width:64px;height:64px;border-radius:50%;background:#E5443B;border:none;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -8px rgba(229,68,59,.6);margin-top:8px}
-  .lv-end .i{width:24px;height:24px}
+  @keyframes lvpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,106,77,.4)}50%{box-shadow:0 0 0 12px rgba(255,106,77,0)}}
+  .lv-name{font-size:16px;font-weight:800;color:var(--ink)}
+  .lv-state{font-size:12.5px;font-weight:700;color:var(--blue)}
+  .lv-chat{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:14px 2px}
+  .lv-msg{display:flex;max-width:82%}
+  .lv-msg.kitty{align-self:flex-start}
+  .lv-msg.me{align-self:flex-end}
+  .lv-msg.sys{align-self:center;max-width:90%}
+  .lv-bubble{font-size:15px;line-height:1.45;padding:10px 14px;border-radius:18px}
+  .lv-msg.kitty .lv-bubble{background:#fff;color:var(--ink);border:1px solid var(--line);border-bottom-left-radius:5px}
+  .lv-msg.me .lv-bubble{background:#FF6A4D;color:#fff;border-bottom-right-radius:5px}
+  .lv-msg.sys .lv-bubble{background:transparent;color:var(--mut);font-size:12.5px;text-align:center}
+  .lv-end{height:54px;border-radius:27px;background:#E5443B;border:none;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 20px -8px rgba(229,68,59,.6)}
+  .lv-end .i{width:20px;height:20px}
   .voc-done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px}
   .voc-done h3{font-size:22px;color:var(--ink);margin-top:8px}
   .voc-done-sub{font-size:14px;color:var(--mut);max-width:260px;margin-bottom:14px;line-height:1.5}
@@ -720,10 +730,12 @@
 
 <!-- LIVE CALL (founder beta) -->
 <div id="live-overlay" hidden>
-  <div class="lv-face"><svg viewBox="0 0 64 64" width="120" height="120"><use href="#kitty-face"/></svg></div>
-  <div class="lv-state" id="lv-state">…</div>
-  <div class="lv-cap" id="lv-cap"></div>
-  <button class="lv-end" id="lv-end" aria-label="End call"><svg class="i"><use href="#i-x"/></svg></button>
+  <div class="lv-top">
+    <div class="lv-face"><svg viewBox="0 0 64 64" width="52" height="52"><use href="#kitty-face"/></svg></div>
+    <div><div class="lv-name">Kitty</div><div class="lv-state" id="lv-state">…</div></div>
+  </div>
+  <div class="lv-chat" id="lv-chat"></div>
+  <button class="lv-end" id="lv-end" aria-label="End call"><svg class="i"><use href="#i-x"/></svg><span data-i18n="lvEnd">Дуусгах</span></button>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -868,7 +880,7 @@
       wlT:"Words learned", mWords:"words learned", wlMore:"+{n} more", vocQ:"Quiz — pick the right word",
       todayT:"Today's workout", vocNew:"new words", lbWords:"Words",
       vocSpk:"Speaking test — say the word", vocSkip:"Skip", vocSListen:"Listening…",
-      vocSGood:"Nice!", vocSBad:"Try again", vocListen:"Hear the word",
+      vocSGood:"Nice!", vocSBad:"Try again", vocListen:"Hear the word", lvEnd:"End call",
       callConnecting:"Connecting…", callSpeaking:"Kitty is speaking…", callListening:"Your turn — speak",
       callThinking:"Kitty is thinking…", callSend:"Send",
       planLbl:"Your plan", redeemB:"Activate",
@@ -1701,6 +1713,17 @@
   var lvWs = null, lvCtx = null, lvProc = null, lvSrc = null, lvOn = false;
   var lvPlayT = 0, lvSources = [];
   function lvState(txt){ $('lv-state').textContent = txt; }
+  var lvKittyEl = null, lvUserEl = null;
+  function lvScroll(){ var c = $('lv-chat'); c.scrollTop = c.scrollHeight; }
+  function lvBubble(cls){
+    var row = document.createElement('div'); row.className = 'lv-msg ' + cls;
+    var b = document.createElement('div'); b.className = 'lv-bubble';
+    row.appendChild(b); $('lv-chat').appendChild(row); lvScroll(); return b;
+  }
+  function lvKittyText(t){ if (!lvKittyEl) lvKittyEl = lvBubble('kitty'); lvKittyEl.textContent += t; lvScroll(); }
+  function lvUserText(t){ if (!lvUserEl) lvUserEl = lvBubble('me'); lvUserEl.textContent += t; lvScroll(); }
+  function lvUserDone(t){ if (t){ if (!lvUserEl) lvUserEl = lvBubble('me'); lvUserEl.textContent = t; } lvUserEl = null; lvScroll(); }
+  function lvAddSys(txt){ lvBubble('sys').textContent = txt; }
   function b64ToF32(b64){
     var bin = atob(b64), n = bin.length / 2, f = new Float32Array(n);
     for (var i = 0; i < n; i++){
@@ -1743,7 +1766,8 @@
   function openLive(){
     if (lvOn) return;
     unlockVoice(); try { voiceEl.pause(); } catch(e){}
-    $('live-overlay').hidden = false; $('lv-cap').textContent = '';
+    $('live-overlay').hidden = false;
+    $('lv-chat').innerHTML = ''; lvKittyEl = null; lvUserEl = null;
     lvState('Connecting…'); lvOn = true;
     getMicStream().then(function(stream){
       var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -1766,10 +1790,12 @@
         var ev; try { ev = JSON.parse(m.data); } catch(e){ return; }
         var t = ev.type || '';
         if (t === 'response.output_audio.delta'){ $('live-overlay').classList.add('talking'); lvState('Kitty is speaking…'); lvPlay(ev.delta || ''); }
-        else if (t === 'response.output_audio_transcript.delta'){ $('lv-cap').textContent = ($('lv-cap').textContent + (ev.delta || '')).slice(-160); }
-        else if (t === 'response.done'){ $('live-overlay').classList.remove('talking'); lvState('Your turn — just speak'); }
+        else if (t === 'response.output_audio_transcript.delta'){ lvKittyText(ev.delta || ''); }
+        else if (t === 'response.done'){ $('live-overlay').classList.remove('talking'); lvKittyEl = null; lvState('Your turn — just speak'); }
         else if (t === 'input_audio_buffer.speech_started'){ lvStopPlayback(); lvState('Listening…'); }
-        else if (t === 'error'){ lvState('Error'); $('lv-cap').textContent = (ev.error && ev.error.message) || 'connection error'; }
+        else if (t === 'conversation.item.input_audio_transcription.delta'){ lvUserText(ev.delta || ''); }
+        else if (t === 'conversation.item.input_audio_transcription.completed'){ lvUserDone(ev.transcript || ''); }
+        else if (t === 'error'){ lvState('Error'); lvAddSys((ev.error && ev.error.message) || 'connection error'); }
       };
       lvWs.onclose = function(){ if (lvOn) lvState('Call ended'); };
       lvWs.onerror = function(){ lvState('Connection failed'); };

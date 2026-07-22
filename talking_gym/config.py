@@ -53,6 +53,9 @@ class Config:
     # Realtime voice for Kitty. marin = bright female (OpenAI's recommended
     # female voice); other options: shimmer, coral, sage, cedar (male), ...
     openai_realtime_voice: str = os.getenv("OPENAI_REALTIME_VOICE", "marin")
+    # Transcribes the learner's speech so the call shows both sides as text.
+    openai_transcribe_model: str = os.getenv("OPENAI_TRANSCRIBE_MODEL",
+                                             "gpt-4o-mini-transcribe")
 
     # Google Gemini — alternate LLM backend learners can switch to mid-session.
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
