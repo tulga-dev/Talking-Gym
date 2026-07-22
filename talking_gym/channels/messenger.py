@@ -386,6 +386,8 @@ async def start_web_server() -> web.AppRunner:
     app.router.add_post("/webhooks/messenger", _webhook_post)
     # PWA app prototype (installable; served from talking_gym/web/)
     app.router.add_get("/app", _file_route("app.html"))
+    # Founder dashboard (page is public, its data API is founder-guarded)
+    app.router.add_get("/admin", _file_route("admin.html"))
     app.router.add_get("/app/manifest.webmanifest", _file_route("manifest.webmanifest", "application/manifest+json"))
     app.router.add_get("/app/sw.js", _file_route("sw.js", "text/javascript"))
     app.router.add_get("/app/icon-192.png", _file_route("icon-192.png"))

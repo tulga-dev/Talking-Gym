@@ -667,6 +667,51 @@ def voice_seconds_today(user_id: int) -> int:
         return row["seconds"] if row else 0
 
 
+# ---------- admin dashboard aggregations (founder-only endpoints) ----------
+
+def admin_user_list(limit: int = 300) -> list[dict]:
+    with _conn() as con:
+        rows = con.execute(
+            "SELECT user_id, name, email, channel, level, target_lang, plan, "
+            "plan_expires, xp, streak, sessions_done, last_session_date, created_at "
+            "FROM users ORDER BY COALESCE(created_at,'') DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def admin_stats() -> dict:
+    today = _today().isoformat()
+    week_ago = (_today() - timedelta(days=6)).isoformat()
+    d14 = (_today() - timedelta(days=13)).isoformat()
+    with _conn() as con:
+        one = lambda sql, p=(): (con.execute(sql, p).fetchone() or {"n": 0})["n"] or 0
+        stats = {
+            "total_users": one("SELECT COUNT(*) AS n FROM users"),
+            "new_7d": one("SELECT COUNT(*) AS n FROM users WHERE created_at >= ?", (week_ago,)),
+            "active_7d": one("SELECT COUNT(*) AS n FROM users WHERE last_session_date >= ?", (week_ago,)),
+            "trained_today": one("SELECT COUNT(*) AS n FROM users WHERE last_session_date = ?", (today,)),
+            "total_sessions": one("SELECT SUM(sessions_done) AS n FROM users"),
+            "total_xp": one("SELECT SUM(xp) AS n FROM users"),
+            "words_known": one("SELECT COUNT(*) AS n FROM vocab_progress WHERE status='known'"),
+            "voice_today": one("SELECT SUM(seconds) AS n FROM voice_usage WHERE day = ?", (today,)),
+            "rt_today": one("SELECT SUM(seconds) AS n FROM rt_usage WHERE day = ?", (today,)),
+        }
+        stats["plans"] = {r["plan"] or "free": r["n"] for r in con.execute(
+            "SELECT plan, COUNT(*) AS n FROM users GROUP BY plan").fetchall()}
+        stats["channels"] = {r["channel"] or "?": r["n"] for r in con.execute(
+            "SELECT channel, COUNT(*) AS n FROM users GROUP BY channel").fetchall()}
+        stats["voice_series"] = [dict(r) for r in con.execute(
+            "SELECT day, SUM(seconds) AS seconds FROM voice_usage WHERE day >= ? "
+            "GROUP BY day ORDER BY day", (d14,)).fetchall()]
+        stats["rt_series"] = [dict(r) for r in con.execute(
+            "SELECT day, SUM(seconds) AS seconds FROM rt_usage WHERE day >= ? "
+            "GROUP BY day ORDER BY day", (d14,)).fetchall()]
+        stats["promo_codes"] = [dict(r) for r in con.execute(
+            "SELECT code, plan, days, max_uses, used_count FROM promo_codes "
+            "ORDER BY code").fetchall()]
+        return stats
+
+
 # ---------- live-call usage (separate daily budget; applies to everyone) ----------
 
 def rt_seconds_today(user_id: int) -> int:

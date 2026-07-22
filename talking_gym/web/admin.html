@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Talking Gym — Admin</title>
+<style>
+  :root{--coral:#FF6A4D;--coral-d:#F0492A;--ink:#2C2438;--mut:#8B8095;--line:#EDE6E0;--bg:#F5EEE6;--card:#fff;--gold:#EE9412;--green:#36B35D}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',Roboto,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;padding:20px}
+  .wrap{max-width:1100px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  h1{font-size:20px;letter-spacing:-.01em}
+  h1 span{color:var(--coral)}
+  .btn{background:var(--coral);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  #gate{background:#FFF3EE;border:1px solid #F6D5C8;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none}
+  #gate a{color:var(--coral-d)}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .tile .lb{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+  .tile .vl{font-size:22px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums}
+  .tile .vl small{font-size:12px;color:var(--mut);font-weight:600}
+  h2{font-size:15px;margin:20px 0 10px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.cols{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#FFEDE6;color:#993C1D;border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:600}
+  .chip b{color:var(--coral-d)}
+  .note{font-size:12px;color:var(--mut);margin-top:8px}
+  .bars{display:flex;align-items:flex-end;gap:4px;height:90px;margin-top:10px}
+  .bars>div{flex:1;background:var(--coral);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+  .bars>div.rt{background:var(--gold)}
+  .bars>div span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--mut);white-space:nowrap}
+  .bars-wrap{padding-bottom:20px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:8px;border-bottom:1px solid #F4EDE7;white-space:nowrap;font-variant-numeric:tabular-nums}
+  td.name{max-width:170px;overflow:hidden;text-overflow:ellipsis}
+  .pill{display:inline-block;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600}
+  .pill.free{background:#EFEAE4;color:var(--mut)}
+  .pill.gym,.pill.premium{background:#FFF0D6;color:#8A5A08}
+  .pill.today{background:#E9F8EE;color:#1E7A3D}
+  input[type=search]{width:260px;max-width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13px;background:#fff}
+  .tbl-scroll{overflow-x:auto}
+  .muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏋️ Talking Gym <span>Admin</span></h1>
+    <div style="display:flex;gap:8px">
+      <button class="btn ghost" onclick="location.href='/app'">Open app</button>
+      <button class="btn" id="refresh">Refresh</button>
+    </div>
+  </header>
+
+  <div id="gate">Not authorized. Log into the <a href="/app">app</a> with a founder account first, then reload this page.</div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="cols">
+    <div class="card">
+      <h2 style="margin-top:0">Plans &amp; codes <span class="muted" style="font-size:11px">(revenue proxy — no payment provider connected yet)</span></h2>
+      <div class="chips" id="plans"></div>
+      <div class="tbl-scroll" style="margin-top:12px">
+        <table id="codes"><thead><tr><th>Code</th><th>Plan</th><th>Days</th><th>Used</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="card bars-wrap">
+      <h2 style="margin-top:0">Activity — last 14 days <span class="muted" style="font-size:11px">(coral: lesson voice s · gold: live call s)</span></h2>
+      <div class="bars" id="bars-voice"></div>
+      <div class="bars" id="bars-rt" style="height:50px;margin-top:24px"></div>
+    </div>
+  </div>
+
+  <h2 style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">Users <input type="search" id="q" placeholder="Search name / email / level…"></h2>
+  <div class="card tbl-scroll">
+    <table id="users">
+      <thead><tr><th>Name</th><th>Email</th><th>Chan</th><th>Level</th><th>Lang</th><th>Plan</th><th>XP</th><th>🔥</th><th>Sessions</th><th>Last active</th><th>Joined</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+var token = null;
+try { token = localStorage.getItem('tg-token'); } catch(e){}
+function req(p){
+  var h = {};
+  if (token){ if (/^\d+$/.test(token)) h['X-User'] = token; else h['Authorization'] = 'Bearer ' + token; }
+  return fetch(p, {headers: h}).then(function(r){
+    if (r.status === 401 || r.status === 403) throw 'forbidden';
+    return r.json();
+  });
+}
+function esc(s){ var d = document.createElement('span'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+function tile(lb, vl, extra){
+  return '<div class="tile"><div class="lb">' + lb + '</div><div class="vl">' + vl + (extra ? ' <small>' + extra + '</small>' : '') + '</div></div>';
+}
+function fmtDay(d){ return d ? d.slice(5) : ''; }
+function bars(el, series, cls){
+  var days = [], today = new Date();
+  for (var i = 13; i >= 0; i--){ var dt = new Date(today - i * 864e5); days.push(dt.toISOString().slice(0, 10)); }
+  var map = {}; (series || []).forEach(function(r){ map[r.day] = r.seconds || 0; });
+  var max = Math.max.apply(null, days.map(function(d){ return map[d] || 0 }).concat([1]));
+  el.innerHTML = days.map(function(d, i){
+    var v = map[d] || 0;
+    return '<div class="' + (cls || '') + '" style="height:' + Math.max(2, Math.round(v * 100 / max)) + '%" title="' + d + ': ' + v + 's">' + (i % 2 ? '<span>' + fmtDay(d) + '</span>' : '') + '</div>';
+  }).join('');
+}
+var allUsers = [];
+function renderUsers(){
+  var q = (document.getElementById('q').value || '').toLowerCase();
+  var tb = document.querySelector('#users tbody');
+  var today = new Date().toISOString().slice(0, 10);
+  tb.innerHTML = allUsers.filter(function(u){
+    if (!q) return true;
+    return ((u.name || '') + ' ' + (u.email || '') + ' ' + (u.level || '') + ' ' + (u.plan || '') + ' ' + (u.channel || '')).toLowerCase().indexOf(q) >= 0;
+  }).map(function(u){
+    var last = u.last_session_date || '';
+    var lastCell = last === today ? '<span class="pill today">today</span>' : esc(last);
+    var plan = u.plan || 'free';
+    return '<tr><td class="name" title="' + esc(u.name) + '">' + esc(u.name) + '</td>' +
+      '<td>' + esc(u.email || '—') + '</td>' +
+      '<td>' + esc((u.channel || '').slice(0, 3)) + '</td>' +
+      '<td>' + esc(u.level) + '</td>' +
+      '<td>' + esc(u.target_lang) + '</td>' +
+      '<td><span class="pill ' + esc(plan) + '">' + esc(plan) + '</span></td>' +
+      '<td>' + (u.xp || 0) + '</td>' +
+      '<td>' + (u.streak || 0) + '</td>' +
+      '<td>' + (u.sessions_done || 0) + '</td>' +
+      '<td>' + lastCell + '</td>' +
+      '<td>' + esc((u.created_at || '').slice(0, 10)) + '</td></tr>';
+  }).join('');
+}
+function load(){
+  Promise.all([req('/api/admin/stats'), req('/api/admin/users')]).then(function(res){
+    var s = res[0];
+    document.getElementById('tiles').innerHTML =
+      tile('Users', s.total_users) +
+      tile('New · 7d', s.new_7d) +
+      tile('Active · 7d', s.active_7d) +
+      tile('Trained today', s.trained_today) +
+      tile('Sessions total', s.total_sessions) +
+      tile('Words learned', s.words_known) +
+      tile('Voice today', s.voice_today, 's') +
+      tile('Live call today', s.rt_today, 's');
+    var plans = s.plans || {};
+    document.getElementById('plans').innerHTML = Object.keys(plans).map(function(k){
+      return '<div class="chip">' + esc(k) + ': <b>' + plans[k] + '</b></div>';
+    }).join('') + Object.keys(s.channels || {}).map(function(k){
+      return '<div class="chip" style="background:#EFF4EA;color:#3B6D11">' + esc(k) + ': <b>' + s.channels[k] + '</b></div>';
+    }).join('');
+    var ct = document.querySelector('#codes tbody');
+    ct.innerHTML = (s.promo_codes || []).map(function(c){
+      return '<tr><td>' + esc(c.code) + '</td><td>' + esc(c.plan) + '</td><td>' + c.days + '</td><td>' + c.used_count + ' / ' + c.max_uses + '</td></tr>';
+    }).join('') || '<tr><td colspan="4" class="muted">no promo codes</td></tr>';
+    bars(document.getElementById('bars-voice'), s.voice_series);
+    bars(document.getElementById('bars-rt'), s.rt_series, 'rt');
+    allUsers = res[1].users || [];
+    renderUsers();
+  }).catch(function(){
+    document.getElementById('gate').style.display = 'block';
+  });
+}
+document.getElementById('refresh').addEventListener('click', load);
+document.getElementById('q').addEventListener('input', renderUsers);
+load();
+</script>
+</body>
+</html>

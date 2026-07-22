@@ -774,6 +774,25 @@ async def api_admin_rt_test(request: web.Request) -> web.Response:
     })
 
 
+async def api_admin_stats(request: web.Request) -> web.Response:
+    """Founder-only: dashboard aggregates for /admin."""
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    return web.json_response(db.admin_stats())
+
+
+async def api_admin_users(request: web.Request) -> web.Response:
+    """Founder-only: newest users with key fields for the /admin table."""
+    user = _user_from(request)
+    if user is None or user["user_id"] not in config.founder_ids:
+        return _err(403, "forbidden")
+    users = db.admin_user_list()
+    for u in users:
+        u["user_id"] = str(u["user_id"])   # JS can't hold 63-bit ints
+    return web.json_response({"users": users})
+
+
 async def api_admin_accounts(request: web.Request) -> web.Response:
     """Founder-only: recent email accounts (for support / password resets)."""
     user = _user_from(request)
@@ -1103,6 +1122,8 @@ def add_api_routes(app: web.Application) -> None:
     app.router.add_get("/api/rt/ws", api_rt_ws)
     app.router.add_get("/api/admin/rt-last", api_admin_rt_last)
     app.router.add_get("/api/admin/rt-test", api_admin_rt_test)
+    app.router.add_get("/api/admin/stats", api_admin_stats)
+    app.router.add_get("/api/admin/users", api_admin_users)
     app.router.add_get("/api/admin/accounts", api_admin_accounts)
     app.router.add_post("/api/admin/set-password", api_admin_set_password)
     app.router.add_post("/api/admin/set-email", api_admin_set_email)
